@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -67,6 +68,21 @@ func loadConfig() {
 	}
 }
 
+func saveConfig() error {
+	if cfgFile == "" {
+		cfgFile = viper.ConfigFileUsed()
+	}
+	if cfgFile == "" {
+		cfgFile = defaultCfgFile
+	}
+
+	if err := viper.WriteConfigAs(cfgFile); err != nil {
+		return fmt.Errorf("unable to save configuration: %v", err)
+	}
+
+	golog.Debugf("Wrote Configuration: %v", cfgFile)
+	return nil
+}
 
 func setAPIkey(key string) error {
 	if !utils.ValidAPIKey(key) {

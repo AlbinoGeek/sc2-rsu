@@ -11,7 +11,6 @@ import (
 	"github.com/kataras/golog"
 	"github.com/mxschmitt/playwright-go"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 
 	"github.com/AlbinoGeek/sc2-rsu/utils"
 )
@@ -171,20 +170,4 @@ func login(email string) error {
 	}
 
 	return setAPIkey(strings.Trim(strings.Split(t, ": ")[1], " \r\n\t"))
-}
-
-func saveConfig() error {
-	if cfgFile == "" {
-		cfgFile = viper.ConfigFileUsed()
-	}
-	if cfgFile == "" {
-		cfgFile = defaultCfgFile
-	}
-
-	if err := viper.WriteConfigAs(cfgFile); err != nil {
-		return fmt.Errorf("unable to save configuration: %v", err)
-	}
-
-	golog.Debugf("Wrote Configuration: %v", cfgFile)
-	return nil
 }
