@@ -1,2 +1,8 @@
+# Browser Automation
+.ms-playwright
+
 # Build Artifacts
 _dist/sc2-rsu
+
+# Configuration Files
+*.yaml
