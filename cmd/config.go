@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -8,6 +9,8 @@ import (
 	"github.com/kataras/golog"
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
+
+	"github.com/AlbinoGeek/sc2-rsu/utils"
 )
 
 var (
@@ -62,4 +65,24 @@ func loadConfig() {
 	if viper.GetBool("verbose") {
 		golog.SetLevel("debug")
 	}
+}
+
+
+func setAPIkey(key string) error {
+	if !utils.ValidAPIKey(key) {
+		return errors.New("invalid API key format")
+	}
+
+	if viper.GetString("apikey") == key {
+		golog.Info("API key already in configuration! Doing nothing.")
+		return nil
+	}
+
+	viper.Set("apikey", key)
+	if err := saveConfig(); err != nil {
+		return err
+	}
+
+	golog.Info("API Key set in configuration!")
+	return nil
 }

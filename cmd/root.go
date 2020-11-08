@@ -17,6 +17,8 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/AlbinoGeek/sc2-rsu/utils"
 )
 
 var (
@@ -24,13 +26,17 @@ var (
 		Short: "SC2ReplayStats Uploader",
 		Long:  `Unofficial SC2ReplayStats Uploader by AlbinoGeek`,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			keys := viper.GetStringSlice("apikeys")
-			if len(keys) == 0 {
-				return errors.New("no API keys found, please use the login command first")
+			key := viper.GetString("apikey")
+			if key == "" {
+				return errors.New("no API key in configuration, please use the login command")
+			}
+
+			if !utils.ValidAPIKey(key) {
+				return errors.New("invalid API key in configuration, please replace it or use the login command")
 			}
 
 			golog.Infof("Starting Automatic Replay Uploader...")
-			return automaticUpload(keys[0])
+			return automaticUpload(key)
 		},
 	}
 )

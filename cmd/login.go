@@ -12,6 +12,8 @@ import (
 	"github.com/mxschmitt/playwright-go"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
+	"github.com/AlbinoGeek/sc2-rsu/utils"
 )
 
 var loginCmd = &cobra.Command{
@@ -22,7 +24,7 @@ var loginCmd = &cobra.Command{
 		}
 
 		// is it an API key?
-		if strings.Count(args[0], ";") == 2 {
+			if utils.ValidAPIKey(args[0]) {
 			return nil
 		}
 
@@ -36,8 +38,8 @@ var loginCmd = &cobra.Command{
 	Short: "Add an sc2replaystats account to the config file",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// is it an API key?
-		if strings.Count(args[0], ";") == 2 {
-			return addAPIKey(args[0])
+			if utils.ValidAPIKey(args[0]) {
+				return setAPIkey(args[0])
 		}
 
 		// is it an email address?
@@ -168,31 +170,7 @@ func login(email string) error {
 		return err
 	}
 
-	key := strings.Trim(strings.Split(t, ": ")[1], " \r\n\t")
-	return addAPIKey(key)
-}
-
-func addAPIKey(key string) error {
-	if len(key) < 80 || len(key) > 100 {
-		return fmt.Errorf("API key format invalid")
-	}
-
-	keys := viper.GetStringSlice("apikeys")
-	for _, k := range keys {
-		if k == key {
-			golog.Infof("API key already in configuration! Doing nothing.")
-			return nil
-		}
-	}
-
-	keys = append(keys, key)
-	viper.Set("apikeys", keys)
-	if err := saveConfig(); err != nil {
-		return err
-	}
-
-	golog.Info("API Key added to configuration!")
-	return nil
+	return setAPIkey(strings.Trim(strings.Split(t, ": ")[1], " \r\n\t"))
 }
 
 func saveConfig() error {
