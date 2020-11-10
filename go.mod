@@ -8,7 +8,6 @@ require (
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/json-iterator/go v1.1.6
 	github.com/kataras/golog v0.1.5
-	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mxschmitt/playwright-go v0.0.0-20201022121208-5de08c36d292
 	github.com/spf13/cobra v1.1.1
 	github.com/spf13/viper v1.7.1

@@ -8,7 +8,6 @@ import (
 	"runtime"
 
 	"github.com/kataras/golog"
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 
 	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
@@ -27,21 +26,17 @@ func loadConfig() {
 	} else {
 		// otherwise, search in the following paths:
 		// 1) User's Home Directory
+		viper.AddConfigPath("$HOME/")
+
 		// 2) Shell's Working Directory
-		// 3) System Configuration Directory (on Linux)
-		// 4) Executable's Parent Directory
-		if home, err := homedir.Dir(); err == nil {
-			viper.AddConfigPath(home)
-		}
+		viper.AddConfigPath(".")
 
-		if wd, err := os.Getwd(); err == nil {
-			viper.AddConfigPath(wd)
-		}
-
+		// 3) System Configuration Directory
 		if runtime.GOOS == "linux" {
 			viper.AddConfigPath("/etc")
 		}
 
+		// 4) Executable's Parent Directory
 		if ed, err := os.Executable(); err == nil {
 			viper.AddConfigPath(filepath.Dir(ed))
 		}
