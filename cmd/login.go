@@ -12,7 +12,7 @@ import (
 	"github.com/mxschmitt/playwright-go"
 	"github.com/spf13/cobra"
 
-	"github.com/AlbinoGeek/sc2-rsu/utils"
+	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
 )
 
 var loginCmd = &cobra.Command{
@@ -23,7 +23,7 @@ var loginCmd = &cobra.Command{
 		}
 
 		// is it an API key?
-			if utils.ValidAPIKey(args[0]) {
+			if sc2replaystats.ValidAPIKey(args[0]) {
 			return nil
 		}
 
@@ -37,7 +37,7 @@ var loginCmd = &cobra.Command{
 	Short: "Add an sc2replaystats account to the config file",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		// is it an API key?
-			if utils.ValidAPIKey(args[0]) {
+			if sc2replaystats.ValidAPIKey(args[0]) {
 				return setAPIkey(args[0])
 		}
 
@@ -51,10 +51,6 @@ var loginCmd = &cobra.Command{
 		return nil
 	},
 }
-
-var (
-	sc2rsBase    = "https://sc2replaystats.com"
-	sc2rsAPIBase = "https://api.sc2replaystats.com"
 )
 
 func login(email string) error {
@@ -91,7 +87,7 @@ func login(email string) error {
 	defer page.Close()
 
 	golog.Infof("Navigating to login page...")
-	if _, err = page.Goto(fmt.Sprintf("%s/Account/signin", sc2rsBase)); err != nil {
+	if _, err = page.Goto(fmt.Sprintf("%s/Account/signin", sc2replaystats.WebRoot)); err != nil {
 		return err
 	}
 
@@ -130,7 +126,7 @@ func login(email string) error {
 	accid := strings.Split(parts[len(parts)-1], "#")[0]
 	golog.Infof("Success! Logged in to account #%v", accid)
 
-	if _, err = page.Goto(fmt.Sprintf("%s/account/settings/%v", sc2rsBase, accid)); err != nil {
+	if _, err = page.Goto(fmt.Sprintf("%s/account/settings/%v", sc2replaystats.WebRoot, accid)); err != nil {
 		return err
 	}
 

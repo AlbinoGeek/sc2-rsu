@@ -18,7 +18,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
-	"github.com/AlbinoGeek/sc2-rsu/utils"
+	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
 )
 
 var (
@@ -31,7 +31,7 @@ var (
 				return errors.New("no API key in configuration, please use the login command")
 			}
 
-			if !utils.ValidAPIKey(key) {
+			if !sc2replaystats.ValidAPIKey(key) {
 				return errors.New("invalid API key in configuration, please replace it or use the login command")
 			}
 
@@ -58,9 +58,11 @@ func automaticUpload(apikey string) error {
 				}
 
 				if event.Op&fsnotify.Create == fsnotify.Create {
-					golog.Infof("Detected new replay file: %v", event.Name)
-					if err := uploadReplay(apikey, event.Name); err != nil {
+					golog.Debugf("uploading replay: %v", event.Name)
+					if id, err := sc2replaystats.UploadReplay(apikey, event.Name); err != nil {
 						golog.Errorf("failed to upload replay: %v: %v", event.Name, err)
+					} else {
+						golog.Infof("sc2replaystats accepted our replay: [%v] %s", id, filepath.Base(event.Name))
 					}
 				}
 				// if event.Op&fsnotify.Write == fsnotify.Write {

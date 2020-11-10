@@ -1,4 +1,4 @@
-package utils
+package sc2replaystats
 
 import (
 	"strconv"

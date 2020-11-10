@@ -11,7 +11,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 
-	"github.com/AlbinoGeek/sc2-rsu/utils"
+	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
 )
 
 var (
@@ -85,7 +85,7 @@ func saveConfig() error {
 }
 
 func setAPIkey(key string) error {
-	if !utils.ValidAPIKey(key) {
+	if !sc2replaystats.ValidAPIKey(key) {
 		return errors.New("invalid API key format")
 	}
 
