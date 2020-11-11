@@ -8,7 +8,7 @@
 - Bronze Friendly: `login` command accepts an API Key or Email Address
 - Optimized Build: Requires no vespene, and less than 10MB of RAM
 
-Missing a feature? [Request it!](https://github.com/AlbinoGeek/sc2-rsu/issues/new)
+Missing a feature? [Request it!](https://github.com/AlbinoGeek/sc2-rsu/issues/new?assignees=AlbinoGeek&labels=enhancement&template=feature-request.md&title=%5BFEATURE+REQUEST%5D)
 
 ## Usage
 
