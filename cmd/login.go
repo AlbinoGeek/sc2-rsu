@@ -153,11 +153,7 @@ func login(email string) error {
 		if err = e.Click(); err != nil {
 			return err
 		}
-		_, err = page.WaitForSelector("*css=a[data-toggle='tab'] >> text=API Access")
-		if err != nil {
-			return err
-		}
-		e, err = page.QuerySelector("*css=.form-group >> text=Authorization Key")
+		e, err = page.WaitForSelector("*css=.form-group >> text=Authorization Key")
 	}
 	if err != nil || e == nil {
 		return fmt.Errorf("unable to find API key: %v", err)
