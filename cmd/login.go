@@ -15,56 +15,59 @@ import (
 	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
 )
 
-var loginCmd = &cobra.Command{
-	Use: "login <apikey or email>",
-	Args: func(cmd *cobra.Command, args []string) error {
-		if l := len(args); l != 1 {
-			return fmt.Errorf("wrong argument count: expected 1, got %d", l)
-		}
+var (
+	loginWarning = `
+============================================================
+We are about to login to sc2replaystats for you to obtain or
+generate your API key. We will have to ask you for your pass
+word, which we WILL NOT SAVE -- once the login form has been
+loaded. If you want to avoid providing your account password
+please call this command with your API key instead. Example:
+%s login <apikey>
+============================================================
 
-		// is it an API key?
+`
+
+	loginCmd = &cobra.Command{
+		Use: "login <apikey or email>",
+		Args: func(cmd *cobra.Command, args []string) error {
+			if l := len(args); l != 1 {
+				return fmt.Errorf("wrong argument count: expected 1, got %d", l)
+			}
+
+			// is it an API key?
 			if sc2replaystats.ValidAPIKey(args[0]) {
+				return nil
+			}
+
+			// is it an email address?
+			if err := checkmail.ValidateFormat(args[0]); err != nil {
+				return fmt.Errorf("email address: %v", err)
+			}
+
 			return nil
-		}
-
-		// is it an email address?
-		if err := checkmail.ValidateFormat(args[0]); err != nil {
-			return fmt.Errorf("email address: %v", err)
-		}
-
-		return nil
-	},
-	Short: "Add an sc2replaystats account to the config file",
-	RunE: func(cmd *cobra.Command, args []string) error {
-		// is it an API key?
+		},
+		Short: "Add an sc2replaystats account to the config file",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			// is it an API key?
 			if sc2replaystats.ValidAPIKey(args[0]) {
 				return setAPIkey(args[0])
-		}
+			}
 
-		// is it an email address?
-		t := time.Now()
-		if err := login(args[0]); err != nil {
-			return err
-		}
-		golog.Debugf("Login completed in %s", time.Since(t))
+			// is it an email address?
+			t := time.Now()
+			if err := login(args[0]); err != nil {
+				return err
+			}
+			golog.Debugf("Login completed in %s", time.Since(t))
 
-		return nil
-	},
-}
+			return nil
+		},
+	}
 )
 
 func login(email string) error {
-	fmt.Printf(`
-	============================================================
-	We are about to login to sc2replaystats for you to obtain or
-	generate your API key. We will have to ask you for your pass
-	word, which we WILL NOT SAVE -- once the login form has been
-	loaded. If you want to avoid providing your account password
-	please call this command with your API key instead. Example:
-	%s login <apikey>
-	============================================================
-
-`, os.Args[0])
+	fmt.Printf(loginWarning, os.Args[0])
 
 	golog.Debugf("Setting up browser...")
 	pw, err := playwright.Run()
