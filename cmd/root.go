@@ -10,6 +10,7 @@ import (
 	"runtime"
 	"strconv"
 	"syscall"
+	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/kataras/golog"
@@ -42,6 +43,8 @@ var (
 )
 
 func automaticUpload(apikey string) error {
+	tt := time.Now()
+
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		golog.Fatalf("failed to setup fswatcher: %v", err)
@@ -119,6 +122,7 @@ func automaticUpload(apikey string) error {
 		close(done)
 	}()
 
+	golog.Debugf("Startup took: %v", time.Since(tt))
 	golog.Info("Ready!")
 	<-done
 	return nil
