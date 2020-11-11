@@ -8,11 +8,11 @@
 - Bronze Friendly: `login` command accepts an API Key or Email Address
 - Optimized Build: Requires no vespene, and less than 10MB of RAM
 
-Missing a feature? [Request it!](/issues/new)
+Missing a feature? [Request it!](https://github.com/AlbinoGeek/sc2-rsu/issues/new)
 
 ## Usage
 
-1. [Download a Release](/AlbinoGeek/sc2-rsu/releases) or [Get the Sources](#building-from-source)
+1. [Download a Release](https://github.com/AlbinoGeek/sc2-rsu/releases) or [Get the Sources](#building-from-source)
 2. Issue the `login` command to perform one-time setup (get your SC2ReplayStats API Key)
 3. Run the program without a command to automatically upload games as they are played
 
@@ -46,4 +46,4 @@ The binary will be built into the `_dist` directory.
 
 ## License
 
-This project is licensed under the terms of the MIT License.
+This project is licensed under the terms of the [MIT License](/LICENSE).
