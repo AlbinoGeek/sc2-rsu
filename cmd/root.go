@@ -65,9 +65,6 @@ func automaticUpload(apikey string) error {
 						golog.Infof("sc2replaystats accepted our replay: [%v] %s", id, filepath.Base(event.Name))
 					}
 				}
-				// if event.Op&fsnotify.Write == fsnotify.Write {
-				// 	log.Println("modified file:", event.Name)
-				// }
 			case err, ok := <-watcher.Errors:
 				if !ok {
 					return
