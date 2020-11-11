@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
-	"strings"
 	"syscall"
 
 	"github.com/fsnotify/fsnotify"
@@ -19,6 +18,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
+	"github.com/AlbinoGeek/sc2-rsu/utils"
 )
 
 var (
@@ -127,92 +127,55 @@ func automaticUpload(apikey string) error {
 func findAccounts(root string) (ids []string, err error) {
 	golog.Debugf("Searching for accounts in replay directory...")
 
-	paths := make([]string, 0)
+	paths, err := utils.FindDirectoriesBySuffix(viper.GetString("replaysRoot"), "ultiplayer", true)
+	if err != nil {
+		return nil, fmt.Errorf("FindDirectory error: %v", err)
+	}
+
+	i := 0
 	uniq := make(map[string]struct{})
-	err = filepath.Walk(root, func(path string, info os.FileInfo, ferr error) error {
-		if ferr != nil {
-			// silently skip access / permission errors
-			if strings.Contains(ferr.Error(), "access denied") ||
-				strings.Contains(ferr.Error(), "permission denied") {
-				return nil
-			}
-
-			return ferr
+	for _, p := range paths {
+		p = utils.StripPathParts(p, 2)
+		if _, duplicate := uniq[p]; !duplicate {
+			uniq[p] = struct{}{}
+			paths[i] = utils.StripPathParts(p, -2)
+			golog.Debugf("found candidate account: %v", paths[i])
+			i++
 		}
-
-		if info.IsDir() && strings.HasSuffix(path, "ultiplayer") {
-			if parts := strings.Split(path, string(filepath.Separator)); len(parts) > 2 {
-				path = strings.Join(parts[len(parts)-4:len(parts)-2], string(filepath.Separator))
-				if _, is := uniq[path]; !is {
-					uniq[path] = struct{}{}
-					paths = append(paths, path)
-					golog.Debugf("found candidate account: %v", path)
-				}
-			}
-		}
-
-		return nil
-	})
+	}
+	paths = paths[:i] // truncate duplicates
 	golog.Debugf("finished scanning for candidates. Found: %v", len(paths))
+
 	return paths, err
-
-	// 	if len(paths) > 1 {
-	// 		fmt.Print(`============================================================
-	// More than one possible replay directory was located while we
-	// scanned for your StarCraft II installation's Accounts folder
-
-	// Please select which directory we should be watching below:`)
-	// 		for i, p := range paths {
-	// 			fmt.Printf("\n  %d: %s", 1+i, p)
-	// 		}
-	// 		fmt.Println("\n============================================================")
-	// 		consoleReader := bufio.NewReaderSize(os.Stdin, 1)
-	// 		for {
-	// 			fmt.Printf("Your Choice [1-%d]: ", len(paths))
-	// 			input, _, _ := consoleReader.ReadLine()
-	// 			choice, err := strconv.Atoi(string(input))
-	// 			if err == nil && choice-1 > 0 && choice-1 < len(paths) {
-	// 				return paths[choice-1], nil
-	// 			}
-	// 		}
-	// 	} else if len(paths) == 1 {
-	// 		return paths[0], nil
-	// 	}
 }
 
 func findReplaysRoot() (root string, err error) {
 	golog.Infof("Determining replays directory... (this could take a few minutes)...")
 
-	paths := make([]string, 0)
+	scanRoot := "/"
+	if runtime.GOOS == "linux" {
+		scanRoot = "/home"
+	} else if runtime.GOOS == "windows" {
+		scanRoot = "/Users"
+	}
+
+	paths, err := utils.FindDirectoriesBySuffix(scanRoot, "ultiplayer", true)
+	if err != nil {
+		return "", fmt.Errorf("FindDirectory error: %v", err)
+	}
+
+	i := 0
 	uniq := make(map[string]struct{})
-	err = filepath.Walk("/", func(path string, info os.FileInfo, ferr error) error {
-		if ferr != nil {
-			// silently skip access / permission errors
-			if strings.Contains(ferr.Error(), "access denied") ||
-				strings.Contains(ferr.Error(), "permission denied") {
-				return nil
-			}
-
-			return ferr
+	for _, p := range paths {
+		p = utils.StripPathParts(p, 4)
+		if _, duplicate := uniq[p]; !duplicate {
+			uniq[p] = struct{}{}
+			paths[i] = p
+			golog.Debugf("found candidate replay directory: %v", p)
+			i++
 		}
-
-		if info.IsDir() &&
-			strings.Contains(path, "ccounts") &&
-			strings.Contains(path, "eplays") &&
-			strings.HasSuffix(path, "ultiplayer") {
-
-			if parts := strings.Split(path, string(filepath.Separator)); len(parts) > 4 {
-				path = strings.Join(parts[:len(parts)-4], string(filepath.Separator))
-				if _, is := uniq[path]; !is {
-					uniq[path] = struct{}{}
-					paths = append(paths, path)
-					golog.Debugf("found candidate replay directory: %v", path)
-				}
-			}
-		}
-
-		return nil
-	})
+	}
+	paths = paths[:i] // truncate duplicates
 	golog.Debugf("finished scanning for candidates. Found: %v", len(paths))
 
 	if len(paths) > 1 {
