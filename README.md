@@ -43,3 +43,7 @@ $ make all
 ```
 
 The binary will be built into the `_dist` directory.
+
+## License
+
+This project is licensed under the terms of the MIT License.
