@@ -69,14 +69,14 @@ please call this command with your API key instead. Example:
 func login(email string) error {
 	fmt.Printf(loginWarning, os.Args[0])
 
-	golog.Debugf("Setting up browser...")
+	golog.Debug("Setting up browser...")
 	pw, err := playwright.Run()
 	if err != nil {
 		return fmt.Errorf("failed to setup signin browser: %v", err)
 	}
 	defer pw.Stop()
 
-	golog.Debugf("Launching browser...")
+	golog.Debug("Launching browser...")
 	browser, err := pw.Chromium.Launch()
 	if err != nil {
 		return fmt.Errorf("failed to initialize signin browser 1: %v", err)
@@ -89,12 +89,12 @@ func login(email string) error {
 	}
 	defer page.Close()
 
-	golog.Infof("Navigating to login page...")
+	golog.Debug("Navigating to login page...")
 	if _, err = page.Goto(fmt.Sprintf("%s/Account/signin", sc2replaystats.WebRoot)); err != nil {
 		return fmt.Errorf("failed to navigate to signin page: %v", err)
 	}
 
-	golog.Debugf("Filling login form...")
+	golog.Debug("Filling login form...")
 	input, err := page.QuerySelector("css=input[name='email']")
 	if err != nil || input == nil {
 		return fmt.Errorf("[signin] failed to locate email field: %v", err)
@@ -144,19 +144,19 @@ func login(email string) error {
 		return fmt.Errorf("failed to navigate to settings page: %v", err)
 	}
 
-	golog.Debugf("Waiting for settings page to load...")
+	golog.Debug("Waiting for settings page to load...")
 	e, err := page.WaitForSelector("*css=a[data-toggle='tab'] >> text=API Access")
 	if err != nil {
 		return fmt.Errorf("[settings] failed to locate API Access section: %v", err)
 	}
-	golog.Debugf("Clicking 'API Access'...")
+	golog.Debug("Clicking 'API Access'...")
 	if err = e.Click(); err != nil {
 		return fmt.Errorf("[settings] failed to click API Access: %v", err)
 	}
-	golog.Debugf("Finding API key...")
+	golog.Debug("Finding API key...")
 	e, err = page.QuerySelector("*css=.form-group >> text=Authorization Key")
 	if e == nil || err != nil {
-		golog.Infof("Generating new API key...")
+		golog.Info("Generating new API key...")
 		e, err = page.QuerySelector("text=Generate New API Key")
 		if err != nil {
 			return fmt.Errorf("[settings] failed to locate Generate New API Key button: %v", err)

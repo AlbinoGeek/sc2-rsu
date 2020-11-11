@@ -36,7 +36,7 @@ var (
 				return errors.New("invalid API key in configuration, please replace it or use the login command")
 			}
 
-			golog.Infof("Starting Automatic Replay Uploader...")
+			golog.Info("Starting Automatic Replay Uploader...")
 			return automaticUpload(key)
 		},
 	}
@@ -81,7 +81,7 @@ func automaticUpload(apikey string) error {
 	watchPaths := make([]string, 0)
 	replaysRoot := viper.GetString("replaysRoot")
 	if f, err := os.Stat(replaysRoot); err != nil || !f.IsDir() {
-		golog.Warnf("Replay Root not configured correctly, searching for replays directory...")
+		golog.Warn("Replay Root not configured correctly, searching for replays directory...")
 		if replaysRoot, err = findReplaysRoot(); err != nil {
 			golog.Fatalf("unable to automatically determine the path to your replays directory: %v", err)
 		}
@@ -129,7 +129,7 @@ func automaticUpload(apikey string) error {
 }
 
 func findAccounts(root string) (ids []string, err error) {
-	golog.Debugf("Searching for accounts in replay directory...")
+	golog.Debug("Searching for accounts in replay directory...")
 
 	paths, err := utils.FindDirectoriesBySuffix(viper.GetString("replaysRoot"), "ultiplayer", true)
 	if err != nil {
@@ -154,7 +154,7 @@ func findAccounts(root string) (ids []string, err error) {
 }
 
 func findReplaysRoot() (root string, err error) {
-	golog.Infof("Determining replays directory... (this could take a few minutes)...")
+	golog.Info("Determining replays directory... (this could take a few minutes)...")
 
 	scanRoot := "/"
 	if runtime.GOOS == "linux" {
