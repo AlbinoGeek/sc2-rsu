@@ -16,6 +16,7 @@
 
 ### Fixed
 
+- Bug where the root directory was offered as Reply directory in some cases
 - Configuration not being detected in home directory
 
 ### Removed

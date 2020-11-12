@@ -175,7 +175,7 @@ func findReplaysRoot() (root string, err error) {
 	uniq := make(map[string]struct{})
 	for _, p := range paths {
 		p = utils.StripPathParts(p, 4)
-		if _, duplicate := uniq[p]; !duplicate {
+		if _, duplicate := uniq[p]; !duplicate && p != "/" {
 			uniq[p] = struct{}{}
 			paths[i] = p
 			golog.Debugf("found candidate replay directory: %v", p)
