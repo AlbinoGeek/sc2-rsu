@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"time"
 
 	"github.com/kataras/golog"
 	"github.com/spf13/viper"
@@ -18,6 +19,15 @@ var (
 	cfgFile        string
 	defaultCfgFile string
 )
+
+func defaultConfig() {
+	for key, val := range map[string]interface{}{
+		"update.check.enabled":     true,
+		"update.check.period":      time.Duration(time.Minute * 10).String(),
+	} {
+		viper.SetDefault(key, val)
+	}
+}
 
 func loadConfig() {
 	if cfgFile != "" {

@@ -39,6 +39,17 @@ var (
 				return errors.New("invalid API key in configuration, please replace it or use the login command")
 			}
 
+			if viper.GetBool("update.check.enabled") {
+				dur := viper.GetString("update.check.period")
+				period, err := time.ParseDuration(dur)
+				if err != nil || period < time.Minute*10 {
+					golog.Warnf("update.check.period invalid or too short: %v", err)
+					period = time.Duration(time.Minute * 10)
+				}
+
+				go updateCheckEvery(period)
+			}
+
 			golog.Info("Starting Automatic Replay Uploader...")
 			return automaticUpload(key)
 		},
@@ -223,6 +234,7 @@ func Execute() error {
 	}
 
 	// Load Configuration on Initialize
+	defaultConfig()
 	cobra.OnInitialize(loadConfig)
 
 	// Attach Flags
