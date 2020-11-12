@@ -47,7 +47,7 @@ var (
 					period = time.Duration(time.Minute * 10)
 				}
 
-				go updateCheckEvery(period)
+				go checkUpdateEvery(period)
 			}
 
 			golog.Info("Starting Automatic Replay Uploader...")

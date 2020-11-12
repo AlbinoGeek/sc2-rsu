@@ -25,13 +25,13 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 			golog.Infof("You are currently running version: %v", VERSION)
 
-			rel := updateCheck()
+			rel := checkUpdate()
 			if rel == nil {
 				golog.Info("No updates found. You are on the latest release version.")
 				return
 			}
 
-			updateNotice(rel)
+			printUpdateNotice(rel)
 		},
 	}
 )
@@ -57,12 +57,12 @@ func isNewer(old, new string) bool {
 	return false
 }
 
-func updateCheckEvery(period time.Duration) {
+func checkUpdateEvery(period time.Duration) {
 	func() {
 		for {
 			tt := time.Now()
-			if rel := updateCheck(); rel != nil {
-				updateNotice(rel)
+			if rel := checkUpdate(); rel != nil {
+				printUpdateNotice(rel)
 				break // only notify the user once
 			}
 			golog.Debugf("update check took: %v", time.Since(tt))
@@ -71,7 +71,7 @@ func updateCheckEvery(period time.Duration) {
 	}()
 }
 
-func updateCheck() *github.RepositoryRelease {
+func checkUpdate() *github.RepositoryRelease {
 	rels, _, err := ghClient.Repositories.ListReleases(context.TODO(), ghOwner, ghRepo, nil)
 	if err != nil {
 		golog.Errorf("failed update check, could not list releases: %v", err)
@@ -87,7 +87,7 @@ func updateCheck() *github.RepositoryRelease {
 	return nil
 }
 
-func updateNotice(rel *github.RepositoryRelease) {
+func printUpdateNotice(rel *github.RepositoryRelease) {
 	line := strings.Repeat("=", termWidth)
 	fmt.Printf(
 		"%s\nUpdate Detected! New Release Version: %v\n\n%s\n%s\n",
