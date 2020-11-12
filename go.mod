@@ -5,6 +5,7 @@ go 1.15
 require (
 	github.com/badoux/checkmail v1.2.1
 	github.com/bgentry/speakeasy v0.1.0
+	github.com/dustin/go-humanize v1.0.0
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/google/go-github/v32 v32.1.0
 	github.com/json-iterator/go v1.1.6

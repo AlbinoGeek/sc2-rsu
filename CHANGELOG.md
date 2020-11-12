@@ -7,8 +7,9 @@
 - More concise non-verbose logging
 - More detailed verbose logging
 - More descriptive error messages
-- `update` command to check for updates
+- `update` command to check for and optionally download updates
 - Periodic check for updates (configurable)
+- Automatically download updates when found (configurable)
 
 ### Changed
 
