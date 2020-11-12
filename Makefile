@@ -95,6 +95,11 @@ all: "$(TARGETDIR)/$(BINARYNAME)"
 	if [ ! -d "$(TARGETDIR)" ]; then mkdir "$(TARGETDIR)"; fi
 	go build -ldflags "-s -w -X main.PROGRAM=$(BINARYNAME) -X main.VERSION=$(CURRENT_VERSION_MICRO)" -o "$(TARGETDIR)/$(BINARYNAME)" "$(MODNAME)"
 
+.PHONY: release
+release:
+	GOOS=linux GOARCH=amd64 go build -ldflags "-s -w -X main.PROGRAM=$(BINARYNAME) -X main.VERSION=$(CURRENT_VERSION_MICRO)" -o "$(TARGETDIR)/$(BINARYNAME)-$(CURRENT_VERSION_MICRO)-linux-amd64" "$(MODNAME)"
+	GOOS=windows GOARCH=amd64 go build -ldflags "-s -w -X main.PROGRAM=$(BINARYNAME) -X main.VERSION=$(CURRENT_VERSION_MICRO)" -o "$(TARGETDIR)/$(BINARYNAME)-$(CURRENT_VERSION_MICRO)-windows-amd64.exe" "$(MODNAME)"
+
 .PHONY: clean
 clean:
 	rm -f "$(TARGETDIR)/$(BINARYNAME)"
