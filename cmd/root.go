@@ -244,6 +244,7 @@ func Execute() error {
 
 	// Add Commands
 	rootCmd.AddCommand(loginCmd)
+	rootCmd.AddCommand(updateCmd)
 	rootCmd.AddCommand(uploadCmd)
 	rootCmd.AddCommand(versionCmd)
 

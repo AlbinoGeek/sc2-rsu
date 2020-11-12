@@ -7,6 +7,7 @@
 - More concise non-verbose logging
 - More detailed verbose logging
 - More descriptive error messages
+- `update` command to check for updates
 - Periodic check for updates (configurable)
 
 ### Changed

@@ -10,6 +10,7 @@ import (
 	"github.com/google/go-github/v32/github"
 	"github.com/kataras/golog"
 	"github.com/mitchellh/go-wordwrap"
+	"github.com/spf13/cobra"
 	stripmd "github.com/writeas/go-strip-markdown"
 )
 
@@ -17,6 +18,22 @@ var (
 	ghClient = github.NewClient(nil)
 	ghOwner  = "AlbinoGeek"
 	ghRepo   = "sc2-rsu"
+
+	updateCmd = &cobra.Command{
+		Use:   "update",
+		Short: "Checks for and optionally downloads program updates",
+		Run: func(cmd *cobra.Command, args []string) {
+			golog.Infof("You are currently running version: %v", VERSION)
+
+			rel := updateCheck()
+			if rel == nil {
+				golog.Info("No updates found. You are on the latest release version.")
+				return
+			}
+
+			updateNotice(rel)
+		},
+	}
 )
 
 func isNewer(old, new string) bool {
@@ -45,13 +62,7 @@ func updateCheckEvery(period time.Duration) {
 		for {
 			tt := time.Now()
 			if rel := updateCheck(); rel != nil {
-				line := strings.Repeat("=", termWidth)
-				fmt.Printf(
-					"%s\nUpdate Detected! New Release Version: %v\n\n%s\n%s\n",
-					line,
-					rel.GetTagName(),
-					wordwrap.WrapString(stripmd.Strip(rel.GetBody()), uint(termWidth)),
-					line)
+				updateNotice(rel)
 				break // only notify the user once
 			}
 			golog.Debugf("update check took: %v", time.Since(tt))
@@ -74,4 +85,14 @@ func updateCheck() *github.RepositoryRelease {
 	}
 
 	return nil
+}
+
+func updateNotice(rel *github.RepositoryRelease) {
+	line := strings.Repeat("=", termWidth)
+	fmt.Printf(
+		"%s\nUpdate Detected! New Release Version: %v\n\n%s\n%s\n",
+		line,
+		rel.GetTagName(),
+		wordwrap.WrapString(stripmd.Strip(rel.GetBody()), uint(termWidth)),
+		line)
 }
