@@ -9,11 +9,14 @@ import (
 	"path/filepath"
 	"runtime"
 	"strconv"
+	"strings"
 	"syscall"
 	"time"
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/kataras/golog"
+	"github.com/mitchellh/go-wordwrap"
+	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -183,15 +186,12 @@ func findReplaysRoot() (root string, err error) {
 	golog.Debugf("finished scanning for candidates. Found: %v", len(paths))
 
 	if len(paths) > 1 {
-		fmt.Print(`============================================================
-More than one possible replay directory was located while we
-scanned for your StarCraft II installation's Accounts folder
-
-Please select which directory we should be watching below:`)
+		line := strings.Repeat("=", termWidth/2)
+		fmt.Printf("\n%s\n%s\n", line, wordwrap.WrapString("More than one possible replay directory was located while we scanned for your StarCraft II installation's Accounts folder.\n\nPlease select which directory we should be watching below:", uint(termWidth/2)))
 		for i, p := range paths {
 			fmt.Printf("\n  %d: %s", 1+i, p)
 		}
-		fmt.Println("\n============================================================")
+		fmt.Printf("\n%s\n", line)
 		consoleReader := bufio.NewReaderSize(os.Stdin, 1)
 		for {
 			fmt.Printf("Your Choice [1-%d]: ", len(paths))
@@ -214,6 +214,11 @@ func Execute() error {
 
 	rootCmd.Use = PROGRAM
 	rootCmd.Version = fmt.Sprintf("%s, version %s-(%s-%s)", PROGRAM, VERSION, runtime.GOARCH, runtime.GOOS)
+
+	// ? should not require RAW mode just go get the dimensions...
+	if w, _, err := terminal.GetSize(0); err == nil {
+		termWidth = w
+	}
 
 	// Load Configuration on Initialize
 	cobra.OnInitialize(loadConfig)

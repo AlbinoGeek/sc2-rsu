@@ -9,6 +9,7 @@ import (
 	"github.com/badoux/checkmail"
 	"github.com/bgentry/speakeasy"
 	"github.com/kataras/golog"
+	"github.com/mitchellh/go-wordwrap"
 	"github.com/mxschmitt/playwright-go"
 	"github.com/spf13/cobra"
 
@@ -16,17 +17,7 @@ import (
 )
 
 var (
-	loginWarning = `
-============================================================
-We are about to login to sc2replaystats for you to obtain or
-generate your API key. We will have to ask you for your pass
-word, which we WILL NOT SAVE -- once the login form has been
-loaded. If you want to avoid providing your account password
-please call this command with your API key instead. Example:
-%s login <apikey>
-============================================================
-
-`
+	loginWarning = "We are about to login to sc2replaystats for you to obtain or generate your API key. We will have to ask you for your password, which we WILL NOT SAVE -- once the login form has been loaded. If you want to avoid providing your account password please call this command with your API key instead."
 
 	loginCmd = &cobra.Command{
 		Use: "login <apikey or email>",
@@ -67,7 +58,13 @@ please call this command with your API key instead. Example:
 )
 
 func login(email string) error {
-	fmt.Printf(loginWarning, os.Args[0])
+	line := strings.Repeat("=", termWidth/2)
+	fmt.Printf(
+		"\n%s\n%s\nExample: %s login <apikey>\n%s\n\n",
+		line,
+		wordwrap.WrapString(loginWarning, uint(termWidth/2)),
+		os.Args[0],
+		line)
 
 	golog.Debug("Setting up browser...")
 	pw, err := playwright.Run()
