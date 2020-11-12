@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+### Added
+
+- Checks replay status until the replay has been processed
+
 ## v0.2
 
 ### Added

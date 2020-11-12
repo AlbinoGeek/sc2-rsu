@@ -77,12 +77,7 @@ func automaticUpload(apikey string) error {
 				}
 
 				if event.Op&fsnotify.Create == fsnotify.Create {
-					golog.Debugf("uploading replay: %v", event.Name)
-					if id, err := sc2replaystats.UploadReplay(apikey, event.Name); err != nil {
-						golog.Errorf("failed to upload replay: %v: %v", event.Name, err)
-					} else {
-						golog.Infof("sc2replaystats accepted our replay: [%v] %s", id, filepath.Base(event.Name))
-					}
+					go handleReplay(apikey, event.Name)
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {
@@ -219,6 +214,37 @@ func findReplaysRoot() (root string, err error) {
 	}
 
 	return
+}
+
+func handleReplay(apikey string, replayFilename string) {
+	golog.Debugf("uploading replay: %v", replayFilename)
+	_, mapName, _ := utils.SplitFilepath(replayFilename)
+
+	rqid, err := sc2replaystats.UploadReplay(apikey, replayFilename)
+	if err != nil {
+		golog.Errorf("failed to upload replay: %v: %v", mapName, err)
+		return
+	}
+	golog.Infof("sc2replaystats accepted : [%v] %s", rqid, mapName)
+	go watchReplayStatus(apikey, rqid)
+}
+
+func watchReplayStatus(apikey string, rqid string) {
+	for {
+		rid, err := sc2replaystats.GetReplayStatus(apikey, rqid)
+		if err != nil {
+			golog.Errorf("error checking reply status: %v: %v", rqid, err)
+			return // could not check status
+		}
+
+		if rid != "" {
+			golog.Infof("sc2replaystats processed: [%v] %s", rqid, rid)
+			return // replay parsed!
+		}
+
+		golog.Debugf("sc2replaystats process..: [%v] %s", rqid, rid)
+		time.Sleep(time.Second / 2)
+	}
 }
 
 // Execute executes the root command once Initialize has been called
