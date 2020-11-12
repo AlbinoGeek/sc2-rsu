@@ -43,6 +43,8 @@ var (
 			return automaticUpload(key)
 		},
 	}
+
+	termWidth = 80
 )
 
 func automaticUpload(apikey string) error {
