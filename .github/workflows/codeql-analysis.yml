@@ -32,12 +32,3 @@ jobs:
     
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
-    
-    - name: CodeClimate Test & Coverage
-      uses: paambaati/codeclimate-action@v2.7.4
-      env:
-        CC_TEST_REPORTER_ID: 1c9aa00a04ab2a656a50e5625dde38d04203477114f4665392368668e09d6e02
-      with:
-        coverageCommand: go test ./... -coverprofile c.out && sed -i "s/github.com\/AlbinoGeek\/sc2-rsu/./g" c.out && cat c.out
-        prefix: sc2-rsu
-        debug: true
