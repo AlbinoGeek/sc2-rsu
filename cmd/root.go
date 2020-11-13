@@ -50,15 +50,42 @@ var (
 				go checkUpdateEvery(period)
 			}
 
+			replaysRoot := viper.GetString("replaysRoot")
+			if f, err := os.Stat(replaysRoot); err != nil || !f.IsDir() {
+				golog.Warn("Replay Root not configured correctly, searching for replays directory...")
+				if replaysRoot, err = findReplaysRoot(); err != nil {
+					golog.Fatalf("unable to automatically determine the path to your replays directory: %v", err)
+				}
+
+				viper.Set("replaysRoot", replaysRoot)
+				if err := saveConfig(); err != nil {
+					return err
+				}
+				golog.Infof("Using replays directory: %v", replaysRoot)
+			}
+
+			accs, err := findAccounts(replaysRoot)
+			if err != nil {
+				return err
+			}
+
+			paths := make([]string, 0)
+			for _, a := range accs {
+				p := filepath.Join(replaysRoot, a, "Replays", "Multiplayer")
+				if f, err := os.Stat(p); err == nil && f.IsDir() {
+					paths = append(paths, p)
+				}
+			}
+
 			golog.Info("Starting Automatic Replay Uploader...")
-			return automaticUpload(key)
+			return automaticUpload(key, paths)
 		},
 	}
 	startTime = time.Now()
 	termWidth = 80
 )
 
-func automaticUpload(apikey string) error {
+func automaticUpload(apikey string, paths []string) error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		golog.Fatalf("failed to setup fswatcher: %v", err)
@@ -93,34 +120,7 @@ func automaticUpload(apikey string) error {
 		}
 	}()
 
-	watchPaths := make([]string, 0)
-	replaysRoot := viper.GetString("replaysRoot")
-	if f, err := os.Stat(replaysRoot); err != nil || !f.IsDir() {
-		golog.Warn("Replay Root not configured correctly, searching for replays directory...")
-		if replaysRoot, err = findReplaysRoot(); err != nil {
-			golog.Fatalf("unable to automatically determine the path to your replays directory: %v", err)
-		}
-
-		viper.Set("replaysRoot", replaysRoot)
-		if err := saveConfig(); err != nil {
-			return err
-		}
-		golog.Infof("Using replays directory: %v", replaysRoot)
-	}
-
-	accs, err := findAccounts(replaysRoot)
-	if err != nil {
-		return err
-	}
-
-	for _, a := range accs {
-		path := filepath.Join(replaysRoot, a, "Replays", "Multiplayer")
-		if f, err := os.Stat(path); err == nil && f.IsDir() {
-			watchPaths = append(watchPaths, path)
-		}
-	}
-
-	for _, p := range watchPaths {
+	for _, p := range paths {
 		golog.Debugf("Watching replays directory: %v", p)
 		if err = watcher.Add(p); err != nil {
 			golog.Fatalf("failed to watch replay directory: %v: %v", p, err)
@@ -195,27 +195,29 @@ func findReplaysRoot() (root string, err error) {
 	paths = paths[:i] // truncate duplicates
 	golog.Debugf("finished scanning for candidates. Found: %v", len(paths))
 
-	if len(paths) > 1 {
-		line := strings.Repeat("=", termWidth/2)
-		fmt.Printf("\n%s\n%s\n", line, wordwrap.WrapString("More than one possible replay directory was located while we scanned for your StarCraft II installation's Accounts folder.\n\nPlease select which directory we should be watching below:", uint(termWidth/2)))
-		for i, p := range paths {
-			fmt.Printf("\n  %d: %s", 1+i, p)
-		}
-		fmt.Printf("\n%s\n", line)
-		consoleReader := bufio.NewReaderSize(os.Stdin, 1)
-		for {
-			fmt.Printf("Your Choice [1-%d]: ", len(paths))
-			input, _, _ := consoleReader.ReadLine()
-			choice, err := strconv.Atoi(string(input))
-			if err == nil && choice-1 > 0 && choice-1 < len(paths) {
-				return paths[choice-1], nil
-			}
-		}
-	} else if len(paths) == 1 {
+	if len(paths) == 1 {
 		return paths[0], nil
 	}
 
-	return
+	if len(paths) == 0 {
+		return "", fmt.Errorf("no root found")
+	}
+
+	line := strings.Repeat("=", termWidth/2)
+	fmt.Printf("\n%s\n%s\n", line, wordwrap.WrapString("More than one possible replay directory was located while we scanned for your StarCraft II installation's Accounts folder.\n\nPlease select which directory we should be watching below:", uint(termWidth/2)))
+	for i, p := range paths {
+		fmt.Printf("\n  %d: %s", 1+i, p)
+	}
+	fmt.Printf("\n%s\n", line)
+	consoleReader := bufio.NewReaderSize(os.Stdin, 1)
+	for {
+		fmt.Printf("Your Choice [1-%d]: ", len(paths))
+		input, _, _ := consoleReader.ReadLine()
+		choice, err := strconv.Atoi(string(input))
+		if err == nil && choice-1 > 0 && choice-1 < len(paths) {
+			return paths[choice-1], nil
+		}
+	}
 }
 
 func handleReplay(apikey string, replayFilename string) {
