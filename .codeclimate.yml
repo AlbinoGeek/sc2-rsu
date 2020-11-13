@@ -1,0 +1,8 @@
+engines:
+  markdownlint:
+    enabled: true
+    checks:
+      MD029:
+        enabled: false
+      MD036:
+        enabled: false
