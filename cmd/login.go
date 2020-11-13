@@ -46,8 +46,21 @@ var (
 			}
 
 			// is it an email address?
+			line := strings.Repeat("=", termWidth/2)
+			fmt.Printf(
+				"\n%s\n%s\nExample: %s login <apikey>\n%s\n\n",
+				line,
+				wordwrap.WrapString(loginWarning, uint(termWidth/2)),
+				os.Args[0],
+				line)
+
+			password, err := speakeasy.Ask(fmt.Sprintf("Password for sc2ReplayStats account %s: ", args[0]))
+			if err != nil {
+				return fmt.Errorf("failed to prompt user for password: %v", err)
+			}
+
 			t := time.Now()
-			if err := login(args[0]); err != nil {
+			if err := login(args[0], password); err != nil {
 				return fmt.Errorf("email login error: %v", err)
 			}
 			golog.Debugf("Login completed in %s", time.Since(t))
@@ -57,15 +70,7 @@ var (
 	}
 )
 
-func login(email string) error {
-	line := strings.Repeat("=", termWidth/2)
-	fmt.Printf(
-		"\n%s\n%s\nExample: %s login <apikey>\n%s\n\n",
-		line,
-		wordwrap.WrapString(loginWarning, uint(termWidth/2)),
-		os.Args[0],
-		line)
-
+func login(email string, password string) error {
 	golog.Debug("Setting up browser...")
 	pw, err := playwright.Run()
 	if err != nil {
@@ -98,13 +103,6 @@ func login(email string) error {
 	}
 	if err = input.Fill(email); err != nil {
 		return fmt.Errorf("[signin] failed to fill email field: %v", err)
-	}
-
-	tt := time.Now()
-	password, err := speakeasy.Ask(fmt.Sprintf("Password for sc2ReplayStats account %s: ", email))
-	golog.Debugf("User input took %s", time.Since(tt))
-	if err != nil {
-		return fmt.Errorf("failed to prompt user for password: %v", err)
 	}
 
 	if input, err = page.QuerySelector("css=input[name='password']"); err != nil || input == nil {
