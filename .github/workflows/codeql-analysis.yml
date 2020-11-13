@@ -26,13 +26,17 @@ jobs:
       uses: github/codeql-action/init@v1
       with:
         languages: ${{ matrix.language }}
-        # queries: ./path/to/local/query, your-org/your-repo/queries@main
-
-    #- name: Autobuild
-    #  uses: github/codeql-action/autobuild@v1
 
     - run: |
        make all
     
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
+    
+    - name: CodeClimate Test & Coverage
+      uses: paambaati/codeclimate-action@v2.7.4
+      env:
+        CC_TEST_REPORTER_ID: 1c9aa00a04ab2a656a50e5625dde38d04203477114f4665392368668e09d6e02
+      with:
+        coverageCommand: go test -coverprofile c.out
+        debug: true
