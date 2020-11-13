@@ -38,5 +38,6 @@ jobs:
       env:
         CC_TEST_REPORTER_ID: 1c9aa00a04ab2a656a50e5625dde38d04203477114f4665392368668e09d6e02
       with:
-        coverageCommand: go test -coverprofile c.out
+        coverageCommand: go test ./... -coverprofile c.out
+        prefix: "github.com/AlbinoGeek/sc2-rsu" 
         debug: true
