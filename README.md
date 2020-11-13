@@ -3,7 +3,7 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/a308471050f8a3357d09/maintainability)](https://codeclimate.com/github/AlbinoGeek/sc2-rsu/maintainability)
 [![GitHub license](https://img.shields.io/github/license/AlbinoGeek/sc2-rsu.svg)](https://github.com/AlbinoGeek/sc2-rsu/blob/master/LICENSE)
 [![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/AlbinoGeek/sc2-rsu.svg)](https://github.com/AlbinoGeek/sc2-rsu)
-[![GoReportCard](https://goreportcard.com/badge/github.com/AlbinoGeek/sc2-rsu)](https://goreportcard.com/report/github.com/AlbinoGeek/sc2-rsu) 
+[![GoReportCard](https://goreportcard.com/badge/github.com/AlbinoGeek/sc2-rsu)](https://goreportcard.com/report/github.com/AlbinoGeek/sc2-rsu)
 
 **Unofficial SC2ReplayStats Uploader** by AlbinoGeek
 
@@ -23,7 +23,7 @@ Missing a feature? [Request it!](https://github.com/AlbinoGeek/sc2-rsu/issues/ne
 
 ```
 $ sc2-rsu login john@doe.com
-  Password for sc2ReplayStats account john@doe.com: 
+  Password for sc2ReplayStats account john@doe.com:
   Success! Logged in to account #9001
   API Key set in configuration!
 
@@ -40,7 +40,7 @@ For full usage instructions, consult the `--help` output.
 2. Clone the repository
 3. Run `make`
 
-```
+```bash
 # Install Golang [apt / yum / dnf install golang]
 $ git clone https://github.com/AlbinoGeek/sc2-rsu
 $ cd sc2-rsu

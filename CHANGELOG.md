@@ -2,17 +2,17 @@
 
 ## Unreleased
 
-### Added
+**Added**
 
 - Checks replay status until the replay has been processed
 
-### Fixed
+**Fixed**
 
 - Bug where empty replay files were sent before SC2 wrote them out
 
 ## v0.2
 
-### Added
+**Added**
 
 - More concise non-verbose logging
 - More detailed verbose logging
@@ -21,22 +21,21 @@
 - Periodic check for updates (configurable)
 - Automatically download updates when found (configurable)
 
-### Changed
+**Changed**
 
 - Faster replays directory searching on Windows and Linux
 - Faster browser login process (less QuerySelector)
 - SC2ReplayStats functions moved to own package
 
-### Fixed
+**Fixed**
 
 - Bug where the root directory was offered as Reply directory in some cases
 - Configuration not being detected in home directory
 
-### Removed
+**Removed**
 
 - Preliminary support for multiple API keys removed
 
 ## v0.1
 
 - Initial Tagged Build
-
