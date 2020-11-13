@@ -6,6 +6,10 @@
 
 - Checks replay status until the replay has been processed
 
+### Fixed
+
+- Bug where empty replay files were sent before SC2 wrote them out
+
 ## v0.2
 
 ### Added

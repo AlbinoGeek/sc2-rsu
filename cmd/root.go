@@ -77,6 +77,12 @@ func automaticUpload(apikey string) error {
 				}
 
 				if event.Op&fsnotify.Create == fsnotify.Create {
+					for {
+						time.Sleep(time.Millisecond * 100)
+						if s, err := os.Stat(event.Name); err == nil && s.Size() > 256 {
+							break
+						}
+					}
 					go handleReplay(apikey, event.Name)
 				}
 			case err, ok := <-watcher.Errors:
@@ -231,6 +237,7 @@ func handleReplay(apikey string, replayFilename string) {
 
 func watchReplayStatus(apikey string, rqid string) {
 	for {
+		time.Sleep(time.Second)
 		rid, err := sc2replaystats.GetReplayStatus(apikey, rqid)
 		if err != nil {
 			golog.Errorf("error checking reply status: %v: %v", rqid, err)
@@ -243,7 +250,6 @@ func watchReplayStatus(apikey string, rqid string) {
 		}
 
 		golog.Debugf("sc2replaystats process..: [%v] %s", rqid, rid)
-		time.Sleep(time.Second / 2)
 	}
 }
 
