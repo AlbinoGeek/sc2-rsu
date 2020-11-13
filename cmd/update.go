@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strconv"
 	"strings"
 	"time"
 
@@ -61,27 +60,6 @@ var (
 	}
 )
 
-func isNewer(old, new string) bool {
-	if len(new) < 1 {
-		return false
-	}
-
-	nparts := strings.Split(strings.Split(new[1:], "-")[0], ".")
-	oparts := strings.Split(old, ".")
-	for i := range nparts {
-		if len(oparts)-1 < i {
-			break
-		}
-
-		n, err1 := strconv.Atoi(nparts[i])
-		o, err2 := strconv.Atoi(oparts[i])
-		if err1 == nil && err2 == nil && n > o {
-			return true
-		}
-	}
-	return false
-}
-
 func checkUpdateEvery(period time.Duration) {
 	func() {
 		for {
@@ -110,7 +88,7 @@ func checkUpdate() *github.RepositoryRelease {
 	}
 
 	for _, rel := range rels {
-		if tag := rel.GetTagName(); isNewer(VERSION, tag) {
+		if tag := rel.GetTagName(); utils.CompareSemVer(VERSION, tag) > 0 {
 			return rel
 		}
 	}
