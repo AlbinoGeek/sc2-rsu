@@ -172,10 +172,8 @@ func findReplaysRoot() (root string, err error) {
 	golog.Info("Determining replays directory... (this could take a few minutes)...")
 
 	scanRoot := "/"
-	if runtime.GOOS == "linux" {
-		scanRoot = "/home"
-	} else if runtime.GOOS == "windows" {
-		scanRoot = "/Users"
+	if home, err := os.UserHomeDir(); err != nil {
+		scanRoot = home
 	}
 
 	paths, err := utils.FindDirectoriesBySuffix(scanRoot, "ultiplayer", true)
