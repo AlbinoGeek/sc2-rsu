@@ -54,13 +54,11 @@ var (
 			return automaticUpload(key)
 		},
 	}
-
+	startTime = time.Now()
 	termWidth = 80
 )
 
 func automaticUpload(apikey string) error {
-	tt := time.Now()
-
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		golog.Fatalf("failed to setup fswatcher: %v", err)
@@ -139,7 +137,7 @@ func automaticUpload(apikey string) error {
 		close(done)
 	}()
 
-	golog.Debugf("Startup took: %v", time.Since(tt))
+	golog.Debugf("Startup took: %v", time.Since(startTime))
 	golog.Info("Ready!")
 	<-done
 	return nil
