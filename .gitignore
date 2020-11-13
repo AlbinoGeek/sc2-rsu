@@ -2,6 +2,7 @@
 .ms-playwright
 
 # Build Artifacts
+_dist/archive
 _dist/sc2-rsu*
 
 # Configuration Files
