@@ -157,7 +157,7 @@ func findAccounts(root string) (ids []string, err error) {
 		p = utils.StripPathParts(p, 2)
 		if _, duplicate := uniq[p]; !duplicate {
 			uniq[p] = struct{}{}
-			paths[i] = utils.StripPathParts(p, -2)
+			paths[i] = p[len(root):]
 			golog.Debugf("found candidate account: %v", paths[i])
 			i++
 		}

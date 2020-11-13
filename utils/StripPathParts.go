@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"path/filepath"
 	"strings"
 )
@@ -9,13 +10,37 @@ import (
 // path parts; if stripRight is positive, they are removed from the right
 // (end), if negative, they are removed from the left (beginning).
 func StripPathParts(path string, stripRight int) string {
+	abs := filepath.IsAbs(path)
+
+	// "normalize" paths by removing trailing separators
+	if path[len(path)-1] == filepath.Separator {
+		path = path[:len(path)-1]
+	}
+
+	parts := strings.Split(path, string(filepath.Separator))
 	if stripRight < 0 {
-		if parts := strings.SplitAfter(path, string(filepath.Separator)); len(parts) >= -stripRight {
-			path = strings.Join(parts[len(parts)-1+stripRight:], "")
+		// stripping more parts than we have
+		if len(parts) <= -stripRight {
+			return ""
 		}
-	} else if stripRight > 0 {
-		if parts := strings.SplitAfter(path, string(filepath.Separator)); len(parts) >= stripRight {
-			path = strings.Join(parts[:len(parts)-stripRight], "")
+
+		return strings.Join(parts[-stripRight:], string(filepath.Separator))
+	}
+
+	if stripRight > 0 {
+		// stripping more parts than we have
+		if len(parts) <= stripRight {
+			if abs {
+				return "/"
+			}
+			return ""
+		}
+
+		path = strings.Join(parts[:len(parts)-stripRight], string(filepath.Separator))
+
+		// restore absolute-ness for re-assembled path
+		if abs && (len(path) == 0 || path[0] != filepath.Separator) {
+			return fmt.Sprintf("%c%s", filepath.Separator, path)
 		}
 	}
 
