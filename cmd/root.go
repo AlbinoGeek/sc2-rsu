@@ -78,14 +78,16 @@ var (
 			}
 
 			golog.Info("Starting Automatic Replay Uploader...")
-			return automaticUpload(key, paths)
+			sc2api = sc2replaystats.New(key)
+			return automaticUpload(paths)
 		},
 	}
+	sc2api    *sc2replaystats.Client
 	startTime = time.Now()
 	termWidth = 80
 )
 
-func automaticUpload(apikey string, paths []string) error {
+func automaticUpload(paths []string) error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		golog.Fatalf("failed to setup fswatcher: %v", err)
@@ -108,7 +110,7 @@ func automaticUpload(apikey string, paths []string) error {
 							break
 						}
 					}
-					go handleReplay(apikey, event.Name)
+					go handleReplay(event.Name)
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {
@@ -220,23 +222,23 @@ func findReplaysRoot() (root string, err error) {
 	}
 }
 
-func handleReplay(apikey string, replayFilename string) {
+func handleReplay(replayFilename string) {
 	golog.Debugf("uploading replay: %v", replayFilename)
 	_, mapName, _ := utils.SplitFilepath(replayFilename)
 
-	rqid, err := sc2replaystats.UploadReplay(apikey, replayFilename)
+	rqid, err := sc2api.UploadReplay(replayFilename)
 	if err != nil {
 		golog.Errorf("failed to upload replay: %v: %v", mapName, err)
 		return
 	}
 	golog.Infof("sc2replaystats accepted : [%v] %s", rqid, mapName)
-	go watchReplayStatus(apikey, rqid)
+	go watchReplayStatus(rqid)
 }
 
-func watchReplayStatus(apikey string, rqid string) {
+func watchReplayStatus(rqid string) {
 	for {
 		time.Sleep(time.Second)
-		rid, err := sc2replaystats.GetReplayStatus(apikey, rqid)
+		rid, err := sc2api.GetReplayStatus(rqid)
 		if err != nil {
 			golog.Errorf("error checking reply status: %v: %v", rqid, err)
 			return // could not check status
