@@ -1,5 +1,6 @@
 # sc2-rsu
 
+[![CodeQL](https://github.com/AlbinoGeek/sc2-rsu/workflows/CodeQL/badge.svg?branch=main)](#)
 [![Maintainability](https://api.codeclimate.com/v1/badges/a308471050f8a3357d09/maintainability)](https://codeclimate.com/github/AlbinoGeek/sc2-rsu/maintainability)
 [![GitHub license](https://img.shields.io/github/license/AlbinoGeek/sc2-rsu.svg)](https://github.com/AlbinoGeek/sc2-rsu/blob/master/LICENSE)
 [![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/AlbinoGeek/sc2-rsu.svg)](https://github.com/AlbinoGeek/sc2-rsu)
