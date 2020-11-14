@@ -30,6 +30,10 @@ var (
 		Short: "SC2ReplayStats Uploader",
 		Long:  `Unofficial SC2ReplayStats Uploader by AlbinoGeek`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			if viper.GetBool("update.check.enabled") {
+				go checkUpdateEvery(getUpdateDuration())
+			}
+
 			key := viper.GetString("apikey")
 			if key == "" {
 				return errors.New("no API key in configuration, please use the login command")
@@ -37,10 +41,6 @@ var (
 
 			if !sc2replaystats.ValidAPIKey(key) {
 				return errors.New("invalid API key in configuration, please replace it or use the login command")
-			}
-
-			if viper.GetBool("update.check.enabled") {
-				go checkUpdateEvery(getUpdateDuration())
 			}
 
 			replaysRoot := viper.GetString("replaysRoot")
