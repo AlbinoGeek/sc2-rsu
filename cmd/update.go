@@ -26,6 +26,8 @@ var (
 	ghOwner  = "AlbinoGeek"
 	ghRepo   = "sc2-rsu"
 
+	minimumUpdatePeriod = time.Minute * 10
+
 	updateCmd = &cobra.Command{
 		Use:   "update",
 		Short: "Checks for and optionally downloads program updates",
@@ -144,6 +146,17 @@ func downloadUpdate(rel *github.RepositoryRelease) error {
 
 	golog.Infof("Update complete!\n\nPlease close the program and start the new version: %s", fname)
 	return nil
+}
+
+func getUpdateDuration() time.Duration {
+	dur := viper.GetString("update.check.period")
+	period, err := time.ParseDuration(dur)
+	if err != nil || period < minimumUpdatePeriod {
+		golog.Warnf("update.check.period invalid or too short: %v", err)
+		period = time.Duration(minimumUpdatePeriod)
+	}
+
+	return period
 }
 
 func printUpdateNotice(rel *github.RepositoryRelease) {

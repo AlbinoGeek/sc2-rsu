@@ -40,14 +40,7 @@ var (
 			}
 
 			if viper.GetBool("update.check.enabled") {
-				dur := viper.GetString("update.check.period")
-				period, err := time.ParseDuration(dur)
-				if err != nil || period < time.Minute*10 {
-					golog.Warnf("update.check.period invalid or too short: %v", err)
-					period = time.Duration(time.Minute * 10)
-				}
-
-				go checkUpdateEvery(period)
+				go checkUpdateEvery(getUpdateDuration())
 			}
 
 			replaysRoot := viper.GetString("replaysRoot")
