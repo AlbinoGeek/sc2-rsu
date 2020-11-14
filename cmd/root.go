@@ -148,7 +148,7 @@ func automaticUpload(paths []string) error {
 func findAccounts(root string) (ids []string, err error) {
 	golog.Debug("Searching for accounts in replay directory...")
 
-	paths, err := utils.FindDirectoriesBySuffix(viper.GetString("replaysRoot"), "ultiplayer", true)
+	paths, err := utils.FindDirectoriesBySuffix(root, "ultiplayer", true)
 	if err != nil {
 		return nil, fmt.Errorf("FindDirectory error: %v", err)
 	}
