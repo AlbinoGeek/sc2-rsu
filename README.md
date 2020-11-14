@@ -8,6 +8,8 @@
 
 **Unofficial SC2ReplayStats Uploader** by AlbinoGeek
 
+![Screenshot](_dist/screen-v0.2.26.png)
+
 ## Features
 
 - Cross-Platform: Full Linux and Windows support, Mac OS X untested
