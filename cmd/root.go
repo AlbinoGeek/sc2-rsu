@@ -149,7 +149,7 @@ func findReplaysRoot() (root string, err error) {
 	golog.Info("Determining replays directory... (this could take a few minutes)...")
 
 	scanRoot := "/"
-	if home, err := os.UserHomeDir(); err != nil {
+	if home, err := os.UserHomeDir(); err == nil {
 		scanRoot = home
 	}
 

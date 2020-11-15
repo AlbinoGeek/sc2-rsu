@@ -10,6 +10,7 @@
 
 - Bug where empty replay files were sent before SC2 wrote them out
 - Bug where accounts could not be found right after locating replays root
+- "Faster replays directory searching" was not actually working (flipped err check)
 
 ## v0.2
 
