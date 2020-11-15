@@ -121,71 +121,48 @@ func automaticUpload(paths []string) (w *fsnotify.Watcher, err error) {
 	return watcher, nil
 }
 
-func findReplaysRoot() (root string, err error) {
-	golog.Info("Determining replays directory... (this could take a few minutes)...")
-
-	scanRoot := "/"
-	if home, err := os.UserHomeDir(); err == nil {
-		scanRoot = home
-	}
-
-	paths, err := utils.FindDirectoriesBySuffix(scanRoot, "ultiplayer", true)
-	if err != nil {
-		return "", fmt.Errorf("FindDirectory error: %v", err)
-	}
-
-	i := 0
-	uniq := make(map[string]struct{})
-	for _, p := range paths {
-		p = utils.StripPathParts(p, 4)
-		if _, duplicate := uniq[p]; !duplicate && p != "/" {
-			uniq[p] = struct{}{}
-			paths[i] = p
-			golog.Debugf("found candidate replay directory: %v", p)
-			i++
-		}
-	}
-	paths = paths[:i] // truncate duplicates
-	golog.Debugf("finished scanning for candidates. Found: %v", len(paths))
-
-	if len(paths) == 1 {
-		return paths[0], nil
-	}
-
-	if len(paths) == 0 {
-		return "", fmt.Errorf("no root found")
-	}
-
-	line := strings.Repeat("=", termWidth/2)
-	fmt.Printf("\n%s\n%s\n", line, wordwrap.WrapString("More than one possible replay directory was located while we scanned for your StarCraft II installation's Accounts folder.\n\nPlease select which directory we should be watching below:", uint(termWidth/2)))
-	for i, p := range paths {
-		fmt.Printf("\n  %d: %s", 1+i, p)
-	}
-	fmt.Printf("\n%s\n", line)
-	consoleReader := bufio.NewReaderSize(os.Stdin, 1)
-	for {
-		fmt.Printf("Your Choice [1-%d]: ", len(paths))
-		input, _, _ := consoleReader.ReadLine()
-		choice, err := strconv.Atoi(string(input))
-		if err == nil && choice-1 > 0 && choice-1 < len(paths) {
-			return paths[choice-1], nil
-		}
-	}
-}
-
 func getWatchPaths() ([]string, error) {
 	replaysRoot := viper.GetString("replaysRoot")
 	if f, err := os.Stat(replaysRoot); err != nil || !f.IsDir() {
 		golog.Warn("Replay Root not configured correctly, searching for replays directory...")
-		if replaysRoot, err = findReplaysRoot(); err != nil {
+		golog.Info("Determining replays directory... (this could take a few minutes)...")
+
+		scanRoot := "/"
+		if home, err := os.UserHomeDir(); err == nil {
+			scanRoot = home
+		}
+
+		roots, err := sc2utils.FindReplaysRoot(scanRoot)
+		if err != nil || len(roots) == 0 {
 			golog.Fatalf("unable to automatically determine the path to your replays directory: %v", err)
 		}
 
-		viper.Set("replaysRoot", replaysRoot)
+		root := roots[0]
+		if len(roots) > 1 {
+			line := strings.Repeat("=", termWidth/2)
+			fmt.Printf("\n%s\n%s\n", line, wordwrap.WrapString("More than one possible replay directory was located while we scanned for your StarCraft II installation's Accounts folder.\n\nPlease select which directory we should be watching below:", uint(termWidth/2)))
+			for i, p := range roots {
+				fmt.Printf("\n  %d: %s", 1+i, p)
+			}
+			fmt.Printf("\n%s\n", line)
+			consoleReader := bufio.NewReaderSize(os.Stdin, 1)
+			for {
+				fmt.Printf("Your Choice [1-%d]: ", len(roots))
+				input, _, _ := consoleReader.ReadLine()
+				choice, err := strconv.Atoi(string(input))
+				if err == nil && choice > 0 && choice-1 < len(roots) {
+					root = roots[choice-1]
+					break
+				}
+			}
+		}
+
+		viper.Set("replaysRoot", root)
 		if err := saveConfig(); err != nil {
 			return nil, err
 		}
-		golog.Infof("Using replays directory: %v", replaysRoot)
+		golog.Infof("Using replays directory: %v", root)
+		replaysRoot = root
 	}
 
 	accs, err := sc2utils.EnumerateAccounts(replaysRoot)
