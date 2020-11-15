@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"image/color"
 	"net/url"
+	"os"
 	"strings"
 	"time"
 
@@ -170,6 +171,70 @@ func guiSettingsBrowseReplaysRoot(uri fyne.ListableURI, err error) {
 	replaysRoot.SetText(root)
 }
 
+func guiSettingsFindReplaysRoot(entry *widget.Entry) func() {
+	scanRoot := "/"
+	if home, err := os.UserHomeDir(); err == nil {
+		scanRoot = home
+	}
+
+	return func() {
+		dlg := dialog.NewProgressInfinite("Searching for Replays Root...",
+			"Please wait while we search for a valid Replays folder.\nThis could take several minutes.",
+			settings)
+		dlg.Show()
+		roots, err := sc2utils.FindReplaysRoot(scanRoot)
+		dlg.Hide()
+
+		if err != nil {
+			dialog.ShowError(err, settings)
+			return
+		}
+
+		if len(roots) == 0 {
+			dialog.ShowError(errors.New("no replay directories found"), settings)
+			return
+		}
+
+		if len(roots) == 1 {
+			accs, err := sc2utils.EnumerateAccounts(roots[0])
+			if err != nil {
+				dialog.ShowError(fmt.Errorf("error scanning for accounts: %v", err), settings)
+				return
+			}
+
+			dialog.ShowInformation("Replays Root Found!",
+				fmt.Sprintf("We found your replays directory!\nIt contains %d account/toons.\n%s", len(accs), roots[0]),
+				settings)
+			entry.SetText(roots[0])
+			return
+		}
+
+		selected := -1
+		listWidget := widget.NewList(func() int {
+			return len(roots)
+		}, func() fyne.CanvasObject {
+			return widget.NewLabel("-")
+		}, func(id int, obj fyne.CanvasObject) {
+			obj.(*widget.Label).SetText(roots[id])
+		})
+		listWidget.OnSelected = func(id int) {
+			selected = id
+		}
+		dlg2 := dialog.NewCustomConfirm("Multiple Possible Roots Found",
+			"Select", "Cancel", widget.NewHScrollContainer(listWidget), func(ok bool) {
+				if !ok {
+					return
+				}
+				viper.Set("replaysRoot", roots[selected])
+				replaysRoot.SetText(roots[selected])
+			}, settings)
+
+		// ! need a way better way to figure out the size of the dialog
+		dlg2.Resize(fyne.NewSize(100+12*len(roots[0]), 140+30*len(roots)))
+		dlg2.Show()
+	}
+}
+
 // TODO: refactor
 func guiSettingsInit() {
 	settings = fyneApp.NewWindow("Settings")
@@ -236,7 +301,7 @@ func guiSettingsInit() {
 				widget.NewLabel("API Key"),
 				widget.NewHScrollContainer(apiKey),
 			),
-			widget.NewButtonWithIcon("Find it for me...", theme.ComputerIcon(), func() {
+			widget.NewButtonWithIcon("Login and Generate it for me...", theme.ComputerIcon(), func() {
 				// ! IMPLEMENT LOGIN FORM
 			}),
 		)),
@@ -247,15 +312,15 @@ func guiSettingsInit() {
 				widget.NewLabel("Replays Root"),
 				widget.NewHScrollContainer(replaysRoot),
 			),
-			widget.NewButtonWithIcon("Browse...", theme.FolderOpenIcon(), func() {
-				dlg := dialog.NewFolderOpen(guiSettingsBrowseReplaysRoot, settings)
-				dlg.Resize(fyne.NewSize(1000, 1000)) // ! can't be larger than the settings window
-				dlg.Show()
-			}),
-			// ! requires refactor of findReplaysRoot
-			// widget.NewButtonWithIcon("Search", theme.SearchIcon(), func() {
-			// }),
-			// ),
+			fyne.NewContainerWithLayout(
+				layout.NewGridLayout(2),
+				widget.NewButtonWithIcon("Find it for me...", theme.SearchIcon(), guiSettingsFindReplaysRoot(replaysRoot)),
+				widget.NewButtonWithIcon("Browse...", theme.FolderOpenIcon(), func() {
+					dlg := dialog.NewFolderOpen(guiSettingsBrowseReplaysRoot, settings)
+					dlg.Resize(settings.Canvas().Size().Subtract(fyne.NewSize(20, 20))) // ! can't be larger than the settings window
+					dlg.Show()
+				}),
+			),
 		)),
 		spacer,
 		layout.NewSpacer(),
