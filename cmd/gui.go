@@ -157,6 +157,7 @@ func guiSettingsBrowseReplaysRoot(uri fyne.ListableURI, err error) {
 			func(ok bool) {
 				if ok {
 					unsaved = true
+					viper.Set("replaysRoot", root)
 					replaysRoot.SetText(root)
 				}
 			},
@@ -165,6 +166,7 @@ func guiSettingsBrowseReplaysRoot(uri fyne.ListableURI, err error) {
 	}
 
 	unsaved = true
+	viper.Set("replaysRoot", root)
 	replaysRoot.SetText(root)
 }
 
