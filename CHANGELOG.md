@@ -11,6 +11,7 @@
 - Bug where empty replay files were sent before SC2 wrote them out
 - Bug where accounts could not be found right after locating replays root
 - "Faster replays directory searching" was not actually working (flipped err check)
+- Bug where we would attempt to upload ".SC2Replay.writeCacheBackup" files
 
 ## v0.2
 

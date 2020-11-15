@@ -93,13 +93,10 @@ func automaticUpload(paths []string) (w *fsnotify.Watcher, err error) {
 				}
 
 				if event.Op&fsnotify.Create == fsnotify.Create {
-					for {
-						time.Sleep(time.Millisecond * 100)
-						if s, err := os.Stat(event.Name); err == nil && s.Size() > 256 {
-							break
-						}
+					// bug: SC2 sometime writes out ".SC2Replay.writeCacheBackup" files
+					if strings.HasSuffix("eplay", event.Name) {
+						go handleReplay(event.Name)
 					}
-					go handleReplay(event.Name)
 				}
 			case err, ok := <-watcher.Errors:
 				if !ok {
@@ -184,9 +181,18 @@ func getWatchPaths() ([]string, error) {
 
 func handleReplay(replayFilename string) {
 	golog.Debugf("uploading replay: %v", replayFilename)
-	_, mapName, _ := utils.SplitFilepath(replayFilename)
+
+	// wait for the replay to have finished being written (large enough filesize)
+	for {
+		time.Sleep(time.Millisecond * 25)
+		// ! I have never seen a replay smaller than 21kb -- but let's be safe...
+		if s, err := os.Stat(replayFilename); err == nil && s.Size() > 10*1024 {
+			break
+		}
+	}
 
 	rqid, err := sc2api.UploadReplay(replayFilename)
+	_, mapName, _ := utils.SplitFilepath(replayFilename)
 	if err != nil {
 		golog.Errorf("failed to upload replay: %v: %v", mapName, err)
 		return
