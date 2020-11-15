@@ -59,83 +59,98 @@ var (
 				return fmt.Errorf("failed to prompt user for password: %v", err)
 			}
 
+			golog.Debug("Setting up browser...")
 			t := time.Now()
-			if err := login(args[0], password); err != nil {
+			pw, browser, page, err := newBrowser()
+			if pw != nil {
+				defer pw.Stop()
+			}
+			if browser != nil {
+				defer browser.Close()
+			}
+			if page != nil {
+				defer page.Close()
+			}
+			if err != nil {
+				return fmt.Errorf("failed to setup browser: %v", err)
+			}
+			golog.Debugf("browser setup took %s", time.Since(t))
+
+			t = time.Now()
+			accid, err := login(page, args[0], password)
+			if err != nil {
 				return fmt.Errorf("email login error: %v", err)
 			}
-			golog.Debugf("Login completed in %s", time.Since(t))
+			golog.Debugf("login took %s", time.Since(t))
+			golog.Infof("Success! Logged in to account #%v", accid)
 
+			t = time.Now()
+			if err := updateAPIKey(page, accid); err != nil {
+				return fmt.Errorf("updateAPIKey error: %v", err)
+			}
+			golog.Debugf("updateAPIKey took %s", time.Since(t))
 			return nil
 		},
 	}
 )
 
-func login(email string, password string) error {
-	golog.Debug("Setting up browser...")
-	pw, err := playwright.Run()
-	if err != nil {
-		return fmt.Errorf("failed to setup signin browser: %v", err)
+func newBrowser() (pw *playwright.Playwright, browser *playwright.Browser, page *playwright.Page, err error) {
+	if pw, err = playwright.Run(); err == nil {
+		if browser, err = pw.Chromium.Launch(); err == nil {
+			page, err = browser.NewPage()
+		}
 	}
-	defer pw.Stop()
 
-	golog.Debug("Launching browser...")
-	browser, err := pw.Chromium.Launch()
-	if err != nil {
-		return fmt.Errorf("failed to initialize signin browser 1: %v", err)
-	}
-	defer browser.Close()
+	return pw, browser, page, err
+}
 
-	page, err := browser.NewPage()
-	if err != nil {
-		return fmt.Errorf("failed to initialize signin browser 2: %v", err)
-	}
-	defer page.Close()
-
+func login(page *playwright.Page, email string, password string) (accountID string, err error) {
 	golog.Debug("Navigating to login page...")
-	if _, err = page.Goto(fmt.Sprintf("%s/Account/signin", sc2replaystats.WebRoot)); err != nil {
-		return fmt.Errorf("failed to navigate to signin page: %v", err)
+	if _, err := page.Goto(fmt.Sprintf("%s/Account/signin", sc2replaystats.WebRoot)); err != nil {
+		return "", fmt.Errorf("failed to navigate to signin page: %v", err)
 	}
 
 	golog.Debug("Filling login form...")
 	input, err := page.QuerySelector("css=input[name='email']")
 	if err != nil || input == nil {
-		return fmt.Errorf("[signin] failed to locate email field: %v", err)
+		return "", fmt.Errorf("[signin] failed to locate email field: %v", err)
 	}
 	if err = input.Fill(email); err != nil {
-		return fmt.Errorf("[signin] failed to fill email field: %v", err)
+		return "", fmt.Errorf("[signin] failed to fill email field: %v", err)
 	}
 
 	if input, err = page.QuerySelector("css=input[name='password']"); err != nil || input == nil {
-		return fmt.Errorf("[signin] failed to locate password field: %v", err)
+		return "", fmt.Errorf("[signin] failed to locate password field: %v", err)
 	}
 	if err = input.Fill(password); err != nil {
-		return fmt.Errorf("[signin] failed to fill password field: %v", err)
+		return "", fmt.Errorf("[signin] failed to fill password field: %v", err)
 	}
 
 	golog.Debugf("Submitting login form...")
 	if input, err = page.QuerySelector("css=input[value='Sign In']"); err != nil || input == nil {
-		return fmt.Errorf("[signin] failed to locate submit button: %v", err)
+		return "", fmt.Errorf("[signin] failed to locate submit button: %v", err)
 	}
 	if err = input.Click(); err != nil {
-		return fmt.Errorf("[signin] failed to click submit button: %v", err)
+		return "", fmt.Errorf("[signin] failed to click submit button: %v", err)
 	}
 
 	url := page.URL()
 	if !strings.Contains(url, "display") {
 		if alert, err := page.QuerySelector("css=.alert-danger"); err == nil && alert != nil {
 			if text, err := alert.InnerText(); err == nil {
-				return fmt.Errorf("[signin] login failed, sc2replaystats says: %v", text)
+				return "", fmt.Errorf("[signin] login failed, sc2replaystats says: %v", text)
 			}
 		}
 
-		return fmt.Errorf("[signin] unexpected redirect URL, login probably failed: %v", url)
+		return "", fmt.Errorf("[signin] unexpected redirect URL, login probably failed: %v", url)
 	}
 
 	parts := strings.Split(url, "/")
-	accid := strings.Split(parts[len(parts)-1], "#")[0]
-	golog.Infof("Success! Logged in to account #%v", accid)
+	return strings.Split(parts[len(parts)-1], "#")[0], nil
+}
 
-	if _, err = page.Goto(fmt.Sprintf("%s/account/settings/%v", sc2replaystats.WebRoot, accid)); err != nil {
+func updateAPIKey(page *playwright.Page, accountID string) error {
+	if _, err := page.Goto(fmt.Sprintf("%s/account/settings/%v", sc2replaystats.WebRoot, accountID)); err != nil {
 		return fmt.Errorf("failed to navigate to settings page: %v", err)
 	}
 
