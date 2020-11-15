@@ -20,6 +20,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
+	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
 	"github.com/AlbinoGeek/sc2-rsu/utils"
 )
 
@@ -120,31 +121,6 @@ func automaticUpload(paths []string) (w *fsnotify.Watcher, err error) {
 	return watcher, nil
 }
 
-func findAccounts(root string) (ids []string, err error) {
-	golog.Debug("Searching for accounts in replay directory...")
-
-	paths, err := utils.FindDirectoriesBySuffix(root, "ultiplayer", true)
-	if err != nil {
-		return nil, fmt.Errorf("FindDirectory error: %v", err)
-	}
-
-	i := 0
-	uniq := make(map[string]struct{})
-	for _, p := range paths {
-		p = utils.StripPathParts(p, 2)
-		if _, duplicate := uniq[p]; !duplicate {
-			uniq[p] = struct{}{}
-			paths[i] = p[len(root):]
-			golog.Debugf("found candidate account: %v", paths[i])
-			i++
-		}
-	}
-	paths = paths[:i] // truncate duplicates
-	golog.Debugf("finished scanning for candidates. Found: %v", len(paths))
-
-	return paths, err
-}
-
 func findReplaysRoot() (root string, err error) {
 	golog.Info("Determining replays directory... (this could take a few minutes)...")
 
@@ -212,7 +188,8 @@ func getWatchPaths() ([]string, error) {
 		golog.Infof("Using replays directory: %v", replaysRoot)
 	}
 
-	accs, err := findAccounts(replaysRoot)
+	accs, err := sc2utils.EnumerateAccounts(replaysRoot)
+	golog.Debugf("account scan returned: %v toons", len(accs))
 	if err != nil {
 		return nil, err
 	}
