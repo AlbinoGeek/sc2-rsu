@@ -3,12 +3,14 @@ package cmd
 import (
 	"errors"
 	"fmt"
+	"image/color"
 	"net/url"
 	"strings"
 	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
@@ -213,6 +215,8 @@ func guiSettingsInit() {
 	replaysRoot = widget.NewEntry()
 	replaysRoot.SetText(viper.GetString("replaysRoot"))
 
+	spacer := canvas.NewRectangle(color.Transparent)
+	spacer.SetMinSize(fyne.NewSize(5, 5))
 	settings.SetContent(widget.NewVBox(
 		widget.NewCard(fmt.Sprintf("%s Settings", PROGRAM), "", widget.NewVBox(
 			checkUpdates,
@@ -223,6 +227,7 @@ func guiSettingsInit() {
 				updatePeriod,
 			),
 		)),
+		spacer,
 		widget.NewCard("sc2ReplayStats Account", "", widget.NewVBox(
 			fyne.NewContainerWithLayout(
 				layout.NewFormLayout(),
@@ -233,6 +238,7 @@ func guiSettingsInit() {
 				// ! IMPLEMENT LOGIN FORM
 			}),
 		)),
+		spacer,
 		widget.NewCard("StarCraft II", "", widget.NewVBox(
 			fyne.NewContainerWithLayout(
 				layout.NewFormLayout(),
@@ -249,6 +255,7 @@ func guiSettingsInit() {
 			// }),
 			// ),
 		)),
+		spacer,
 		layout.NewSpacer(),
 		widget.NewSeparator(),
 		fyne.NewContainerWithLayout(
@@ -269,7 +276,7 @@ func guiSettingsInit() {
 		),
 	))
 
-	settings.Resize(fyne.NewSize(420, 420))
+	settings.Resize(fyne.NewSize(600, 600))
 	settings.SetFixedSize(true)
 	settings.SetPadded(false)
 	settings.SetOnClosed(func() {
