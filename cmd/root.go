@@ -43,36 +43,35 @@ var (
 				return errors.New("invalid API key in configuration, please replace it or use the login command")
 			}
 
-			replaysRoot := viper.GetString("replaysRoot")
-			if f, err := os.Stat(replaysRoot); err != nil || !f.IsDir() {
-				golog.Warn("Replay Root not configured correctly, searching for replays directory...")
-				if replaysRoot, err = findReplaysRoot(); err != nil {
-					golog.Fatalf("unable to automatically determine the path to your replays directory: %v", err)
-				}
-
-				viper.Set("replaysRoot", replaysRoot)
-				if err := saveConfig(); err != nil {
-					return err
-				}
-				golog.Infof("Using replays directory: %v", replaysRoot)
-			}
-
-			accs, err := findAccounts(replaysRoot)
+			paths, err := getWatchPaths()
 			if err != nil {
 				return err
 			}
 
-			paths := make([]string, 0)
-			for _, a := range accs {
-				p := filepath.Join(replaysRoot, a, "Replays", "Multiplayer")
-				if f, err := os.Stat(p); err == nil && f.IsDir() {
-					paths = append(paths, p)
-				}
-			}
-
 			golog.Info("Starting Automatic Replay Uploader...")
 			sc2api = sc2replaystats.New(key)
-			return automaticUpload(paths)
+
+			done := make(chan struct{})
+			w, err := automaticUpload(paths)
+			if err != nil {
+				return err
+			}
+			defer w.Close()
+
+			// Setup Interrupt (Ctrl+C) Handler
+			c := make(chan os.Signal)
+			signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+			go func() {
+				sig := <-c
+				fmt.Println()
+				golog.Warnf("Received signal:%v, Quitting.", sig)
+				close(done)
+			}()
+
+			golog.Debugf("Startup took: %v", time.Since(startTime))
+			golog.Info("Ready!")
+			<-done
+			return nil
 		},
 	}
 	sc2api    *sc2replaystats.Client
@@ -80,14 +79,12 @@ var (
 	termWidth = 80
 )
 
-func automaticUpload(paths []string) error {
+func automaticUpload(paths []string) (w *fsnotify.Watcher, err error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		golog.Fatalf("failed to setup fswatcher: %v", err)
+		return nil, fmt.Errorf("failed to setup fswatcher: %v", err)
 	}
-	defer watcher.Close()
 
-	done := make(chan bool)
 	go func() {
 		for {
 			select {
@@ -122,20 +119,7 @@ func automaticUpload(paths []string) error {
 		}
 	}
 
-	// Setup Interrupt (Ctrl+C) Handler
-	c := make(chan os.Signal)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
-	go func() {
-		sig := <-c
-		fmt.Println()
-		golog.Warnf("Received signal:%v, Quitting.", sig)
-		close(done)
-	}()
-
-	golog.Debugf("Startup took: %v", time.Since(startTime))
-	golog.Info("Ready!")
-	<-done
-	return nil
+	return watcher, nil
 }
 
 func findAccounts(root string) (ids []string, err error) {
@@ -213,6 +197,37 @@ func findReplaysRoot() (root string, err error) {
 			return paths[choice-1], nil
 		}
 	}
+}
+
+func getWatchPaths() ([]string, error) {
+	replaysRoot := viper.GetString("replaysRoot")
+	if f, err := os.Stat(replaysRoot); err != nil || !f.IsDir() {
+		golog.Warn("Replay Root not configured correctly, searching for replays directory...")
+		if replaysRoot, err = findReplaysRoot(); err != nil {
+			golog.Fatalf("unable to automatically determine the path to your replays directory: %v", err)
+		}
+
+		viper.Set("replaysRoot", replaysRoot)
+		if err := saveConfig(); err != nil {
+			return nil, err
+		}
+		golog.Infof("Using replays directory: %v", replaysRoot)
+	}
+
+	accs, err := findAccounts(replaysRoot)
+	if err != nil {
+		return nil, err
+	}
+
+	paths := make([]string, 0)
+	for _, a := range accs {
+		p := filepath.Join(replaysRoot, a, "Replays", "Multiplayer")
+		if f, err := os.Stat(p); err == nil && f.IsDir() {
+			paths = append(paths, p)
+		}
+	}
+
+	return paths, nil
 }
 
 func handleReplay(replayFilename string) {
