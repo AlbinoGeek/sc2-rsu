@@ -37,6 +37,13 @@ func gui() error {
 	fyneApp = app.New()
 	fyneApp.Settings().SetTheme(theme.DarkTheme())
 
+	guiMainInit()
+
+	fyneApp.Run()
+	return nil
+}
+
+func guiMainInit() {
 	mainWindow = fyneApp.NewWindow(fmt.Sprintf("SC2ReplayStats Uploader (%s)", PROGRAM))
 	mainWindow.SetMainMenu(fyne.NewMainMenu(
 		fyne.NewMenu("Menu",
@@ -49,27 +56,6 @@ func gui() error {
 		),
 	))
 
-	mainWindow.Resize(fyne.NewSize(420, 360))
-	mainWindow.CenterOnScreen()
-	mainWindow.Show()
-
-	// accs, err := findAccounts(replaysRoot)
-	// if err != nil {
-	// 	return err
-	// }
-
-	// paths := make([]string, 0)
-	// for _, a := range accs {
-	// 	p := filepath.Join(replaysRoot, a, "Replays", "Multiplayer")
-	// 	if f, err := os.Stat(p); err == nil && f.IsDir() {
-	// 		paths = append(paths, p)
-	// 	}
-	// }
-
-	// golog.Info("Starting Automatic Replay Uploader...")
-	// sc2api = sc2replaystats.New(key)
-	// go automaticUpload(paths)
-
 	hello := widget.NewLabel("Hello Fyne!")
 	mainWindow.SetContent(widget.NewVBox(
 		hello,
@@ -78,8 +64,33 @@ func gui() error {
 		}),
 	))
 
-	fyneApp.Run()
-	return nil
+	mainWindow.Resize(fyne.NewSize(420, 360))
+	mainWindow.CenterOnScreen()
+	mainWindow.Show()
+
+	// choice := ""
+	// listWidget := widget.NewSelect(data, func(s string) {
+	// 	choice = s
+	// })
+	// dlg2 := dialog.NewCustomConfirm("Multiple Possible Roots Found",
+	// 	"Select", "Cancel", listWidget, func(ok bool) {
+	// 		if !ok {
+	// 			return
+	// 		}
+	// 		// viper.Set("replaysRoot", roots[selected])
+	// 		// replaysRoot.SetText(roots[selected])
+	// 		viper.Set("replaysRoot", choice)
+	// 		replaysRoot.SetText(choice)
+	// 	}, settings)
+
+	// // ! need a way better way to figure out the size of the dialog
+	// dlg2.Resize(fyne.NewSize(100+12*len(roots[0]), 140+30*len(roots)))
+	// dlg2.Show()
+	// return
+
+	if viper.GetString("version") == "" {
+		guiFirstRun()
+	}
 }
 
 func guiCheckUpdate() {
@@ -125,6 +136,16 @@ func guiDoUpdate(rel *github.RepositoryRelease) func(bool) {
 			dialog.ShowInformation("Update Complete!", "Please close the program and start the new binary.", mainWindow)
 		}
 	}
+}
+
+func guiFirstRun() {
+	// modal := widget.NewModalPopUp(
+	// 	widget.NewCard("Welcome!", "First-Time Setup",
+	// 		widget.NewVBox(
+	// 			widget.NewLabel("You are only two steps away from having your replays automatically uploaded to sc2replaystats!"),
+	// 		),
+	// 	), mainWindow.Canvas())
+	// modal.Show()
 }
 
 func guiSettings() {
@@ -210,27 +231,44 @@ func guiSettingsFindReplaysRoot(entry *widget.Entry) func() {
 		}
 
 		selected := -1
+		longest := ""
+		for _, s := range roots {
+			if l := len(s); l > len(longest) {
+				longest = s
+			}
+		}
+
 		listWidget := widget.NewList(func() int {
 			return len(roots)
 		}, func() fyne.CanvasObject {
-			return widget.NewLabel("-")
+			return widget.NewLabel(longest)
 		}, func(id int, obj fyne.CanvasObject) {
 			obj.(*widget.Label).SetText(roots[id])
 		})
 		listWidget.OnSelected = func(id int) {
 			selected = id
 		}
+		// choice := ""
+		// listWidget := widget.NewSelect(roots, func(s string) {
+		// 	choice = s
+		// })
+		// listWidget := widget.NewEntry()
 		dlg2 := dialog.NewCustomConfirm("Multiple Possible Roots Found",
 			"Select", "Cancel", widget.NewHScrollContainer(listWidget), func(ok bool) {
 				if !ok {
 					return
 				}
-				viper.Set("replaysRoot", roots[selected])
-				replaysRoot.SetText(roots[selected])
+				_ = selected
+				// viper.Set("replaysRoot", roots[selected])
+				// replaysRoot.SetText(roots[selected])
+				// viper.Set("replaysRoot", choice)
+				// replaysRoot.SetText(choice)
 			}, settings)
 
-		// ! need a way better way to figure out the size of the dialog
-		dlg2.Resize(fyne.NewSize(100+12*len(roots[0]), 140+30*len(roots)))
+		size := fyne.MeasureText(longest, theme.TextSize(), fyne.TextStyle{})
+		size.Height *= len(roots)
+
+		dlg2.Resize(fyne.NewSize(60, 144).Add(size))
 		dlg2.Show()
 	}
 }
