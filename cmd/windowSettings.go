@@ -14,9 +14,11 @@ import (
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
+
+	"github.com/spf13/viper"
+
 	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
 	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
-	"github.com/spf13/viper"
 )
 
 type windowSettings struct {
