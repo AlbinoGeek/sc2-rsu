@@ -46,7 +46,7 @@ func gui() error {
 func guiMainInit() {
 	mainWindow = fyneApp.NewWindow(fmt.Sprintf("SC2ReplayStats Uploader (%s)", PROGRAM))
 	mainWindow.SetMainMenu(fyne.NewMainMenu(
-		fyne.NewMenu("Menu",
+		fyne.NewMenu("File",
 			fyne.NewMenuItem("Check for Updates", guiCheckUpdate),
 			fyne.NewMenuItem("Settings", guiSettings),
 			fyne.NewMenuItemSeparator(),
