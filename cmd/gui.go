@@ -71,26 +71,6 @@ func guiMainInit() {
 	mainWindow.CenterOnScreen()
 	mainWindow.Show()
 
-	// choice := ""
-	// listWidget := widget.NewSelect(data, func(s string) {
-	// 	choice = s
-	// })
-	// dlg2 := dialog.NewCustomConfirm("Multiple Possible Roots Found",
-	// 	"Select", "Cancel", listWidget, func(ok bool) {
-	// 		if !ok {
-	// 			return
-	// 		}
-	// 		// viper.Set("replaysRoot", roots[selected])
-	// 		// replaysRoot.SetText(roots[selected])
-	// 		viper.Set("replaysRoot", choice)
-	// 		replaysRoot.SetText(choice)
-	// 	}, settings)
-
-	// // ! need a way better way to figure out the size of the dialog
-	// dlg2.Resize(fyne.NewSize(100+12*len(roots[0]), 140+30*len(roots)))
-	// dlg2.Show()
-	// return
-
 	if viper.GetString("version") == "" {
 		guiFirstRun()
 	}
@@ -301,11 +281,6 @@ func guiSettingsFindReplaysRoot(entry *widget.Entry) func() {
 		listWidget.OnSelected = func(id int) {
 			selected = id
 		}
-		// choice := ""
-		// listWidget := widget.NewSelect(roots, func(s string) {
-		// 	choice = s
-		// })
-		// listWidget := widget.NewEntry()
 		dlg2 := dialog.NewCustomConfirm("Multiple Possible Roots Found",
 			"Select", "Cancel", widget.NewHScrollContainer(listWidget), func(ok bool) {
 				if !ok {
@@ -314,8 +289,6 @@ func guiSettingsFindReplaysRoot(entry *widget.Entry) func() {
 				_ = selected
 				// viper.Set("replaysRoot", roots[selected])
 				// replaysRoot.SetText(roots[selected])
-				// viper.Set("replaysRoot", choice)
-				// replaysRoot.SetText(choice)
 			}, settings)
 
 		size := fyne.MeasureText(longest, theme.TextSize(), fyne.TextStyle{})
