@@ -12,6 +12,7 @@
 - Bug where accounts could not be found right after locating replays root
 - "Faster replays directory searching" was not actually working (flipped err check)
 - Bug where we would attempt to upload ".SC2Replay.writeCacheBackup" files
+- Bug where replays could be uploaded while they were still being written
 
 ## v0.2
 
