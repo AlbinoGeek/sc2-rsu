@@ -30,6 +30,7 @@ var (
 	mainWindow  fyne.Window
 	replaysRoot *widget.Entry
 	settings    fyne.Window
+	about       fyne.Window
 	unsaved     bool
 )
 
@@ -49,10 +50,11 @@ func guiMainInit() {
 		fyne.NewMenu("File",
 			fyne.NewMenuItem("Check for Updates", guiCheckUpdate),
 			fyne.NewMenuItem("Settings", guiSettings),
-			fyne.NewMenuItemSeparator(),
-			fyne.NewMenuItem("Browse Source", guiOpenGithub("")),
+		),
+		fyne.NewMenu("Help",
 			fyne.NewMenuItem("Report Bug", guiOpenGithub("issues/new?assignees=AlbinoGeek&labels=bug&template=bug-report.md&title=%5BBUG%5D")),
 			fyne.NewMenuItem("Request Feature", guiOpenGithub("issues/new?assignees=AlbinoGeek&labels=enhancement&template=feature-request.md&title=%5BFEATURE+REQUEST%5D")),
+			fyne.NewMenuItemSeparator(),
 			fyne.NewMenuItem("About", guiAbout),
 		),
 	))
