@@ -24,6 +24,8 @@ import (
 	"github.com/AlbinoGeek/sc2-rsu/utils"
 )
 
+const validReplaySize = 26 * 1024
+
 var (
 	rootCmd = &cobra.Command{
 		Short: "SC2ReplayStats Uploader",
@@ -183,11 +185,18 @@ func handleReplay(replayFilename string) {
 	golog.Debugf("uploading replay: %v", replayFilename)
 
 	// wait for the replay to have finished being written (large enough filesize)
+	var lastSize int64
 	for {
-		time.Sleep(time.Millisecond * 25)
-		// ! I have never seen a replay smaller than 21kb -- but let's be safe...
-		if s, err := os.Stat(replayFilename); err == nil && s.Size() > 10*1024 {
-			break
+		time.Sleep(time.Millisecond * 10)
+
+		// ! smallest replay I've seen is 27418 bytes (-3 second long)
+		if s, err := os.Stat(replayFilename); err == nil && s.Size() > validReplaySize {
+			// check that the replay has stopped growing
+			if s.Size() > lastSize {
+				lastSize = s.Size()
+			} else {
+				break
+			}
 		}
 	}
 
