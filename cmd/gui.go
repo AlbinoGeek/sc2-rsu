@@ -426,7 +426,8 @@ func guiSettingsInit() {
 					dialog.ShowError(err, settings)
 				} else {
 					unsaved = false
-					dialog.ShowInformation("Saved!", "Your settings have been saved.", settings)
+					dialog.ShowInformation("Saved!", "Your settings have been saved.", mainWindow)
+					settings.Close()
 				}
 			}),
 		),
