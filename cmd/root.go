@@ -94,7 +94,7 @@ func automaticUpload(paths []string) (w *fsnotify.Watcher, err error) {
 
 				if event.Op&fsnotify.Create == fsnotify.Create {
 					// bug: SC2 sometime writes out ".SC2Replay.writeCacheBackup" files
-					if strings.HasSuffix("eplay", event.Name) {
+					if strings.HasSuffix(event.Name, "eplay") {
 						go handleReplay(event.Name)
 					}
 				}
