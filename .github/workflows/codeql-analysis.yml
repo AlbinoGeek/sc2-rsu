@@ -1,4 +1,4 @@
-name: "CodeQL"
+name: "CI"
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   analyze:
-    name: Analyze
+    name: Build and Analyze
     runs-on: ubuntu-latest
 
     strategy:
@@ -26,13 +26,9 @@ jobs:
       uses: github/codeql-action/init@v1
       with:
         languages: ${{ matrix.language }}
-        # queries: ./path/to/local/query, your-org/your-repo/queries@main
 
-    #- name: Autobuild
-    #  uses: github/codeql-action/autobuild@v1
-
-    - run: |
-       make all
+    - name: Perform make all
+      run: make all
     
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
