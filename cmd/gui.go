@@ -53,6 +53,7 @@ func guiMainInit() {
 			fyne.NewMenuItem("Browse Source", guiOpenGithub("")),
 			fyne.NewMenuItem("Report Bug", guiOpenGithub("issues/new?assignees=AlbinoGeek&labels=bug&template=bug-report.md&title=%5BBUG%5D")),
 			fyne.NewMenuItem("Request Feature", guiOpenGithub("issues/new?assignees=AlbinoGeek&labels=enhancement&template=feature-request.md&title=%5BFEATURE+REQUEST%5D")),
+			fyne.NewMenuItem("About", guiAbout),
 		),
 	))
 
@@ -146,6 +147,56 @@ func guiFirstRun() {
 	// 		),
 	// 	), mainWindow.Canvas())
 	// modal.Show()
+}
+
+func guiAbout() {
+	if about == nil {
+		guiAboutInit()
+	}
+
+	about.Show()
+	about.CenterOnScreen()
+}
+
+func guiAboutInit() {
+	about = fyneApp.NewWindow("About")
+
+	u, _ := url.Parse(ghLink(""))
+	about.SetContent(
+		fyne.NewContainerWithLayout(layout.NewCenterLayout(), widget.NewVBox(
+			widget.NewHBox(
+				layout.NewSpacer(),
+				widget.NewCard(PROGRAM, "", nil),
+				layout.NewSpacer(),
+			),
+			widget.NewHBox(
+				layout.NewSpacer(),
+				widget.NewForm(
+					widget.NewFormItem("Author", widget.NewLabel(ghOwner)),
+					widget.NewFormItem("Version", widget.NewLabel(VERSION)),
+				),
+				layout.NewSpacer(),
+			),
+			widget.NewHBox(
+				layout.NewSpacer(),
+				widget.NewHyperlink("Browse Source", u),
+				layout.NewSpacer(),
+			),
+		)),
+	)
+
+	about.Resize(fyne.NewSize(200, 160))
+	about.SetFixedSize(true)
+	about.SetPadded(false)
+	about.SetOnClosed(func() {
+		about = nil
+	})
+
+	about.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
+		if k.Name == fyne.KeyEscape {
+			about.Close()
+		}
+	})
 }
 
 func guiSettings() {
@@ -413,8 +464,12 @@ func guiSettingsInit() {
 	})
 }
 
+func ghLink(slug string) string {
+	return fmt.Sprintf("https://github.com/%s/%s/%s", ghOwner, ghRepo, slug)
+}
+
 func guiOpenGithub(slug string) func() {
-	u, _ := url.Parse(fmt.Sprintf("https://github.com/%s/%s/%s", ghOwner, ghRepo, slug))
+	u, _ := url.Parse(ghLink(slug))
 	return func() {
 		if err := fyneApp.OpenURL(u); err != nil {
 			dialog.ShowError(err, mainWindow)
