@@ -159,6 +159,10 @@ func getUpdateDuration() time.Duration {
 	return period
 }
 
+func ghLink(slug string) string {
+	return fmt.Sprintf("https://github.com/%s/%s/%s", ghOwner, ghRepo, slug)
+}
+
 func printUpdateNotice(rel *github.RepositoryRelease) {
 	line := strings.Repeat("=", termWidth)
 	fmt.Printf(

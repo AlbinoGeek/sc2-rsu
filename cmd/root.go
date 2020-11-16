@@ -27,6 +27,9 @@ import (
 const validReplaySize = 26 * 1024
 
 var (
+	// GUI is the application's graphical interface
+	GUI *graphicalInterface
+
 	rootCmd = &cobra.Command{
 		Short: "SC2ReplayStats Uploader",
 		Long:  `Unofficial SC2ReplayStats Uploader by AlbinoGeek`,
@@ -36,7 +39,18 @@ var (
 			}
 
 			if !textMode {
-				return gui()
+				GUI = newUI()
+				if viper.GetString("version") == "" {
+					// modal := widget.NewModalPopUp(
+					// 	widget.NewCard("Welcome!", "First-Time Setup",
+					// 		widget.NewVBox(
+					// 			widget.NewLabel("You are only two steps away from having your replays automatically uploaded to sc2replaystats!"),
+					// 		),
+					// 	), mainWindow.Canvas())
+					// modal.Show()
+				}
+				GUI.Run()
+				return nil
 			}
 
 			key := viper.GetString("apikey")
