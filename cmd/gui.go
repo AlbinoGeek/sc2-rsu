@@ -286,9 +286,8 @@ func guiSettingsFindReplaysRoot(entry *widget.Entry) func() {
 				if !ok {
 					return
 				}
-				_ = selected
-				// viper.Set("replaysRoot", roots[selected])
-				// replaysRoot.SetText(roots[selected])
+				viper.Set("replaysRoot", roots[selected])
+				replaysRoot.SetText(roots[selected])
 			}, settings)
 
 		size := fyne.MeasureText(longest, theme.TextSize(), fyne.TextStyle{})
