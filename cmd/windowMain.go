@@ -38,6 +38,27 @@ func (w *windowMain) Init() {
 		}),
 	))
 
+	// closing the main window should quit the application
+	w.SetCloseIntercept(func() {
+		// Close "About" if it's open
+		if win := w.ui.windows[WindowAbout].GetWindow(); win != nil {
+			win.Close()
+		}
+
+		win := w.ui.windows[WindowSettings]
+		if win.GetWindow() != nil {
+			settings := win.(*windowSettings)
+			if settings.unsaved {
+				settings.onClose()
+				return
+			}
+			settings.Close()
+		}
+
+		w.Close()
+		w.app.Quit()
+	})
+
 	w.Resize(fyne.NewSize(420, 360))
 	w.CenterOnScreen()
 	w.Show()
