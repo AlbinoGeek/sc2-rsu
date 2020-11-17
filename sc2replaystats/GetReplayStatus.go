@@ -3,6 +3,8 @@ package sc2replaystats
 import (
 	"fmt"
 	"net/http"
+
+	"github.com/kataras/golog"
 )
 
 // GetReplayStatus tries to retrieve the replayID associated with a given
@@ -13,6 +15,11 @@ func (client *Client) GetReplayStatus(replayQueueID string) (replayID string, er
 	// return the replay_id if present
 	if rid, ok := res["replay_id"]; ok {
 		replayID = rid
+	}
+
+	if e, ok := res["error"]; ok {
+		golog.Debugf("sc2replaystats failure: %v", e)
+		err = fmt.Errorf("replay processing failed")
 	}
 
 	return
