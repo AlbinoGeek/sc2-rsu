@@ -22,8 +22,11 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/viper v1.7.1
 	github.com/writeas/go-strip-markdown v2.0.1+incompatible
-	golang.org/x/crypto v0.0.0-20201112155050-0c6587e931a9
-	golang.org/x/sys v0.0.0-20201113233024-12cec1faf1ba
+	golang.org/x/crypto v0.0.0-20201116153603-4be66e5b6582
+	golang.org/x/image v0.0.0-20200927104501-e162460cd6b5 // indirect
+	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b // indirect
+	golang.org/x/sys v0.0.0-20201116194326-cc9327a14d48
+	golang.org/x/term v0.0.0-20201117132131-f5c789dd3221 // indirect
 	golang.org/x/text v0.3.4 // indirect
 	gopkg.in/check.v1 v1.0.0-20200902074654-038fdea0a05b // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
