@@ -339,6 +339,7 @@ func (w *windowSettings) openLogin() {
 			}
 
 			w.apiKey.SetText(key)
+			w.apiKey.Validate()
 		}
 	}, w)
 
