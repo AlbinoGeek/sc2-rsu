@@ -26,7 +26,7 @@ var (
 	ghOwner  = "AlbinoGeek"
 	ghRepo   = "sc2-rsu"
 
-	minimumUpdatePeriod = time.Minute * 10
+	minimumUpdatePeriod = time.Hour
 
 	updateCmd = &cobra.Command{
 		Use:   "update",

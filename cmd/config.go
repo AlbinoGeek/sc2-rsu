@@ -24,7 +24,7 @@ func defaultConfig() {
 	for key, val := range map[string]interface{}{
 		"update.automatic.enabled": false,
 		"update.check.enabled":     true,
-		"update.check.period":      time.Duration(time.Minute * 10).String(),
+		"update.check.period":      time.Duration(minimumUpdatePeriod).String(),
 	} {
 		viper.SetDefault(key, val)
 	}
