@@ -42,7 +42,7 @@ func (client *Client) UploadReplay(filename string) (replayQueueID string, err e
 		return "", fmt.Errorf("failed to prepare formdata: %v", err)
 	}
 
-	res, err := client.request(http.MethodPost, "replay", contentType, &buf)
+	res, err := client.requestMap(http.MethodPost, "replay", contentType, &buf)
 
 	// return the replay_queue_id if present
 	if rqid, ok := res["replay_queue_id"]; ok {
