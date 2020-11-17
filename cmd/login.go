@@ -85,10 +85,14 @@ var (
 			golog.Infof("Success! Logged in to account #%v", accid)
 
 			t = time.Now()
-			if err := updateAPIKey(page, accid); err != nil {
-				return fmt.Errorf("updateAPIKey error: %v", err)
+			key, err := extractAPIKey(page, accid)
+			if err != nil {
+				return fmt.Errorf("extractAPIKey error: %v", err)
 			}
-			golog.Debugf("updateAPIKey took %s", time.Since(t))
+			golog.Debugf("extractAPIKey took %s", time.Since(t))
+			if err = setAPIkey(key); err != nil {
+				return fmt.Errorf("setAPIKey: %v", err)
+			}
 			return nil
 		},
 	}
@@ -149,19 +153,19 @@ func login(page *playwright.Page, email string, password string) (accountID stri
 	return strings.Split(parts[len(parts)-1], "#")[0], nil
 }
 
-func updateAPIKey(page *playwright.Page, accountID string) error {
+func extractAPIKey(page *playwright.Page, accountID string) (string, error) {
 	if _, err := page.Goto(fmt.Sprintf("%s/account/settings/%v", sc2replaystats.WebRoot, accountID)); err != nil {
-		return fmt.Errorf("failed to navigate to settings page: %v", err)
+		return "", fmt.Errorf("failed to navigate to settings page: %v", err)
 	}
 
 	golog.Debug("Waiting for settings page to load...")
 	e, err := page.WaitForSelector("*css=a[data-toggle='tab'] >> text=API Access")
 	if err != nil {
-		return fmt.Errorf("[settings] failed to locate API Access section: %v", err)
+		return "", fmt.Errorf("[settings] failed to locate API Access section: %v", err)
 	}
 	golog.Debug("Clicking 'API Access'...")
 	if err = e.Click(); err != nil {
-		return fmt.Errorf("[settings] failed to click API Access: %v", err)
+		return "", fmt.Errorf("[settings] failed to click API Access: %v", err)
 	}
 	golog.Debug("Finding API key...")
 	e, err = page.QuerySelector("*css=.form-group >> text=Authorization Key")
@@ -169,21 +173,21 @@ func updateAPIKey(page *playwright.Page, accountID string) error {
 		golog.Info("Generating new API key...")
 		e, err = page.QuerySelector("text=Generate New API Key")
 		if err != nil {
-			return fmt.Errorf("[settings] failed to locate Generate New API Key button: %v", err)
+			return "", fmt.Errorf("[settings] failed to locate Generate New API Key button: %v", err)
 		}
 		if err = e.Click(); err != nil {
-			return fmt.Errorf("[settings] failed to click Generate New API Key button: %v", err)
+			return "", fmt.Errorf("[settings] failed to click Generate New API Key button: %v", err)
 		}
 		e, err = page.WaitForSelector("*css=.form-group >> text=Authorization Key")
 	}
 	if err != nil || e == nil {
-		return fmt.Errorf("[settings] failed to locate \"Authorization Key\" (API Key): %v", err)
+		return "", fmt.Errorf("[settings] failed to locate \"Authorization Key\" (API Key): %v", err)
 	}
 
 	t, err := e.InnerText()
 	if err != nil {
-		return fmt.Errorf("[settings] failed to resolve \"Authorization Key\" (API Key) Text: %v", err)
+		return "", fmt.Errorf("[settings] failed to resolve \"Authorization Key\" (API Key) Text: %v", err)
 	}
 
-	return setAPIkey(strings.Trim(strings.Split(t, ": ")[1], " \r\n\t"))
+	return strings.Trim(strings.Split(t, ": ")[1], " \r\n\t"), nil
 }
