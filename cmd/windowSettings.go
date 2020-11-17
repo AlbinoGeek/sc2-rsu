@@ -108,9 +108,7 @@ func (w *windowSettings) Init() {
 				widget.NewLabel("API Key"),
 				widget.NewHScrollContainer(w.apiKey),
 			),
-			widget.NewButtonWithIcon("Login and Generate it for me...", theme.ComputerIcon(), func() {
-				// ! IMPLEMENT LOGIN FORM
-			}),
+			widget.NewButtonWithIcon("Login and Generate it for me...", theme.ComputerIcon(), w.openLogin),
 		)),
 		spacer,
 		widget.NewCard("StarCraft II", "", widget.NewVBox(
@@ -283,6 +281,70 @@ func (w *windowSettings) onClose() {
 				w.Close()
 			}
 		}, w)
+}
+
+func (w *windowSettings) openLogin() {
+	user := widget.NewEntry()
+	pass := widget.NewPasswordEntry()
+
+	// TODO: actually write a different warning for the gui instead of recycling the cli warning
+	warning := widget.NewLabel(loginWarning[:strings.LastIndexByte(loginWarning[:len(loginWarning)-1], '.')+1])
+	warning.Wrapping = fyne.TextWrapWord
+	vbox := widget.NewVBox(
+		warning,
+		layout.NewSpacer(),
+		widget.NewForm(
+			widget.NewFormItem("Email", user),
+			widget.NewFormItem("Password", pass),
+		),
+		layout.NewSpacer(),
+	)
+
+	dlg := dialog.NewCustomConfirm("Login to sc2replaystats", "Login", "Cancel", vbox, func(ok bool) {
+		if ok {
+			dlg2 := dialog.NewProgressInfinite("1) Login", "Setting up our login browser...", w)
+			dlg2.Show()
+			pw, browser, page, err := newBrowser()
+			if pw != nil {
+				defer pw.Stop()
+			}
+			if browser != nil {
+				defer browser.Close()
+			}
+			if page != nil {
+				defer page.Close()
+			}
+			dlg2.Hide()
+
+			if err != nil {
+				dialog.ShowError(fmt.Errorf("failed setting up browser: %v", err), w)
+				return
+			}
+
+			dlg2 = dialog.NewProgressInfinite("2) Login", "Please wait while we try to login to sc2replaystats...", w)
+			dlg2.Show()
+			accid, err := login(page, user.Text, pass.Text)
+			dlg2.Hide()
+			if err != nil {
+				dialog.ShowError(fmt.Errorf("login error: %v", err), w)
+				return
+			}
+			dlg2 = dialog.NewProgressInfinite("3) Login", "Finding or Generating API Key...", w)
+			dlg2.Show()
+			key, err := extractAPIKey(page, accid)
+			dlg2.Hide()
+			if err != nil {
+				dialog.ShowError(fmt.Errorf("failed to get API key: %v", err), w)
+				return
+			}
+
+			w.apiKey.SetText(key)
+		}
+	}, w)
+
+	vbox.Resize(fyne.NewSize(999, 280))
+	dlg.Resize(fyne.NewSize(420, 280))
+	dlg.Show()
 }
 
 func (w *windowSettings) save() {

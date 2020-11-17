@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	loginWarning = "We are about to login to sc2replaystats for you to obtain or generate your API key. We will have to ask you for your password, which we WILL NOT SAVE -- once the login form has been loaded. If you want to avoid providing your account password please call this command with your API key instead."
+	loginWarning = "We are about to login to sc2replaystats for you to obtain or generate your API key. We will have to ask you for your password, which we WILL NOT SAVE. If you want to avoid providing your account password please call this command with your API key instead."
 
 	loginCmd = &cobra.Command{
 		Use: "login <apikey or email>",
