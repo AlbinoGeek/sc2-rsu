@@ -40,15 +40,6 @@ var (
 
 			if !textMode {
 				GUI = newUI()
-				if viper.GetString("version") == "" {
-					// modal := widget.NewModalPopUp(
-					// 	widget.NewCard("Welcome!", "First-Time Setup",
-					// 		widget.NewVBox(
-					// 			widget.NewLabel("You are only two steps away from having your replays automatically uploaded to sc2replaystats!"),
-					// 		),
-					// 	), mainWindow.Canvas())
-					// modal.Show()
-				}
 				GUI.Run()
 				return nil
 			}
