@@ -91,6 +91,10 @@ func (w *windowSettings) Init() {
 
 	spacer := canvas.NewRectangle(color.Transparent)
 	spacer.SetMinSize(fyne.NewSize(5, 5))
+
+	btnSave := widget.NewButtonWithIcon("Save", theme.DocumentSaveIcon(), w.save)
+	btnSave.Importance = widget.HighImportance
+
 	w.SetContent(widget.NewVBox(
 		widget.NewCard(fmt.Sprintf("%s Settings", PROGRAM), "", widget.NewVBox(
 			w.checkUpdates,
@@ -135,7 +139,7 @@ func (w *windowSettings) Init() {
 			widget.NewButtonWithIcon("Cancel", theme.CancelIcon(), func() {
 				w.onClose()
 			}),
-			widget.NewButtonWithIcon("Save", theme.DocumentSaveIcon(), w.save),
+			btnSave,
 		),
 	))
 
