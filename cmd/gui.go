@@ -10,13 +10,13 @@ import (
 )
 
 const (
-	// WindowAbout is an index string used in GraphicalApplication.window
+	// WindowAbout is an index string used in graphicalInterface.windows
 	WindowAbout = "About"
 
-	// WindowMain is an index string used in GraphicalApplication.window
+	// WindowMain is an index string used in graphicalInterface.windows
 	WindowMain = "Main"
 
-	// WindowSettings is an index string used in GraphicalApplication.window
+	// WindowSettings is an index string used in graphicalInterface.windows
 	WindowSettings = "Settings"
 )
 
