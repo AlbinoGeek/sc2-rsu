@@ -15,7 +15,8 @@ import (
 
 type windowMain struct {
 	*windowBase
-	modal *widget.PopUp
+	gettingStarted uint
+	modal          *widget.PopUp
 }
 
 func (w *windowMain) Init() {
@@ -149,7 +150,6 @@ func (w *windowMain) WizardModal(skipText, nextText string, skipFn, nextFn func(
 		)
 
 		w.modal.Show()
-		// box.Resize(fyne.NewSize(320, 220)) // 3
 		w.modal.Refresh()
 		return
 	}
@@ -175,15 +175,18 @@ func (w *windowMain) WizardModal(skipText, nextText string, skipFn, nextFn func(
 	w.modal = widget.NewModalPopUp(box, w.Canvas())
 	w.modal.Show()
 
-	w.modal.Resize(fyne.NewSize(320, 220)) // 1
-	box.Resize(fyne.NewSize(320, 220))     // 2
+	size := fyne.NewSize(360, 240)
+	w.modal.Resize(size)
+	box.Resize(size)
 }
 
 func (w *windowMain) openGettingStarted1() {
+	w.gettingStarted = 1
 	w.WizardModal("Skip", "Next", nil, func() {
 		if viper.GetString("replaysroot") == "" {
 			w.openGettingStarted2()
 		} else {
+			w.gettingStarted = 0
 			w.modal.Hide()
 		}
 	},
@@ -194,35 +197,43 @@ func (w *windowMain) openGettingStarted1() {
 }
 
 func (w *windowMain) openGettingStarted2() {
+	w.gettingStarted = 2
+
 	btnSettings := widget.NewButtonWithIcon("Open Settings", theme.SettingsIcon(), func() {
 		w.ui.OpenWindow(WindowSettings)
 	})
 	btnSettings.Importance = widget.HighImportance
 
 	// TODO: Refactor this to actually have the settings UI, not just direct the user to settings
-	w.WizardModal("", "Next", nil, func() {
-		if viper.GetString("apikey") == "" {
-			w.openGettingStarted3()
-		} else {
-			w.modal.Hide()
-		}
-	},
-		labelWithWrapping("First thing's first. We need to find your StarCraft II Replays Directory!"),
+	w.WizardModal("", "", nil, nil,
+		labelWithWrapping("First thing's first. Please use the button below to open the Settings dialog, and under the StarCraft II section, add your Replays Directory."),
 		btnSettings,
+		labelWithWrapping("Once you have found your replays directory and saved the settings, this setup wizard will automatically advance to the next step."),
 	)
 }
 
 func (w *windowMain) openGettingStarted3() {
+	w.gettingStarted = 3
+
 	btnSettings := widget.NewButtonWithIcon("Open Settings", theme.SettingsIcon(), func() {
 		w.ui.OpenWindow(WindowSettings)
 	})
 	btnSettings.Importance = widget.HighImportance
 
 	// TODO: Refactor this to actually have the settings UI, not just direct the user to settings
-	w.WizardModal("", "Next", nil, func() {
-		w.modal.Hide()
-	},
+	w.WizardModal("", "", nil, nil,
 		labelWithWrapping("Lastly, please set your sc2replaystats API key. If you do not know how to find this, use the \"Login and find it for me\" button to have us login to your account and generate one on your behalf."),
 		btnSettings,
+	)
+}
+
+func (w *windowMain) openGettingStarted4() {
+	w.gettingStarted = 0
+
+	w.WizardModal("Close", "", func() {
+		w.gettingStarted = 0
+		w.modal.Hide()
+	}, nil,
+		labelWithWrapping("Contratulations! You have finished first-time setup. You can change these settings at any time by going to File -> Settings."),
 	)
 }

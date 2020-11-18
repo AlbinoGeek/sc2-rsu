@@ -360,6 +360,14 @@ func (w *windowSettings) save() {
 		return
 	}
 
+	main := w.ui.windows[WindowMain].(*windowMain)
+	if main.gettingStarted == 3 && w.apiKey.Text != "" {
+		main.openGettingStarted4()
+	}
+	if main.gettingStarted == 2 && w.replaysRoot.Text != "" {
+		main.openGettingStarted3()
+	}
+
 	viper.Set("apikey", w.apiKey.Text)
 	viper.Set("replaysRoot", w.replaysRoot.Text)
 	viper.Set("update.automatic.enabled", w.autoDownload.Checked)
