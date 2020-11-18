@@ -369,7 +369,7 @@ func (w *windowSettings) save() {
 }
 
 func (w *windowSettings) validate() error {
-	if err := w.apiKey.Validate(); err != nil {
+	if err := w.apiKey.Validate(); w.apiKey.Text != "" && err != nil {
 		return fmt.Errorf("invalid value for \"API Key\": %v", err)
 	}
 	if err := w.replaysRoot.Validate(); err != nil {
