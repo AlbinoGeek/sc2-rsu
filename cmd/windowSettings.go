@@ -354,9 +354,11 @@ func (w *windowSettings) save() {
 		return
 	}
 
+	viper.Set("apikey", w.apiKey.Text)
 	viper.Set("replaysRoot", w.replaysRoot.Text)
 	viper.Set("update.automatic.enabled", w.autoDownload.Checked)
 	viper.Set("update.check.enabled", w.checkUpdates.Checked)
+	viper.Set("version", VERSION)
 
 	if err := saveConfig(); err != nil {
 		dialog.ShowError(err, w)
