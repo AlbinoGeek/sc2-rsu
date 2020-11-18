@@ -89,6 +89,23 @@ func (w *windowSettings) Init() {
 		w.unsaved = true
 	}
 
+	replaysRootSection := widget.NewVBox(
+		fyne.NewContainerWithLayout(
+			layout.NewFormLayout(),
+			widget.NewLabel("Replays Root"),
+			widget.NewHScrollContainer(w.replaysRoot),
+		),
+		fyne.NewContainerWithLayout(
+			layout.NewGridLayout(2),
+			widget.NewButtonWithIcon("Find it for me...", theme.SearchIcon(), func() { go w.findReplaysRoot() }),
+			widget.NewButtonWithIcon("Browse...", theme.FolderOpenIcon(), func() {
+				dlg := dialog.NewFolderOpen(w.browseReplaysRoot, w)
+				dlg.Resize(w.Canvas().Size().Subtract(fyne.NewSize(20, 20))) // ! can't be larger than the settings window
+				dlg.Show()
+			}),
+		),
+	)
+
 	spacer := canvas.NewRectangle(color.Transparent)
 	spacer.SetMinSize(fyne.NewSize(5, 5))
 
@@ -115,22 +132,7 @@ func (w *windowSettings) Init() {
 			widget.NewButtonWithIcon("Login and Generate it for me...", theme.ComputerIcon(), w.openLogin),
 		)),
 		spacer,
-		widget.NewCard("StarCraft II", "", widget.NewVBox(
-			fyne.NewContainerWithLayout(
-				layout.NewFormLayout(),
-				widget.NewLabel("Replays Root"),
-				widget.NewHScrollContainer(w.replaysRoot),
-			),
-			fyne.NewContainerWithLayout(
-				layout.NewGridLayout(2),
-				widget.NewButtonWithIcon("Find it for me...", theme.SearchIcon(), func() { go w.findReplaysRoot() }),
-				widget.NewButtonWithIcon("Browse...", theme.FolderOpenIcon(), func() {
-					dlg := dialog.NewFolderOpen(w.browseReplaysRoot, w)
-					dlg.Resize(w.Canvas().Size().Subtract(fyne.NewSize(20, 20))) // ! can't be larger than the settings window
-					dlg.Show()
-				}),
-			),
-		)),
+		widget.NewCard("StarCraft II", "", replaysRootSection),
 		spacer,
 		layout.NewSpacer(),
 		widget.NewSeparator(),
