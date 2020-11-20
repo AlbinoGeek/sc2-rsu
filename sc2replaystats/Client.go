@@ -81,6 +81,9 @@ func (client *Client) requestBytes(method, slug, contentType string, data io.Rea
 
 func (client *Client) requestMap(method, slug, contentType string, data io.Reader) (result map[string]string, err error) {
 	resp, err := client.doRequest(method, slug, contentType, data)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	result = make(map[string]string)
