@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/container"
 	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/layout"
@@ -126,12 +127,14 @@ func (w *windowMain) Refresh() {
 	w.genAccountList()
 	w.genUploadList()
 
-	tblName := widget.NewLabelWithStyle("Map Name", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	tblID := widget.NewLabelWithStyle("ID", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	tblStatus := widget.NewLabelWithStyle("Status", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-	tblName.Move(fyne.NewPos(8, 0))
-	tblID.Move(fyne.NewPos(238, 0))
-	tblStatus.Move(fyne.NewPos(326, 0))
+	tblName := newText("Map Name", 14, true)
+	tblName.Move(fyne.NewPos(8, 3))
+
+	tblID := newText("ID", 14, true)
+	tblID.Move(fyne.NewPos(248, 3))
+
+	tblStatus := newText("Status", 14, true)
+	tblStatus.Move(fyne.NewPos(334, 3))
 
 	w.SetContent(container.NewAppTabs(
 		container.NewTabItem("Accounts",
@@ -198,22 +201,32 @@ func (w *windowMain) genAccountList() {
 	}
 }
 
+func newText(text string, size int, bold bool) *canvas.Text {
+	return &canvas.Text{
+		Color:     theme.TextColor(),
+		Text:      text,
+		TextSize:  size,
+		TextStyle: fyne.TextStyle{Bold: bold},
+	}
+}
+
 func (w *windowMain) genUploadList() {
 	w.uploadList = widget.NewTable(
 		func() (int, int) { return len(w.uploadStatus), 3 },
 		func() fyne.CanvasObject {
-			return widget.NewLabel("@@@@@@@@")
+			return newText("@@@@@@@@", 14, false)
 		},
 		func(tci widget.TableCellID, f fyne.CanvasObject) {
-			l := f.(*widget.Label)
+			l := f.(*canvas.Text)
 			switch atom := w.uploadStatus[tci.Row]; tci.Col {
 			case 0:
-				l.SetText(atom.MapName)
+				l.Text = atom.MapName
 			case 1:
-				l.SetText(atom.ReplayID)
+				l.Text = atom.ReplayID
 			case 2:
-				l.SetText(atom.Status)
+				l.Text = atom.Status
 			}
+			l.Refresh()
 		},
 	)
 	w.uploadList.OnSelected = func(id widget.TableCellID) {
@@ -226,9 +239,9 @@ func (w *windowMain) genUploadList() {
 			w.app.OpenURL(u)
 		}
 	}
-	w.uploadList.SetColumnWidth(0, 220)
-	w.uploadList.SetColumnWidth(1, 80)
-	w.uploadList.SetColumnWidth(2, 100)
+	w.uploadList.SetColumnWidth(0, 230)
+	w.uploadList.SetColumnWidth(1, 76)
+	w.uploadList.SetColumnWidth(2, 84)
 }
 
 func (w *windowMain) toggleUploading(btn *widget.Button, id string) func() {
