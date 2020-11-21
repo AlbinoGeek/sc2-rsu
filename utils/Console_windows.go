@@ -53,13 +53,13 @@ func FixRedirection() error {
 		}
 
 		if stderr == invalid {
-			stderr, err = syscall.GetStdHandle(syscall.STD_ERROR_HANDLE)
+			stderr, _ = syscall.GetStdHandle(syscall.STD_ERROR_HANDLE)
 		}
 		if stdin == invalid {
-			stdin, err = syscall.GetStdHandle(syscall.STD_INPUT_HANDLE)
+			stdin, _ = syscall.GetStdHandle(syscall.STD_INPUT_HANDLE)
 		}
 		if stdout == invalid {
-			stdout, err = syscall.GetStdHandle(syscall.STD_OUTPUT_HANDLE)
+			stdout, _ = syscall.GetStdHandle(syscall.STD_OUTPUT_HANDLE)
 		}
 	}
 
