@@ -2,21 +2,38 @@ package cmd
 
 import (
 	"fmt"
+	"path/filepath"
+	"strconv"
+	"strings"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
 	"github.com/google/go-github/v32/github"
+	"github.com/kataras/golog"
 	"github.com/spf13/viper"
+
+	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
+	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
 )
 
 type windowMain struct {
 	*windowBase
 	gettingStarted uint
 	modal          *widget.PopUp
+	uploadStatus   []uploadRecord
+}
+
+type uploadRecord struct {
+	Filename string
+	Filesize string
+	MapName  string
+	ReplayID string
+	Status   string
 }
 
 func (w *windowMain) Init() {
@@ -35,13 +52,7 @@ func (w *windowMain) Init() {
 		),
 	))
 
-	hello := widget.NewLabel("Hello Fyne!")
-	w.SetContent(widget.NewVBox(
-		hello,
-		widget.NewButton("Hi!", func() {
-			hello.SetText("Welcome :)")
-		}),
-	))
+	w.Refresh()
 
 	// closing the main window should quit the application
 	w.SetCloseIntercept(func() {
@@ -71,6 +82,123 @@ func (w *windowMain) Init() {
 	if viper.GetString("version") == "" || viper.GetString("apikey") == "" {
 		w.openGettingStarted1()
 	}
+}
+
+func toonList(accounts []string) (toons map[string][]string) {
+	toons = make(map[string][]string)
+	for _, acc := range accounts {
+		parts := strings.Split(acc[1:], string(filepath.Separator))
+		toonList, ok := toons[parts[0]]
+		if !ok {
+			toons[parts[0]] = []string{parts[1]}
+		} else {
+			toons[parts[0]] = append(toonList, parts[1])
+		}
+	}
+
+	return toons
+}
+
+func (w *windowMain) Refresh() {
+	if sc2api == nil {
+		sc2api = sc2replaystats.New(viper.GetString("apikey"))
+	}
+
+	// var startStopBtn *widget.Button
+	// uploadEnabled := true
+	// toggleUploader := func() {
+	// 	uploadEnabled = !uploadEnabled
+	// 	if uploadEnabled {
+	// 		startStopBtn.Importance = widget.MediumImportance
+	// 		startStopBtn.Icon = theme.MediaPlayIcon()
+	// 		startStopBtn.Text = "Start Automatic Upload"
+	// 		startStopBtn.Refresh()
+	// 	} else {
+	// 		startStopBtn.Importance = widget.HighImportance
+	// 		startStopBtn.Icon = theme.MediaPauseIcon()
+	// 		startStopBtn.Text = "Pause Automatic Upload"
+	// 		startStopBtn.Refresh()
+	// 	}
+	// }
+	// startStopBtn = widget.NewButtonWithIcon("Start Automatic Upload", theme.MediaPlayIcon(), toggleUploader)
+	// toggleUploader()
+
+	tc := container.NewAppTabs(
+		container.NewTabItem("Accounts",
+			container.NewVScroll(w.genAccountList()),
+		),
+		container.NewTabItem("Uploads",
+			container.NewVScroll(w.genUploadList()),
+		),
+	)
+	w.SetContent(tc)
+}
+
+func (w *windowMain) genAccountList() fyne.CanvasObject {
+	players, err := sc2api.GetAccountPlayers()
+	if err != nil {
+		golog.Errorf("GetAccountPlayers: %v", err)
+	}
+
+	accounts, err := sc2utils.EnumerateAccounts(viper.GetString("replaysRoot"))
+	if err != nil {
+		accounts = []string{"No Accounts Found/"}
+	}
+
+	accList := container.NewVBox()
+	for acc, list := range toonList(accounts) {
+		accList.Add(widget.NewCard(acc, "", nil))
+		for i, toon := range list {
+			parts := strings.Split(toon, "-")
+
+			aLabel := widget.NewLabel("Unknown Character")
+			for _, p := range players {
+				if parts[len(parts)-1] == strconv.Itoa(int(p.Player.CharacterID)) {
+					aLabel.SetText(p.Player.Name)
+				}
+			}
+
+			toggleBtn := widget.NewButtonWithIcon("", theme.MediaPauseIcon(), func() {
+				fmt.Printf("Hide/Show [%s][%d]\n", acc, i)
+			})
+			toggleBtn.Importance = widget.HighImportance
+
+			accList.Add(
+				container.NewBorder(nil, nil,
+					toggleBtn,
+					widget.NewLabel(sc2utils.RegionsMap[parts[0]]),
+					aLabel,
+				),
+			)
+		}
+	}
+
+	return accList
+}
+
+func (w *windowMain) genUploadList() fyne.CanvasObject {
+	list := widget.NewTable(
+		func() (int, int) { return len(w.uploadStatus), 3 },
+		func() fyne.CanvasObject {
+			return widget.NewLabel("@@@@@@@@")
+		},
+		func(tci widget.TableCellID, f fyne.CanvasObject) {
+			l := f.(*widget.Label)
+			switch atom := w.uploadStatus[tci.Row]; tci.Col {
+			case 0:
+				l.SetText(atom.MapName)
+			case 1:
+				l.SetText(atom.Filesize)
+			case 2:
+				l.SetText(atom.Status)
+			}
+		},
+	)
+	list.SetColumnWidth(0, 200)
+	list.SetColumnWidth(1, 80)
+	list.SetColumnWidth(2, 100)
+
+	return list
 }
 
 func labelWithWrapping(text string) *widget.Label {
