@@ -4,6 +4,7 @@
 
 **Added**
 
+- **A GRAPHICAL INTERFACE**
 - Checks replay status until the replay has been processed
 
 **Fixed**

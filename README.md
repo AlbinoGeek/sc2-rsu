@@ -1,4 +1,4 @@
-# sc2-rsu
+# **Unofficial SC2ReplayStats Uploader** by AlbinoGeek
 
 [![CodeQL](https://github.com/AlbinoGeek/sc2-rsu/workflows/CodeQL/badge.svg?branch=main)](#)
 [![Maintainability](https://api.codeclimate.com/v1/badges/a308471050f8a3357d09/maintainability)](https://codeclimate.com/github/AlbinoGeek/sc2-rsu/maintainability)
@@ -6,9 +6,9 @@
 [![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/AlbinoGeek/sc2-rsu.svg)](https://github.com/AlbinoGeek/sc2-rsu)
 [![GoReportCard](https://goreportcard.com/badge/github.com/AlbinoGeek/sc2-rsu)](https://goreportcard.com/report/github.com/AlbinoGeek/sc2-rsu)
 
-**Unofficial SC2ReplayStats Uploader** by AlbinoGeek
+![GUI Screenshot](_dist/screen-v0.2.85-gui.gif)
 
-![Screenshot](_dist/screen-v0.2.26.png)
+![CLI Screenshot](_dist/screen-v0.2.26.png)
 
 ## Features
 
@@ -20,9 +20,17 @@ Missing a feature? [Request it!](https://github.com/AlbinoGeek/sc2-rsu/issues/ne
 
 ## Usage
 
+### Using the Graphical Interface
+
+1. [Download a Release](https://github.com/AlbinoGeek/sc2-rsu/releases) or [Get the Sources](#building-from-source)
+2. Run the program without a command to open the Graphical User Interface
+3. Follow the on-screen First-Time Setup to get started!
+
+### Using the Command-Line Interface
+
 1. [Download a Release](https://github.com/AlbinoGeek/sc2-rsu/releases) or [Get the Sources](#building-from-source)
 2. Issue the `login` command to perform one-time setup (get your SC2ReplayStats API Key)
-3. Run the program without a command to automatically upload games as they are played
+3. Run the program with the `--text` switch to automatically upload games as they are played
 
 ```
 $ sc2-rsu login john@doe.com
@@ -34,6 +42,7 @@ $ sc2-rsu
   Starting Automatic Replay Uploader...
   Ready!
 ```
+
 
 For full usage instructions, consult the `--help` output.
 
