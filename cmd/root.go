@@ -53,11 +53,35 @@ var (
 			sc2api = sc2replaystats.New(key)
 
 			done := make(chan struct{})
-			w, err := automaticUpload(paths)
+			w, err := newWatcher(paths)
 			if err != nil {
 				return err
 			}
 			defer w.Close()
+
+			go func() {
+				for {
+					select {
+					case event, ok := <-w.Events:
+						if !ok {
+							return
+						}
+
+						if event.Op&fsnotify.Create == fsnotify.Create {
+							// bug: SC2 sometime writes out ".SC2Replay.writeCacheBackup" files
+							if strings.HasSuffix(event.Name, "eplay") {
+								go handleReplay(event.Name)
+							}
+						}
+					case err, ok := <-w.Errors:
+						if !ok {
+							return
+						}
+
+						golog.Warnf("fswatcher error: %v", err)
+					}
+				}
+			}()
 
 			// Setup Interrupt (Ctrl+C) Handler
 			c := make(chan os.Signal)
@@ -80,35 +104,11 @@ var (
 	termWidth = 80
 )
 
-func automaticUpload(paths []string) (w *fsnotify.Watcher, err error) {
+func newWatcher(paths []string) (w *fsnotify.Watcher, err error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, fmt.Errorf("failed to setup fswatcher: %v", err)
 	}
-
-	go func() {
-		for {
-			select {
-			case event, ok := <-watcher.Events:
-				if !ok {
-					return
-				}
-
-				if event.Op&fsnotify.Create == fsnotify.Create {
-					// bug: SC2 sometime writes out ".SC2Replay.writeCacheBackup" files
-					if strings.HasSuffix(event.Name, "eplay") {
-						go handleReplay(event.Name)
-					}
-				}
-			case err, ok := <-watcher.Errors:
-				if !ok {
-					return
-				}
-
-				golog.Warnf("fswatcher error: %v", err)
-			}
-		}
-	}()
 
 	for _, p := range paths {
 		golog.Debugf("Watching replays directory: %v", p)
@@ -126,34 +126,9 @@ func getWatchPaths() ([]string, error) {
 		golog.Warn("Replay Root not configured correctly, searching for replays directory...")
 		golog.Info("Determining replays directory... (this could take a few minutes)...")
 
-		scanRoot := "/"
-		if home, err := os.UserHomeDir(); err == nil {
-			scanRoot = home
-		}
-
-		roots, err := sc2utils.FindReplaysRoot(scanRoot)
-		if err != nil || len(roots) == 0 {
-			golog.Fatalf("unable to automatically determine the path to your replays directory: %v", err)
-		}
-
-		root := roots[0]
-		if len(roots) > 1 {
-			line := strings.Repeat("=", termWidth/2)
-			fmt.Printf("\n%s\n%s\n", line, wordwrap.WrapString("More than one possible replay directory was located while we scanned for your StarCraft II installation's Accounts folder.\n\nPlease select which directory we should be watching below:", uint(termWidth/2)))
-			for i, p := range roots {
-				fmt.Printf("\n  %d: %s", 1+i, p)
-			}
-			fmt.Printf("\n%s\n", line)
-			consoleReader := bufio.NewReaderSize(os.Stdin, 1)
-			for {
-				fmt.Printf("Your Choice [1-%d]: ", len(roots))
-				input, _, _ := consoleReader.ReadLine()
-				choice, err := strconv.Atoi(string(input))
-				if err == nil && choice > 0 && choice-1 < len(roots) {
-					root = roots[choice-1]
-					break
-				}
-			}
+		root, err := findReplaysRoot()
+		if err != nil {
+			golog.Fatal(err)
 		}
 
 		viper.Set("replaysRoot", root)
@@ -179,6 +154,40 @@ func getWatchPaths() ([]string, error) {
 	}
 
 	return paths, nil
+}
+
+func findReplaysRoot() (string, error) {
+	scanRoot := "/"
+	if home, err := os.UserHomeDir(); err == nil {
+		scanRoot = home
+	}
+
+	roots, err := sc2utils.FindReplaysRoot(scanRoot)
+	if err != nil || len(roots) == 0 {
+		return "", fmt.Errorf("unable to automatically determine the path to your replays directory: %v", err)
+	}
+
+	root := roots[0]
+	if len(roots) > 1 {
+		line := strings.Repeat("=", termWidth/2)
+		fmt.Printf("\n%s\n%s\n", line, wordwrap.WrapString("More than one possible replay directory was located while we scanned for your StarCraft II installation's Accounts folder.\n\nPlease select which directory we should be watching below:", uint(termWidth/2)))
+		for i, p := range roots {
+			fmt.Printf("\n  %d: %s", 1+i, p)
+		}
+		fmt.Printf("\n%s\n", line)
+		consoleReader := bufio.NewReaderSize(os.Stdin, 1)
+		for {
+			fmt.Printf("Your Choice [1-%d]: ", len(roots))
+			input, _, _ := consoleReader.ReadLine()
+			choice, err := strconv.Atoi(string(input))
+			if err == nil && choice > 0 && choice-1 < len(roots) {
+				root = roots[choice-1]
+				break
+			}
+		}
+	}
+
+	return root, nil
 }
 
 func handleReplay(replayFilename string) {
