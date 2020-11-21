@@ -27,12 +27,21 @@ import (
 const validReplaySize = 26 * 1024
 
 var (
+	// GUI is the application's graphical interface
+	GUI *graphicalInterface
+
 	rootCmd = &cobra.Command{
 		Short: "SC2ReplayStats Uploader",
 		Long:  `Unofficial SC2ReplayStats Uploader by AlbinoGeek`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if viper.GetBool("update.check.enabled") {
 				go checkUpdateEvery(getUpdateDuration())
+			}
+
+			if !textMode {
+				GUI = newUI()
+				GUI.Run()
+				return nil
 			}
 
 			key := viper.GetString("apikey")
@@ -102,6 +111,7 @@ var (
 	sc2api    *sc2replaystats.Client
 	startTime = time.Now()
 	termWidth = 80
+	textMode  bool
 )
 
 func newWatcher(paths []string) (w *fsnotify.Watcher, err error) {

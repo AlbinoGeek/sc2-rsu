@@ -14,8 +14,10 @@ import (
 	"github.com/google/go-github/v32/github"
 	"github.com/kataras/golog"
 	"github.com/mitchellh/go-wordwrap"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
 	stripmd "github.com/writeas/go-strip-markdown"
 
 	"github.com/AlbinoGeek/sc2-rsu/utils"
@@ -157,6 +159,10 @@ func getUpdateDuration() time.Duration {
 	}
 
 	return period
+}
+
+func ghLink(slug string) string {
+	return fmt.Sprintf("https://github.com/%s/%s/%s", ghOwner, ghRepo, slug)
 }
 
 func printUpdateNotice(rel *github.RepositoryRelease) {

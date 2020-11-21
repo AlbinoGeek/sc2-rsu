@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+
 	"golang.org/x/crypto/ssh/terminal"
 )
 
@@ -27,6 +28,7 @@ func Execute() error {
 
 	// Attach Flags
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", fmt.Sprintf("config file (default is $HOME/%s)", defaultCfgFile))
+	rootCmd.PersistentFlags().BoolVar(&textMode, "text", false, "force text (console) user interface")
 	rootCmd.PersistentFlags().BoolP("verbose", "v", false, "enable debug logging for troubleshooting sake")
 	viper.BindPFlag("verbose", rootCmd.PersistentFlags().Lookup("verbose"))
 
