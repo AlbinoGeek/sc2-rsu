@@ -206,6 +206,10 @@ func (w *windowMain) genUploadList() {
 		},
 	)
 	w.uploadList.OnSelected = func(id widget.TableCellID) {
+		if id.Row > len(w.uploadStatus)-1 {
+			return // selected row that does not exist
+		}
+
 		if rid := w.uploadStatus[id.Row].ReplayID; rid != "" {
 			u, _ := url.Parse(fmt.Sprintf("%s/replay/%s", sc2replaystats.WebRoot, rid))
 			w.app.OpenURL(u)
