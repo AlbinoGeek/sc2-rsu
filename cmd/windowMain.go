@@ -208,7 +208,7 @@ func (w *windowMain) checkUpdate() {
 	}
 
 	dialog.ShowConfirm("Update Available!",
-		fmt.Sprintf("You are running version %s.\nAn update is avaialble: %s\nWould you like us to download it now?", VERSION, rel.GetTagName()),
+		fmt.Sprintf("You are running version %s.\nAn update is available: %s\nWould you like us to download it now?", VERSION, rel.GetTagName()),
 		w.doUpdate(rel), w)
 }
 
