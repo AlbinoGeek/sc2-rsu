@@ -126,12 +126,23 @@ func (w *windowMain) Refresh() {
 	w.genAccountList()
 	w.genUploadList()
 
+	tblName := widget.NewLabelWithStyle("Map Name", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	tblID := widget.NewLabelWithStyle("ID", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	tblStatus := widget.NewLabelWithStyle("Status", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	tblName.Move(fyne.NewPos(8, 0))
+	tblID.Move(fyne.NewPos(238, 0))
+	tblStatus.Move(fyne.NewPos(326, 0))
+
 	w.SetContent(container.NewAppTabs(
 		container.NewTabItem("Accounts",
 			container.NewVScroll(w.accList),
 		),
 		container.NewTabItem("Uploads",
-			container.NewVScroll(w.uploadList),
+			container.NewBorder(
+				fyne.NewContainerWithoutLayout(
+					tblName, tblID, tblStatus,
+				), nil, nil, nil, w.uploadList,
+			),
 		),
 	))
 }
