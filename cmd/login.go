@@ -98,14 +98,43 @@ var (
 	}
 )
 
-func newBrowser() (pw *playwright.Playwright, browser *playwright.Browser, page *playwright.Page, err error) {
-	if pw, err = playwright.Run(); err == nil {
-		if browser, err = pw.Chromium.Launch(); err == nil {
-			page, err = browser.NewPage()
-		}
+func extractAPIKey(page *playwright.Page, accountID string) (string, error) {
+	if _, err := page.Goto(fmt.Sprintf("%s/account/settings/%v", sc2replaystats.WebRoot, accountID)); err != nil {
+		return "", fmt.Errorf("failed to navigate to settings page: %v", err)
 	}
 
-	return pw, browser, page, err
+	golog.Debug("Waiting for settings page to load...")
+	e, err := page.WaitForSelector("*css=a[data-toggle='tab'] >> text=API Access")
+	if err != nil {
+		return "", fmt.Errorf("[settings] failed to locate API Access section: %v", err)
+	}
+	golog.Debug("Clicking 'API Access'...")
+	if err = e.Click(); err != nil {
+		return "", fmt.Errorf("[settings] failed to click API Access: %v", err)
+	}
+	golog.Debug("Finding API key...")
+	e, err = page.QuerySelector("*css=.form-group >> text=Authorization Key")
+	if e == nil || err != nil {
+		golog.Info("Generating new API key...")
+		e, err = page.QuerySelector("text=Generate New API Key")
+		if err != nil {
+			return "", fmt.Errorf("[settings] failed to locate Generate New API Key button: %v", err)
+		}
+		if err = e.Click(); err != nil {
+			return "", fmt.Errorf("[settings] failed to click Generate New API Key button: %v", err)
+		}
+		e, err = page.WaitForSelector("*css=.form-group >> text=Authorization Key")
+	}
+	if err != nil || e == nil {
+		return "", fmt.Errorf("[settings] failed to locate \"Authorization Key\" (API Key): %v", err)
+	}
+
+	t, err := e.InnerText()
+	if err != nil {
+		return "", fmt.Errorf("[settings] failed to resolve \"Authorization Key\" (API Key) Text: %v", err)
+	}
+
+	return strings.Trim(strings.Split(t, ": ")[1], " \r\n\t"), nil
 }
 
 func login(page *playwright.Page, email string, password string) (accountID string, err error) {
@@ -153,41 +182,12 @@ func login(page *playwright.Page, email string, password string) (accountID stri
 	return strings.Split(parts[len(parts)-1], "#")[0], nil
 }
 
-func extractAPIKey(page *playwright.Page, accountID string) (string, error) {
-	if _, err := page.Goto(fmt.Sprintf("%s/account/settings/%v", sc2replaystats.WebRoot, accountID)); err != nil {
-		return "", fmt.Errorf("failed to navigate to settings page: %v", err)
-	}
-
-	golog.Debug("Waiting for settings page to load...")
-	e, err := page.WaitForSelector("*css=a[data-toggle='tab'] >> text=API Access")
-	if err != nil {
-		return "", fmt.Errorf("[settings] failed to locate API Access section: %v", err)
-	}
-	golog.Debug("Clicking 'API Access'...")
-	if err = e.Click(); err != nil {
-		return "", fmt.Errorf("[settings] failed to click API Access: %v", err)
-	}
-	golog.Debug("Finding API key...")
-	e, err = page.QuerySelector("*css=.form-group >> text=Authorization Key")
-	if e == nil || err != nil {
-		golog.Info("Generating new API key...")
-		e, err = page.QuerySelector("text=Generate New API Key")
-		if err != nil {
-			return "", fmt.Errorf("[settings] failed to locate Generate New API Key button: %v", err)
+func newBrowser() (pw *playwright.Playwright, browser *playwright.Browser, page *playwright.Page, err error) {
+	if pw, err = playwright.Run(); err == nil {
+		if browser, err = pw.Chromium.Launch(); err == nil {
+			page, err = browser.NewPage()
 		}
-		if err = e.Click(); err != nil {
-			return "", fmt.Errorf("[settings] failed to click Generate New API Key button: %v", err)
-		}
-		e, err = page.WaitForSelector("*css=.form-group >> text=Authorization Key")
-	}
-	if err != nil || e == nil {
-		return "", fmt.Errorf("[settings] failed to locate \"Authorization Key\" (API Key): %v", err)
 	}
 
-	t, err := e.InnerText()
-	if err != nil {
-		return "", fmt.Errorf("[settings] failed to resolve \"Authorization Key\" (API Key) Text: %v", err)
-	}
-
-	return strings.Trim(strings.Split(t, ": ")[1], " \r\n\t"), nil
+	return pw, browser, page, err
 }

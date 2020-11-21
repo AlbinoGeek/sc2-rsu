@@ -114,20 +114,38 @@ var (
 	textMode  bool
 )
 
-func newWatcher(paths []string) (w *fsnotify.Watcher, err error) {
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		return nil, fmt.Errorf("failed to setup fswatcher: %v", err)
+func findReplaysRoot() (string, error) {
+	scanRoot := "/"
+	if home, err := os.UserHomeDir(); err == nil {
+		scanRoot = home
 	}
 
-	for _, p := range paths {
-		golog.Debugf("Watching replays directory: %v", p)
-		if err = watcher.Add(p); err != nil {
-			golog.Fatalf("failed to watch replay directory: %v: %v", p, err)
+	roots, err := sc2utils.FindReplaysRoot(scanRoot)
+	if err != nil || len(roots) == 0 {
+		return "", fmt.Errorf("unable to automatically determine the path to your replays directory: %v", err)
+	}
+
+	root := roots[0]
+	if len(roots) > 1 {
+		line := strings.Repeat("=", termWidth/2)
+		fmt.Printf("\n%s\n%s\n", line, wordwrap.WrapString("More than one possible replay directory was located while we scanned for your StarCraft II installation's Accounts folder.\n\nPlease select which directory we should be watching below:", uint(termWidth/2)))
+		for i, p := range roots {
+			fmt.Printf("\n  %d: %s", 1+i, p)
+		}
+		fmt.Printf("\n%s\n", line)
+		consoleReader := bufio.NewReaderSize(os.Stdin, 1)
+		for {
+			fmt.Printf("Your Choice [1-%d]: ", len(roots))
+			input, _, _ := consoleReader.ReadLine()
+			choice, err := strconv.Atoi(string(input))
+			if err == nil && choice > 0 && choice-1 < len(roots) {
+				root = roots[choice-1]
+				break
+			}
 		}
 	}
 
-	return watcher, nil
+	return root, nil
 }
 
 func getWatchPaths() ([]string, error) {
@@ -166,40 +184,6 @@ func getWatchPaths() ([]string, error) {
 	return paths, nil
 }
 
-func findReplaysRoot() (string, error) {
-	scanRoot := "/"
-	if home, err := os.UserHomeDir(); err == nil {
-		scanRoot = home
-	}
-
-	roots, err := sc2utils.FindReplaysRoot(scanRoot)
-	if err != nil || len(roots) == 0 {
-		return "", fmt.Errorf("unable to automatically determine the path to your replays directory: %v", err)
-	}
-
-	root := roots[0]
-	if len(roots) > 1 {
-		line := strings.Repeat("=", termWidth/2)
-		fmt.Printf("\n%s\n%s\n", line, wordwrap.WrapString("More than one possible replay directory was located while we scanned for your StarCraft II installation's Accounts folder.\n\nPlease select which directory we should be watching below:", uint(termWidth/2)))
-		for i, p := range roots {
-			fmt.Printf("\n  %d: %s", 1+i, p)
-		}
-		fmt.Printf("\n%s\n", line)
-		consoleReader := bufio.NewReaderSize(os.Stdin, 1)
-		for {
-			fmt.Printf("Your Choice [1-%d]: ", len(roots))
-			input, _, _ := consoleReader.ReadLine()
-			choice, err := strconv.Atoi(string(input))
-			if err == nil && choice > 0 && choice-1 < len(roots) {
-				root = roots[choice-1]
-				break
-			}
-		}
-	}
-
-	return root, nil
-}
-
 func handleReplay(replayFilename string) {
 	golog.Debugf("uploading replay: %v", replayFilename)
 
@@ -227,6 +211,22 @@ func handleReplay(replayFilename string) {
 	}
 	golog.Infof("sc2replaystats accepted : [%v] %s", rqid, mapName)
 	go watchReplayStatus(rqid)
+}
+
+func newWatcher(paths []string) (w *fsnotify.Watcher, err error) {
+	watcher, err := fsnotify.NewWatcher()
+	if err != nil {
+		return nil, fmt.Errorf("failed to setup fswatcher: %v", err)
+	}
+
+	for _, p := range paths {
+		golog.Debugf("Watching replays directory: %v", p)
+		if err = watcher.Add(p); err != nil {
+			golog.Fatalf("failed to watch replay directory: %v: %v", p, err)
+		}
+	}
+
+	return watcher, nil
 }
 
 func watchReplayStatus(rqid string) {
