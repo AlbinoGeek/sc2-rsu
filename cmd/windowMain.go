@@ -2,9 +2,12 @@ package cmd
 
 import (
 	"fmt"
+	"net/url"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/container"
@@ -13,31 +16,42 @@ import (
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
+	"github.com/fsnotify/fsnotify"
 	"github.com/google/go-github/v32/github"
 	"github.com/kataras/golog"
 	"github.com/spf13/viper"
 
 	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
 	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
+	"github.com/AlbinoGeek/sc2-rsu/utils"
 )
 
 type windowMain struct {
 	*windowBase
 	gettingStarted uint
 	modal          *widget.PopUp
-	uploadStatus   []uploadRecord
+	uploadEnabled  map[string]bool
+	uploadStatus   []*uploadRecord
+	watcher        *fsnotify.Watcher
+
+	accList    *fyne.Container
+	uploadList *widget.Table
 }
 
 type uploadRecord struct {
 	Filename string
 	Filesize string
 	MapName  string
+	QueueID  string
 	ReplayID string
 	Status   string
 }
 
 func (w *windowMain) Init() {
 	w.windowBase.Window = w.windowBase.app.NewWindow("SC2ReplayStats Uploader")
+
+	w.uploadEnabled = make(map[string]bool)
+	w.uploadStatus = make([]*uploadRecord, 0)
 
 	w.SetMainMenu(fyne.NewMainMenu(
 		fyne.NewMenu("File",
@@ -51,8 +65,6 @@ func (w *windowMain) Init() {
 			fyne.NewMenuItem("About", func() { w.ui.OpenWindow(WindowAbout) }),
 		),
 	))
-
-	w.Refresh()
 
 	// closing the main window should quit the application
 	w.SetCloseIntercept(func() {
@@ -71,13 +83,24 @@ func (w *windowMain) Init() {
 			settings.Close()
 		}
 
+		if w.watcher != nil {
+			w.watcher.Close()
+		}
+
 		w.Close()
 		w.app.Quit()
 	})
 
+	if sc2api == nil {
+		sc2api = sc2replaystats.New(viper.GetString("apikey"))
+	}
+	w.Refresh()
+
 	w.Resize(fyne.NewSize(420, 360))
 	w.CenterOnScreen()
 	w.Show()
+
+	w.setupUploader()
 
 	if viper.GetString("version") == "" || viper.GetString("apikey") == "" {
 		w.openGettingStarted1()
@@ -100,44 +123,33 @@ func toonList(accounts []string) (toons map[string][]string) {
 }
 
 func (w *windowMain) Refresh() {
-	if sc2api == nil {
-		sc2api = sc2replaystats.New(viper.GetString("apikey"))
-	}
+	w.genAccountList()
+	w.genUploadList()
 
-	// var startStopBtn *widget.Button
-	// uploadEnabled := true
-	// toggleUploader := func() {
-	// 	uploadEnabled = !uploadEnabled
-	// 	if uploadEnabled {
-	// 		startStopBtn.Importance = widget.MediumImportance
-	// 		startStopBtn.Icon = theme.MediaPlayIcon()
-	// 		startStopBtn.Text = "Start Automatic Upload"
-	// 		startStopBtn.Refresh()
-	// 	} else {
-	// 		startStopBtn.Importance = widget.HighImportance
-	// 		startStopBtn.Icon = theme.MediaPauseIcon()
-	// 		startStopBtn.Text = "Pause Automatic Upload"
-	// 		startStopBtn.Refresh()
-	// 	}
-	// }
-	// startStopBtn = widget.NewButtonWithIcon("Start Automatic Upload", theme.MediaPlayIcon(), toggleUploader)
-	// toggleUploader()
-
-	tc := container.NewAppTabs(
+	w.SetContent(container.NewAppTabs(
 		container.NewTabItem("Accounts",
-			container.NewVScroll(w.genAccountList()),
+			container.NewVScroll(w.accList),
 		),
 		container.NewTabItem("Uploads",
-			container.NewVScroll(w.genUploadList()),
+			container.NewVScroll(w.uploadList),
 		),
-	)
-	w.SetContent(tc)
+	))
 }
 
-func (w *windowMain) genAccountList() fyne.CanvasObject {
+func (w *windowMain) genAccountList() {
+	if w.accList != nil {
+		objects := w.accList.Objects
+		for _, o := range objects {
+			w.accList.Remove(o)
+		}
+	} else {
+		w.accList = container.NewVBox()
+	}
+
 	players, err := sc2api.GetAccountPlayers()
 	if err != nil {
 		golog.Errorf("GetAccountPlayers: %v", err)
+		return
 	}
 
 	accounts, err := sc2utils.EnumerateAccounts(viper.GetString("replaysRoot"))
@@ -145,10 +157,9 @@ func (w *windowMain) genAccountList() fyne.CanvasObject {
 		accounts = []string{"No Accounts Found/"}
 	}
 
-	accList := container.NewVBox()
 	for acc, list := range toonList(accounts) {
-		accList.Add(widget.NewCard(acc, "", nil))
-		for i, toon := range list {
+		w.accList.Add(widget.NewCard(acc, "", nil))
+		for _, toon := range list {
 			parts := strings.Split(toon, "-")
 
 			aLabel := widget.NewLabel("Unknown Character")
@@ -158,12 +169,14 @@ func (w *windowMain) genAccountList() fyne.CanvasObject {
 				}
 			}
 
-			toggleBtn := widget.NewButtonWithIcon("", theme.MediaPauseIcon(), func() {
-				fmt.Printf("Hide/Show [%s][%d]\n", acc, i)
-			})
+			toggleBtn := widget.NewButtonWithIcon("", theme.MediaPauseIcon(), nil)
 			toggleBtn.Importance = widget.HighImportance
 
-			accList.Add(
+			id := fmt.Sprintf("%s/%s", acc, toon)
+			toggleBtn.OnTapped = w.toggleUploading(toggleBtn, id)
+			w.uploadEnabled[id] = true
+
+			w.accList.Add(
 				container.NewBorder(nil, nil,
 					toggleBtn,
 					widget.NewLabel(sc2utils.RegionsMap[parts[0]]),
@@ -172,12 +185,10 @@ func (w *windowMain) genAccountList() fyne.CanvasObject {
 			)
 		}
 	}
-
-	return accList
 }
 
-func (w *windowMain) genUploadList() fyne.CanvasObject {
-	list := widget.NewTable(
+func (w *windowMain) genUploadList() {
+	w.uploadList = widget.NewTable(
 		func() (int, int) { return len(w.uploadStatus), 3 },
 		func() fyne.CanvasObject {
 			return widget.NewLabel("@@@@@@@@")
@@ -188,17 +199,170 @@ func (w *windowMain) genUploadList() fyne.CanvasObject {
 			case 0:
 				l.SetText(atom.MapName)
 			case 1:
-				l.SetText(atom.Filesize)
+				l.SetText(atom.ReplayID)
 			case 2:
 				l.SetText(atom.Status)
 			}
 		},
 	)
-	list.SetColumnWidth(0, 200)
-	list.SetColumnWidth(1, 80)
-	list.SetColumnWidth(2, 100)
+	w.uploadList.OnSelected = func(id widget.TableCellID) {
+		if rid := w.uploadStatus[id.Row].ReplayID; rid != "" {
+			u, _ := url.Parse(fmt.Sprintf("%s/replay/%s", sc2replaystats.WebRoot, rid))
+			w.app.OpenURL(u)
+		}
+	}
+	w.uploadList.SetColumnWidth(0, 220)
+	w.uploadList.SetColumnWidth(1, 80)
+	w.uploadList.SetColumnWidth(2, 100)
+}
 
-	return list
+func (w *windowMain) toggleUploading(btn *widget.Button, id string) func() {
+	return func() {
+		replaysRoot := viper.GetString("replaysRoot")
+
+		w.uploadEnabled[id] = !w.uploadEnabled[id]
+		if w.uploadEnabled[id] {
+			if err := w.watcher.Remove(filepath.Join(replaysRoot, id, "Replays", "Multiplayer")); err != nil {
+				dialog.NewError(err, w)
+				return
+			}
+
+			btn.Importance = widget.HighImportance
+			btn.Icon = theme.MediaPauseIcon()
+		} else {
+			if err := w.watcher.Add(filepath.Join(replaysRoot, id, "Replays", "Multiplayer")); err != nil {
+				dialog.NewError(err, w)
+				return
+			}
+
+			btn.Importance = widget.MediumImportance
+			btn.Icon = theme.MediaPlayIcon()
+		}
+	}
+}
+
+func (w *windowMain) handleReplay(replayFilename string) {
+	_, mapName, _ := utils.SplitFilepath(replayFilename)
+	entry := &uploadRecord{
+		Filename: replayFilename,
+		MapName:  mapName,
+		Status:   "pending",
+	}
+
+	golog.Debugf("uploading replay: %v", replayFilename)
+	w.uploadStatus = append(w.uploadStatus, entry)
+	w.uploadList.Refresh()
+
+	// wait for the replay to have finished being written (large enough filesize)
+	var lastSize int64
+	for {
+		time.Sleep(time.Millisecond * 10)
+
+		// ! smallest replay I've seen is 27418 bytes (-3 second long)
+		if s, err := os.Stat(replayFilename); err == nil && s.Size() > validReplaySize {
+			// check that the replay has stopped growing
+			if s.Size() > lastSize {
+				lastSize = s.Size()
+			} else {
+				break
+			}
+		}
+	}
+
+	entry.Status = "uploading"
+	w.uploadList.Refresh()
+
+	rqid, err := sc2api.UploadReplay(replayFilename)
+	entry.QueueID = rqid
+
+	if err != nil {
+		entry.Status = "u failed"
+		w.uploadList.Refresh()
+
+		dialog.NewError(fmt.Errorf("replay upload failed:%v\n%v", mapName, err), w)
+		return
+	}
+
+	entry.Status = "processing"
+	w.uploadList.Refresh()
+
+	go w.watchReplayStatus(entry)
+}
+
+func (w *windowMain) watchReplayStatus(entry *uploadRecord) {
+	for {
+		time.Sleep(time.Second)
+		rid, err := sc2api.GetReplayStatus(entry.QueueID)
+		if err != nil {
+			golog.Errorf("error checking reply status: %v: %v", entry.QueueID, err)
+			entry.Status = "p failed"
+			w.uploadList.Refresh()
+			return // could not check status
+		}
+
+		if rid != "" {
+			entry.Status = "success"
+			entry.ReplayID = rid
+			w.uploadList.Refresh()
+			return // replay parsed!
+		}
+
+		golog.Debugf("sc2replaystats process..: [%v] %s", entry.QueueID, rid)
+	}
+}
+
+func (w *windowMain) setupUploader() {
+	replaysRoot := viper.GetString("replaysRoot")
+	if replaysRoot == "" {
+		return
+	}
+
+	accs, err := sc2utils.EnumerateAccounts(replaysRoot)
+	if err != nil {
+		dialog.NewError(err, w)
+	}
+
+	paths := make([]string, len(accs))
+	for i, a := range accs {
+		paths[i] = filepath.Join(replaysRoot, a, "Replays", "Multiplayer")
+	}
+
+	// TODO : should just clear watch paths instead of making a new watcher
+	// in case we were setup again (replaysRoot changed)
+	if w.watcher != nil {
+		w.watcher.Close()
+	}
+
+	watch, err := newWatcher(paths)
+	if err != nil {
+		dialog.NewError(fmt.Errorf("Failed to start uploader:\n%v", err), w)
+		return
+	}
+	w.watcher = watch
+
+	go func() {
+		for {
+			select {
+			case event, ok := <-watch.Events:
+				if !ok {
+					return
+				}
+
+				if event.Op&fsnotify.Create == fsnotify.Create {
+					// bug: SC2 sometime writes out ".SC2Replay.writeCacheBackup" files
+					if strings.HasSuffix(event.Name, "eplay") {
+						go w.handleReplay(event.Name)
+					}
+				}
+			case err, ok := <-watch.Errors:
+				if !ok {
+					return
+				}
+
+				golog.Warnf("fswatcher error: %v", err)
+			}
+		}
+	}()
 }
 
 func labelWithWrapping(text string) *widget.Label {

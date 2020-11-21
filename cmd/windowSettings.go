@@ -368,8 +368,26 @@ func (w *windowSettings) save() {
 		main.openGettingStarted3()
 	}
 
-	viper.Set("apikey", w.apiKey.Text)
-	viper.Set("replaysRoot", w.replaysRoot.Text)
+	var changes bool
+
+	if oldKey := viper.Get("apikey"); oldKey != w.apiKey.Text {
+		viper.Set("apikey", w.apiKey.Text)
+		changes = true
+
+		// Use the new apiKey immediately
+		sc2api = sc2replaystats.New(w.apiKey.Text)
+	}
+
+	if oldRoot := viper.Get("replaysRoot"); oldRoot != w.replaysRoot.Text {
+		viper.Set("replaysRoot", w.replaysRoot.Text)
+		changes = true
+	}
+
+	if changes {
+		main.genAccountList()
+		main.setupUploader()
+	}
+
 	viper.Set("update.automatic.enabled", w.autoDownload.Checked)
 	viper.Set("update.check.enabled", w.checkUpdates.Checked)
 	viper.Set("version", VERSION)
