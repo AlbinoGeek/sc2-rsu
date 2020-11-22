@@ -13,11 +13,11 @@ func labelWithWrapping(text string) *widget.Label {
 	return label
 }
 
-func newText(text string, size int, bold bool) *canvas.Text {
+func newText(text string, scale float32, bold bool) *canvas.Text {
 	return &canvas.Text{
 		Color:     theme.TextColor(),
 		Text:      text,
-		TextSize:  size,
+		TextSize:  int(float32(app.New().Settings().Theme().TextSize()) * scale),
 		TextStyle: fyne.TextStyle{Bold: bold},
 	}
 }

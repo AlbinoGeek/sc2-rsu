@@ -112,13 +112,13 @@ func (w *windowMain) Refresh() {
 	w.genAccountList()
 	w.genUploadList()
 
-	tblName := newText("Map Name", 14, true)
+	tblName := newText("Map Name", 1, true)
 	tblName.Move(fyne.NewPos(8, 3))
 
-	tblID := newText("ID", 14, true)
+	tblID := newText("ID", 1, true)
 	tblID.Move(fyne.NewPos(248, 3))
 
-	tblStatus := newText("Status", 14, true)
+	tblStatus := newText("Status", 1, true)
 	tblStatus.Move(fyne.NewPos(334, 3))
 
 	w.SetContent(container.NewAppTabs(
@@ -291,7 +291,7 @@ func (w *windowMain) genUploadList() {
 	w.uploadList = widget.NewTable(
 		func() (int, int) { return len(w.uploadStatus), 3 },
 		func() fyne.CanvasObject {
-			return newText("@@@@@@@@", 14, false)
+			return newText("@@@@@@@@", 1, false)
 		},
 		func(tci widget.TableCellID, f fyne.CanvasObject) {
 			l := f.(*canvas.Text)
