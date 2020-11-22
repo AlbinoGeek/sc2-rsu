@@ -338,7 +338,7 @@ func (w *windowMain) handleReplay(replayFilename string) {
 	// wait for the replay to have finished being written (large enough filesize)
 	var lastSize int64
 	for {
-		time.Sleep(time.Millisecond * 50)
+		time.Sleep(time.Millisecond * 250)
 
 		// ! smallest replay I've seen is 27418 bytes (-3 second long)
 		if s, err := os.Stat(replayFilename); err == nil && s.Size() > validReplaySize {
