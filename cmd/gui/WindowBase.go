@@ -19,14 +19,17 @@ func (b *WindowBase) SetWindow(w fyne.Window) {
 	b.w = w
 }
 
+// Init creates a new "Hello, World" window (should be overridden!)
 func (b *WindowBase) Init() {
 	b.SetWindow(b.App.NewWindow("Hello, World!"))
 }
 
+// Show does what it says on the tin
 func (b *WindowBase) Show() {
 	b.Show()
 }
 
+// Hide does what it says on the tin
 func (b *WindowBase) Hide() {
-	b.Show()
+	b.Hide()
 }
