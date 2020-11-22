@@ -18,14 +18,20 @@ var (
 	cfgExt         = "yaml"
 	cfgFile        string
 	defaultCfgFile string
-)
-
-func defaultConfig() {
-	for key, val := range map[string]interface{}{
+	defaults       = map[string]interface{}{
+		"theme.iconInlineSize":     20, // 20
+		"theme.padding":            4,
+		"theme.scrollBarSize":      12, // 16
+		"theme.scrollBarSmallSize": 3,
+		"theme.textSize":           14,
 		"update.automatic.enabled": false,
 		"update.check.enabled":     true,
 		"update.check.period":      time.Duration(minimumUpdatePeriod).String(),
-	} {
+	}
+)
+
+func defaultConfig() {
+	for key, val := range defaults {
 		viper.SetDefault(key, val)
 	}
 }

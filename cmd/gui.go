@@ -24,8 +24,19 @@ func newUI() *graphicalInterface {
 	ui := new(graphicalInterface)
 	ui.app = app.New()
 
-	ui.app.Settings().SetTheme(theme.DarkTheme())
+	ui.theme = guiTheme{Base: theme.DarkTheme()}
+	ui.app.Settings().SetTheme(ui.theme)
 
+	return ui
+}
+
+type graphicalInterface struct {
+	app     fyne.App
+	theme   fyne.Theme
+	windows map[string]Window
+}
+
+func (ui *graphicalInterface) Init() {
 	ui.windows = make(map[string]Window)
 	ui.windows[WindowMain] = &windowMain{
 		windowBase: &windowBase{app: ui.app, ui: ui}}
@@ -34,13 +45,6 @@ func newUI() *graphicalInterface {
 	ui.windows[WindowSettings] = &windowSettings{
 		windowBase: &windowBase{app: ui.app, ui: ui}}
 	ui.windows[WindowMain].Init()
-
-	return ui
-}
-
-type graphicalInterface struct {
-	app     fyne.App
-	windows map[string]Window
 }
 
 // OpenGitHub launches the user's browser to a given GitHub URL relative to

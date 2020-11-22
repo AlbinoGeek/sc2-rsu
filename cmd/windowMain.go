@@ -258,14 +258,16 @@ func (w *windowMain) genAccountList() {
 	}
 
 	for acc, list := range toonList(accounts) {
-		w.accList.Add(widget.NewCard(acc, "", nil))
+		header := newText(acc, 1.6, true)
+		header.Move(fyne.NewPos(w.ui.theme.Padding()/2, 1+w.ui.theme.Padding()/2))
+		w.accList.Add(fyne.NewContainerWithoutLayout(header))
 		for _, toon := range list {
 			parts := strings.Split(toon, "-")
 
-			aLabel := widget.NewLabel("Unknown Character")
+			aLabel := newText("Unknown Character", 1, false)
 			for _, p := range players {
 				if parts[len(parts)-1] == strconv.Itoa(int(p.Player.CharacterID)) {
-					aLabel.SetText(p.Player.Name)
+					aLabel.Text = p.Player.Name
 				}
 			}
 
@@ -279,7 +281,7 @@ func (w *windowMain) genAccountList() {
 			w.accList.Add(
 				container.NewBorder(nil, nil,
 					toggleBtn,
-					widget.NewLabel(sc2utils.RegionsMap[parts[0]]),
+					newText(sc2utils.RegionsMap[parts[0]], .9, false),
 					aLabel,
 				),
 			)

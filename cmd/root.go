@@ -40,6 +40,7 @@ var (
 
 			if !textMode {
 				GUI = newUI()
+				GUI.Init()
 				GUI.Run()
 				return nil
 			}
