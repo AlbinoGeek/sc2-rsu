@@ -19,6 +19,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 
+	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
 	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
 	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
 	"github.com/AlbinoGeek/sc2-rsu/utils"
@@ -28,7 +29,7 @@ const validReplaySize = 26 * 1024
 
 var (
 	// GUI is the application's graphical interface
-	GUI *graphicalInterface
+	GUI *gui.GraphicalInterface
 
 	rootCmd = &cobra.Command{
 		Short: "SC2ReplayStats Uploader",
@@ -39,8 +40,12 @@ var (
 			}
 
 			if !textMode {
-				GUI = newUI()
-				GUI.Init()
+				GUI = gui.New()
+				GUI.Init(map[string]gui.Window{
+					WindowMain:     &windowMain{WindowBase: &gui.WindowBase{App: GUI.App, UI: GUI}},
+					WindowAbout:    &windowAbout{WindowBase: &gui.WindowBase{App: GUI.App, UI: GUI}},
+					WindowSettings: &windowSettings{WindowBase: &gui.WindowBase{App: GUI.App, UI: GUI}},
+				}, WindowMain)
 				GUI.Run()
 				return nil
 			}

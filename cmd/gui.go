@@ -1,75 +1,12 @@
 package cmd
 
-import (
-	"net/url"
-
-	"fyne.io/fyne"
-	"fyne.io/fyne/app"
-	"fyne.io/fyne/dialog"
-	"fyne.io/fyne/theme"
-)
-
 const (
-	// WindowAbout is an index string used in graphicalInterface.windows
+	// WindowAbout is an index string used in GraphicalInterface.windows
 	WindowAbout = "About"
 
-	// WindowMain is an index string used in graphicalInterface.windows
+	// WindowMain is an index string used in GraphicalInterface.windows
 	WindowMain = "Main"
 
-	// WindowSettings is an index string used in graphicalInterface.windows
+	// WindowSettings is an index string used in GraphicalInterface.windows
 	WindowSettings = "Settings"
 )
-
-func newUI() *graphicalInterface {
-	ui := new(graphicalInterface)
-	ui.app = app.New()
-
-	ui.theme = guiTheme{Base: theme.DarkTheme()}
-	ui.app.Settings().SetTheme(ui.theme)
-
-	return ui
-}
-
-type graphicalInterface struct {
-	app     fyne.App
-	theme   fyne.Theme
-	windows map[string]Window
-}
-
-func (ui *graphicalInterface) Init() {
-	ui.windows = make(map[string]Window)
-	ui.windows[WindowMain] = &windowMain{
-		windowBase: &windowBase{app: ui.app, ui: ui}}
-	ui.windows[WindowAbout] = &windowAbout{
-		windowBase: &windowBase{app: ui.app, ui: ui}}
-	ui.windows[WindowSettings] = &windowSettings{
-		windowBase: &windowBase{app: ui.app, ui: ui}}
-	ui.windows[WindowMain].Init()
-}
-
-// OpenGitHub launches the user's browser to a given GitHub URL relative to
-// this project's repository root
-func (ui *graphicalInterface) OpenGitHub(slug string) func() {
-	u, _ := url.Parse(ghLink(slug))
-	return func() {
-		if err := ui.app.OpenURL(u); err != nil {
-			dialog.ShowError(err, ui.windows[WindowMain].GetWindow())
-		}
-	}
-}
-
-// OpenWindow shows a given window, initializing it first if needed
-func (ui *graphicalInterface) OpenWindow(windowName string) {
-	if w, ok := ui.windows[windowName]; ok {
-		if w.GetWindow() == nil {
-			w.Init()
-		} else {
-			w.Show()
-		}
-	}
-}
-
-// Run starts the fyne.App and shows the main window
-func (ui *graphicalInterface) Run() {
-	ui.app.Run()
-}

@@ -1,4 +1,4 @@
-package cmd
+package gui
 
 import (
 	"fyne.io/fyne"

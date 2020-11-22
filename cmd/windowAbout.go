@@ -6,14 +6,16 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
+	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
 )
 
 type windowAbout struct {
-	*windowBase
+	*gui.WindowBase
 }
 
-func (w *windowAbout) Init() {
-	w.windowBase.Window = w.windowBase.app.NewWindow("About")
+func (about *windowAbout) Init() {
+	w := about.App.NewWindow("About")
+	about.SetWindow(w)
 
 	u, _ := url.Parse(ghLink(""))
 
@@ -41,7 +43,7 @@ func (w *windowAbout) Init() {
 	)
 
 	w.SetOnClosed(func() {
-		w.SetWindow(nil)
+		about.SetWindow(nil)
 	})
 
 	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {

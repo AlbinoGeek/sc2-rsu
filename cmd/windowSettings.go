@@ -17,12 +17,13 @@ import (
 
 	"github.com/spf13/viper"
 
+	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
 	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
 	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
 )
 
 type windowSettings struct {
-	*windowBase
+	*gui.WindowBase
 
 	// do we have unsaved changes in the form?
 	unsaved bool
@@ -36,70 +37,71 @@ type windowSettings struct {
 }
 
 // TODO: candidate for refactor
-func (w *windowSettings) Init() {
-	w.windowBase.Window = w.windowBase.app.NewWindow("Settings")
+func (settings *windowSettings) Init() {
+	w := settings.App.NewWindow("Settings")
+	settings.SetWindow(w)
 
-	w.apiKey = widget.NewEntry()
-	w.apiKey.SetText(viper.GetString("apiKey"))
-	w.apiKey.Validator = func(key string) (err error) {
+	settings.apiKey = widget.NewEntry()
+	settings.apiKey.SetText(viper.GetString("apiKey"))
+	settings.apiKey.Validator = func(key string) (err error) {
 		if !sc2replaystats.ValidAPIKey(key) {
 			err = errors.New("invalid API key format")
 		}
 		return
 	}
-	w.apiKey.OnChanged = func(string) {
-		w.unsaved = true
+	settings.apiKey.OnChanged = func(string) {
+		settings.unsaved = true
 	}
 
-	w.autoDownload = widget.NewCheck("Automatically Download Updates?", func(checked bool) {
-		w.unsaved = true
+	settings.autoDownload = widget.NewCheck("Automatically Download Updates?", func(checked bool) {
+		settings.unsaved = true
 	})
-	w.autoDownload.SetChecked(viper.GetBool("update.automatic.enabled"))
+	settings.autoDownload.SetChecked(viper.GetBool("update.automatic.enabled"))
 
-	w.updatePeriod = widget.NewEntry()
-	w.updatePeriod.SetText(getUpdateDuration().String())
-	w.updatePeriod.Validator = func(period string) (err error) {
+	settings.updatePeriod = widget.NewEntry()
+	settings.updatePeriod.SetText(getUpdateDuration().String())
+	settings.updatePeriod.Validator = func(period string) (err error) {
 		_, err = time.ParseDuration(period)
 		return
 	}
-	w.updatePeriod.OnChanged = func(string) {
-		w.unsaved = true
+	settings.updatePeriod.OnChanged = func(string) {
+		settings.unsaved = true
 	}
 
-	w.checkUpdates = widget.NewCheck("Check for Updates Periodically?", func(checked bool) {
-		w.unsaved = true
+	settings.checkUpdates = widget.NewCheck("Check for Updates Periodically?", func(checked bool) {
+		settings.unsaved = true
 		if checked {
-			w.autoDownload.Enable()
-			w.updatePeriod.Enable()
+			settings.autoDownload.Enable()
+			settings.updatePeriod.Enable()
 		} else {
-			w.autoDownload.Disable()
-			w.updatePeriod.Disable()
+			settings.autoDownload.Disable()
+			settings.updatePeriod.Disable()
 		}
 	})
-	w.checkUpdates.SetChecked(viper.GetBool("update.check.enabled"))
-	if !w.checkUpdates.Checked {
-		w.autoDownload.Disable()
-		w.updatePeriod.Disable()
+	settings.checkUpdates.SetChecked(viper.GetBool("update.check.enabled"))
+	if !settings.checkUpdates.Checked {
+		settings.autoDownload.Disable()
+		settings.updatePeriod.Disable()
 	}
-	w.unsaved = false // otherwise set by the above line
+	settings.unsaved = false // otherwise set by the above line
 
-	w.replaysRoot = widget.NewEntry()
-	w.replaysRoot.SetText(viper.GetString("replaysRoot"))
-	w.replaysRoot.OnChanged = func(string) {
-		w.unsaved = true
+	settings.replaysRoot = widget.NewEntry()
+	settings.replaysRoot.SetText(viper.GetString("replaysRoot"))
+	settings.replaysRoot.OnChanged = func(string) {
+		settings.unsaved = true
 	}
 
 	replaysRootSection := widget.NewVBox(
 		fyne.NewContainerWithLayout(
 			layout.NewFormLayout(),
 			widget.NewLabel("Replays Root"),
-			widget.NewHScrollContainer(w.replaysRoot),
+			widget.NewHScrollContainer(settings.replaysRoot),
 		),
 		fyne.NewContainerWithLayout(
 			layout.NewGridLayout(2),
-			widget.NewButtonWithIcon("Find it for me...", theme.SearchIcon(), func() { go w.findReplaysRoot() }),
+			widget.NewButtonWithIcon("Find it for me...", theme.SearchIcon(), func() { go settings.findReplaysRoot() }),
 			widget.NewButtonWithIcon("Browse...", theme.FolderOpenIcon(), func() {
-				dlg := dialog.NewFolderOpen(w.browseReplaysRoot, w)
+				dlg := dialog.NewFolderOpen(settings.browseReplaysRoot, w)
 				dlg.Resize(w.Canvas().Size().Subtract(fyne.NewSize(20, 20))) // ! can't be larger than the settings window
 				dlg.Show()
 			}),
@@ -109,17 +111,17 @@ func (w *windowSettings) Init() {
 	spacer := canvas.NewRectangle(color.Transparent)
 	spacer.SetMinSize(fyne.NewSize(5, 5))
 
-	btnSave := widget.NewButtonWithIcon("Save", theme.DocumentSaveIcon(), w.save)
+	btnSave := widget.NewButtonWithIcon("Save", theme.DocumentSaveIcon(), settings.save)
 	btnSave.Importance = widget.HighImportance
 
 	w.SetContent(widget.NewVBox(
 		widget.NewCard(fmt.Sprintf("%s Settings", PROGRAM), "", widget.NewVBox(
-			w.checkUpdates,
-			w.autoDownload,
+			settings.checkUpdates,
+			settings.autoDownload,
 			fyne.NewContainerWithLayout(
 				layout.NewFormLayout(),
 				widget.NewLabel("Check Every"),
-				w.updatePeriod,
+				settings.updatePeriod,
 			),
 		)),
 		spacer,
@@ -127,9 +129,9 @@ func (w *windowSettings) Init() {
 			fyne.NewContainerWithLayout(
 				layout.NewFormLayout(),
 				widget.NewLabel("API Key"),
-				widget.NewHScrollContainer(w.apiKey),
+				widget.NewHScrollContainer(settings.apiKey),
 			),
-			widget.NewButtonWithIcon("Login and Generate it for me...", theme.ComputerIcon(), w.openLogin),
+			widget.NewButtonWithIcon("Login and Generate it for me...", theme.ComputerIcon(), settings.openLogin),
 		)),
 		spacer,
 		widget.NewCard("StarCraft II", "", replaysRootSection),
@@ -139,20 +141,20 @@ func (w *windowSettings) Init() {
 		fyne.NewContainerWithLayout(
 			layout.NewGridLayout(2),
 			widget.NewButtonWithIcon("Cancel", theme.CancelIcon(), func() {
-				w.onClose()
+				settings.onClose()
 			}),
 			btnSave,
 		),
 	))
 
-	w.SetCloseIntercept(w.onClose)
+	w.SetCloseIntercept(settings.onClose)
 	w.SetOnClosed(func() {
-		w.SetWindow(nil)
+		settings.SetWindow(nil)
 	})
 
 	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
 		if k.Name == fyne.KeyEscape {
-			w.onClose()
+			settings.onClose()
 		}
 	})
 
@@ -165,9 +167,9 @@ func (w *windowSettings) Init() {
 }
 
 // TODO: candidate for refactor
-func (w *windowSettings) browseReplaysRoot(uri fyne.ListableURI, err error) {
+func (settings *windowSettings) browseReplaysRoot(uri fyne.ListableURI, err error) {
 	if err != nil {
-		dialog.ShowError(err, w)
+		dialog.ShowError(err, settings.GetWindow())
 		return
 	}
 
@@ -181,16 +183,16 @@ func (w *windowSettings) browseReplaysRoot(uri fyne.ListableURI, err error) {
 	}
 
 	// TODO: record the newly found accounts if confirmed
-	w.confirmValidReplaysRoot(root, func() {
-		w.unsaved = true
-		w.replaysRoot.SetText(root)
+	settings.confirmValidReplaysRoot(root, func() {
+		settings.unsaved = true
+		settings.replaysRoot.SetText(root)
 	})
 }
 
 // confirmValidReplaysRoot checks whether there are any accounts found at a
 // given root, and if not, asks the user if they would like to use this root
 // regardless. If they confirm, or accounts were found, callback is called.
-func (w *windowSettings) confirmValidReplaysRoot(root string, callback func()) {
+func (settings *windowSettings) confirmValidReplaysRoot(root string, callback func()) {
 	if accs, err := sc2utils.EnumerateAccounts(root); err == nil && len(accs) > 0 {
 		callback()
 		return
@@ -202,11 +204,12 @@ func (w *windowSettings) confirmValidReplaysRoot(root string, callback func()) {
 			if ok {
 				callback()
 			}
-		}, w)
+		}, settings.GetWindow())
 }
 
 // TODO: candidate for refactor
-func (w *windowSettings) findReplaysRoot() {
+func (settings *windowSettings) findReplaysRoot() {
+	w := settings.GetWindow()
 	scanRoot := "/"
 	if home, err := os.UserHomeDir(); err == nil {
 		scanRoot = home
@@ -229,9 +232,9 @@ func (w *windowSettings) findReplaysRoot() {
 	}
 
 	if len(roots) == 1 {
-		w.confirmValidReplaysRoot(roots[0], func() {
-			w.unsaved = true
-			w.replaysRoot.SetText(roots[0])
+		settings.confirmValidReplaysRoot(roots[0], func() {
+			settings.unsaved = true
+			settings.replaysRoot.SetText(roots[0])
 			dialog.ShowInformation("Replays Root Found!", "We found your replays directory!", w)
 		})
 		return
@@ -261,11 +264,11 @@ func (w *windowSettings) findReplaysRoot() {
 				return
 			}
 
-			w.confirmValidReplaysRoot(roots[selected], func() {
-				w.unsaved = true
-				w.replaysRoot.SetText(roots[selected])
+			settings.confirmValidReplaysRoot(roots[selected], func() {
+				settings.unsaved = true
+				settings.replaysRoot.SetText(roots[selected])
 			})
-		}, w)
+		}, settings.GetWindow())
 
 	size := fyne.MeasureText(longest, theme.TextSize(), fyne.TextStyle{})
 	size.Height *= len(roots)
@@ -274,8 +277,9 @@ func (w *windowSettings) findReplaysRoot() {
 	dlg2.Show()
 }
 
-func (w *windowSettings) onClose() {
-	if !w.unsaved {
+func (settings *windowSettings) onClose() {
+	w := settings.GetWindow()
+	if !settings.unsaved {
 		w.Close()
 		return
 	}
@@ -289,7 +293,8 @@ func (w *windowSettings) onClose() {
 		}, w)
 }
 
-func (w *windowSettings) openLogin() {
+func (settings *windowSettings) openLogin() {
+	w := settings.GetWindow()
 	user := widget.NewEntry()
 	pass := widget.NewPasswordEntry()
 
@@ -344,8 +349,8 @@ func (w *windowSettings) openLogin() {
 				return
 			}
 
-			w.apiKey.SetText(key)
-			w.apiKey.Validate()
+			settings.apiKey.SetText(key)
+			settings.apiKey.Validate()
 		}
 	}, w)
 
@@ -354,32 +359,33 @@ func (w *windowSettings) openLogin() {
 	dlg.Show()
 }
 
-func (w *windowSettings) save() {
-	if err := w.validate(); err != nil {
+func (settings *windowSettings) save() {
+	w := settings.GetWindow()
+	if err := settings.validate(); err != nil {
 		dialog.ShowError(err, w)
 		return
 	}
 
-	main := w.ui.windows[WindowMain].(*windowMain)
-	if main.gettingStarted == 3 && w.apiKey.Text != "" {
+	main := settings.UI.Windows[WindowMain].(*windowMain)
+	if main.gettingStarted == 3 && settings.apiKey.Text != "" {
 		main.openGettingStarted4()
 	}
-	if main.gettingStarted == 2 && w.replaysRoot.Text != "" {
+	if main.gettingStarted == 2 && settings.replaysRoot.Text != "" {
 		main.openGettingStarted3()
 	}
 
 	var changes bool
 
-	if oldKey := viper.Get("apikey"); oldKey != w.apiKey.Text {
-		viper.Set("apikey", w.apiKey.Text)
+	if oldKey := viper.Get("apikey"); oldKey != settings.apiKey.Text {
+		viper.Set("apikey", settings.apiKey.Text)
 		changes = true
 
 		// Use the new apiKey immediately
-		sc2api = sc2replaystats.New(w.apiKey.Text)
+		sc2api = sc2replaystats.New(settings.apiKey.Text)
 	}
 
-	if oldRoot := viper.Get("replaysRoot"); oldRoot != w.replaysRoot.Text {
-		viper.Set("replaysRoot", w.replaysRoot.Text)
+	if oldRoot := viper.Get("replaysRoot"); oldRoot != settings.replaysRoot.Text {
+		viper.Set("replaysRoot", settings.replaysRoot.Text)
 		changes = true
 	}
 
@@ -388,8 +394,8 @@ func (w *windowSettings) save() {
 		main.setupUploader()
 	}
 
-	viper.Set("update.automatic.enabled", w.autoDownload.Checked)
-	viper.Set("update.check.enabled", w.checkUpdates.Checked)
+	viper.Set("update.automatic.enabled", settings.autoDownload.Checked)
+	viper.Set("update.check.enabled", settings.checkUpdates.Checked)
 	viper.Set("version", VERSION)
 
 	if err := saveConfig(); err != nil {
@@ -397,19 +403,19 @@ func (w *windowSettings) save() {
 		return
 	}
 
-	dialog.ShowInformation("Saved!", "Your settings have been saved.", w.ui.windows[WindowMain].GetWindow())
-	w.unsaved = false
+	dialog.ShowInformation("Saved!", "Your settings have been saved.", settings.UI.Windows[WindowMain].GetWindow())
+	settings.unsaved = false
 	w.Close()
 }
 
-func (w *windowSettings) validate() error {
-	if err := w.apiKey.Validate(); w.apiKey.Text != "" && err != nil {
+func (settings *windowSettings) validate() error {
+	if err := settings.apiKey.Validate(); settings.apiKey.Text != "" && err != nil {
 		return fmt.Errorf("invalid value for \"API Key\": %v", err)
 	}
-	if err := w.replaysRoot.Validate(); err != nil {
+	if err := settings.replaysRoot.Validate(); err != nil {
 		return fmt.Errorf("invalid value for \"Replays Root\": %v", err)
 	}
-	if err := w.updatePeriod.Validate(); err != nil {
+	if err := settings.updatePeriod.Validate(); err != nil {
 		return fmt.Errorf("invalid value for \"Check Every\": %v", err)
 	}
 
