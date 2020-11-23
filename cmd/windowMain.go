@@ -262,7 +262,7 @@ func (main *windowMain) genAccountList() {
 	}
 
 	for acc, list := range toonList(accounts) {
-		header := newText(acc, 1.6, true)
+		header := newHeader(acc)
 		header.Move(fyne.NewPos(main.UI.Theme.Padding()/2, 1+main.UI.Theme.Padding()/2))
 		main.accList.Add(fyne.NewContainerWithoutLayout(header))
 		for _, toon := range list {

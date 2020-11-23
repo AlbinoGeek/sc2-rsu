@@ -12,6 +12,10 @@ func labelWithWrapping(text string) *widget.Label {
 	return label
 }
 
+func newHeader(text string) *canvas.Text {
+	return newText(text, 1.6, true)
+}
+
 func newText(text string, scale float32, bold bool) *canvas.Text {
 	return &canvas.Text{
 		Color:     GUI.Theme.TextColor(),

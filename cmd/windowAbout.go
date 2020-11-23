@@ -6,6 +6,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
+
 	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
 )
 
@@ -23,7 +24,7 @@ func (about *windowAbout) Init() {
 		fyne.NewContainerWithLayout(layout.NewCenterLayout(), widget.NewVBox(
 			widget.NewHBox(
 				layout.NewSpacer(),
-				widget.NewCard(PROGRAM, "", nil),
+				newText(PROGRAM, 1.6, true),
 				layout.NewSpacer(),
 			),
 			widget.NewHBox(
