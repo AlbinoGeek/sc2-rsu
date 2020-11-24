@@ -10,6 +10,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
@@ -22,8 +23,8 @@ import (
 	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
 )
 
-type windowSettings struct {
-	*gui.WindowBase
+type tabSettings struct {
+	gui.Window
 
 	// do we have unsaved changes in the form?
 	unsaved bool
@@ -37,9 +38,8 @@ type windowSettings struct {
 }
 
 // TODO: candidate for refactor
-func (settings *windowSettings) Init() {
-	w := settings.App.NewWindow("Settings")
-	settings.SetWindow(w)
+func (settings *tabSettings) Init() *fyne.Container {
+	w := settings.GetWindow()
 
 	settings.apiKey = widget.NewEntry()
 	settings.apiKey.SetText(viper.GetString("apiKey"))
@@ -103,22 +103,32 @@ func (settings *windowSettings) Init() {
 		fyne.NewContainerWithLayout(
 			layout.NewGridLayout(2),
 			widget.NewButtonWithIcon("Find it for me...", theme.SearchIcon(), func() { go settings.findReplaysRoot() }),
-			widget.NewButtonWithIcon("Browse...", theme.FolderOpenIcon(), func() {
-				dlg := dialog.NewFolderOpen(settings.browseReplaysRoot, w)
-				dlg.Resize(w.Canvas().Size().Subtract(fyne.NewSize(20, 20))) // ! can't be larger than the settings window
+			widget.NewButtonWithIcon("Select folder...", theme.FolderOpenIcon(), func() {
+				dlg := dialog.NewFolderOpen(settings.browseReplaysRoot, settings.GetWindow())
+				dlg.Resize(settings.GetWindow().Canvas().Size().Subtract(fyne.NewSize(20, 20))) // ! can't be larger than the settings window
 				dlg.Show()
 			}),
 		),
 	)
 
-	spacer := canvas.NewRectangle(color.Transparent)
-	spacer.SetMinSize(fyne.NewSize(5, 5))
-
 	btnSave := widget.NewButtonWithIcon("Save", theme.DocumentSaveIcon(), settings.save)
 	btnSave.Importance = widget.HighImportance
 
-	w.SetContent(widget.NewVBox(
-		widget.NewCard(fmt.Sprintf("%s Settings", PROGRAM), "", widget.NewVBox(
+	spacer := canvas.NewRectangle(color.Transparent)
+	spacer.SetMinSize(fyne.NewSize(5, 5))
+
+	w.SetCloseIntercept(settings.onClose)
+
+	return container.NewBorder(
+		nil,
+		container.NewVBox(
+			widget.NewSeparator(),
+			btnSave,
+		),
+		nil,
+		nil,
+		widget.NewVScrollContainer(widget.NewVBox(
+			newHeader(PROGRAM),
 			settings.checkUpdates,
 			settings.autoDownload,
 			fyne.NewContainerWithLayout(
@@ -126,51 +136,23 @@ func (settings *windowSettings) Init() {
 				widget.NewLabel("Check Every"),
 				settings.updatePeriod,
 			),
-		)),
-		spacer,
-		widget.NewCard("sc2ReplayStats Account", "", widget.NewVBox(
+			spacer,
+			newHeader("sc2ReplayStats"),
 			fyne.NewContainerWithLayout(
 				layout.NewFormLayout(),
 				widget.NewLabel("API Key"),
 				widget.NewHScrollContainer(settings.apiKey),
 			),
 			widget.NewButtonWithIcon("Login and Generate it for me...", theme.ComputerIcon(), settings.openLogin),
+			spacer,
+			newHeader("StarCraft II"),
+			replaysRootSection,
 		)),
-		spacer,
-		widget.NewCard("StarCraft II", "", replaysRootSection),
-		spacer,
-		layout.NewSpacer(),
-		widget.NewSeparator(),
-		fyne.NewContainerWithLayout(
-			layout.NewGridLayout(2),
-			widget.NewButtonWithIcon("Cancel", theme.CancelIcon(), func() {
-				settings.onClose()
-			}),
-			btnSave,
-		),
-	))
-
-	w.SetCloseIntercept(settings.onClose)
-	w.SetOnClosed(func() {
-		settings.SetWindow(nil)
-	})
-
-	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
-		if k.Name == fyne.KeyEscape {
-			settings.onClose()
-		}
-	})
-
-	w.SetPadded(false)
-	w.SetFixedSize(true)
-
-	w.Resize(fyne.NewSize(600, 600))
-	w.CenterOnScreen()
-	w.Show()
+	)
 }
 
 // TODO: candidate for refactor
-func (settings *windowSettings) browseReplaysRoot(uri fyne.ListableURI, err error) {
+func (settings *tabSettings) browseReplaysRoot(uri fyne.ListableURI, err error) {
 	if err != nil {
 		dialog.ShowError(err, settings.GetWindow())
 		return
@@ -192,7 +174,7 @@ func (settings *windowSettings) browseReplaysRoot(uri fyne.ListableURI, err erro
 // confirmValidReplaysRoot checks whether there are any accounts found at a
 // given root, and if not, asks the user if they would like to use this root
 // regardless. If they confirm, or accounts were found, callback is called.
-func (settings *windowSettings) confirmValidReplaysRoot(root string, callback func()) {
+func (settings *tabSettings) confirmValidReplaysRoot(root string, callback func()) {
 	if accs, err := sc2utils.EnumerateAccounts(root); err == nil && len(accs) > 0 {
 		callback()
 		return
@@ -208,7 +190,7 @@ func (settings *windowSettings) confirmValidReplaysRoot(root string, callback fu
 }
 
 // TODO: candidate for refactor
-func (settings *windowSettings) findReplaysRoot() {
+func (settings *tabSettings) findReplaysRoot() {
 	w := settings.GetWindow()
 	scanRoot := "/"
 
@@ -282,24 +264,20 @@ func (settings *windowSettings) findReplaysRoot() {
 	dlg2.Show()
 }
 
-func (settings *windowSettings) onClose() {
+func (settings *tabSettings) onClose() {
 	w := settings.GetWindow()
 
 	if !settings.unsaved {
-		w.Close()
 		return
 	}
 
 	dialog.ShowConfirm("Unsaved Changes",
 		"You have not saved your settings.\nAre you sure you want to discard amy changes?",
 		func(ok bool) {
-			if ok {
-				w.Close()
-			}
 		}, w)
 }
 
-func (settings *windowSettings) openLogin() {
+func (settings *tabSettings) openLogin() {
 	w := settings.GetWindow()
 	user := widget.NewEntry()
 	pass := widget.NewPasswordEntry()
@@ -372,7 +350,7 @@ func (settings *windowSettings) openLogin() {
 	dlg.Show()
 }
 
-func (settings *windowSettings) save() {
+func (settings *tabSettings) save() {
 	w := settings.GetWindow()
 
 	if err := settings.validate(); err != nil {
@@ -380,7 +358,7 @@ func (settings *windowSettings) save() {
 		return
 	}
 
-	main := settings.UI.Windows[WindowMain].(*windowMain)
+	main := settings.Window.(*windowMain)
 	if main.gettingStarted == 3 && settings.apiKey.Text != "" {
 		main.openGettingStarted4()
 	}
@@ -421,13 +399,11 @@ func (settings *windowSettings) save() {
 		return
 	}
 
-	dialog.ShowInformation("Saved!", "Your settings have been saved.", settings.UI.Windows[WindowMain].GetWindow())
+	dialog.ShowInformation("Saved!", "Your settings have been saved.", w)
 	settings.unsaved = false
-
-	w.Close()
 }
 
-func (settings *windowSettings) validate() error {
+func (settings *tabSettings) validate() error {
 	if err := settings.apiKey.Validate(); settings.apiKey.Text != "" && err != nil {
 		return fmt.Errorf("invalid value for \"API Key\": %v", err)
 	}

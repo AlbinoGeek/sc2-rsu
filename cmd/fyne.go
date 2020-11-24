@@ -14,7 +14,7 @@ func labelWithWrapping(text string) *widget.Label {
 }
 
 func newHeader(text string) *canvas.Text {
-	return newText(text, 1.6, true)
+	return newText(text, 1.7, true)
 }
 
 func newText(text string, scale float32, bold bool) *canvas.Text {

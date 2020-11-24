@@ -42,9 +42,7 @@ var (
 			if !textMode {
 				GUI = gui.New()
 				GUI.Init(map[string]gui.Window{
-					WindowMain:     &windowMain{WindowBase: &gui.WindowBase{App: GUI.App, UI: GUI}},
-					WindowAbout:    &windowAbout{WindowBase: &gui.WindowBase{App: GUI.App, UI: GUI}},
-					WindowSettings: &windowSettings{WindowBase: &gui.WindowBase{App: GUI.App, UI: GUI}},
+					WindowMain: &windowMain{WindowBase: &gui.WindowBase{App: GUI.App, UI: GUI}},
 				}, WindowMain)
 				GUI.Run()
 				return nil

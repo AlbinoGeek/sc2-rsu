@@ -5,7 +5,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -37,7 +36,10 @@ type windowMain struct {
 	watcher        *fsnotify.Watcher
 
 	accList    *fyne.Container
+	tabs       *container.AppTabs
 	uploadList *widget.Table
+
+	settings *tabSettings
 }
 
 type uploadRecord struct {
@@ -56,34 +58,11 @@ func (main *windowMain) Init() {
 	main.uploadEnabled = make(map[string]bool)
 	main.uploadStatus = make([]*uploadRecord, 0)
 
-	w.SetMainMenu(fyne.NewMainMenu(
-		fyne.NewMenu("File",
-			fyne.NewMenuItem("Check for Updates", func() { go main.checkUpdate() }),
-			fyne.NewMenuItem("Settings", func() { main.UI.OpenWindow(WindowSettings) }),
-		),
-		fyne.NewMenu("Help",
-			fyne.NewMenuItem("Report Bug", main.OpenGitHub("issues/new?assignees=AlbinoGeek&labels=bug&template=bug-report.md&title=%5BBUG%5D")),
-			fyne.NewMenuItem("Request Feature", main.OpenGitHub("issues/new?assignees=AlbinoGeek&labels=enhancement&template=feature-request.md&title=%5BFEATURE+REQUEST%5D")),
-			fyne.NewMenuItemSeparator(),
-			fyne.NewMenuItem("About", func() { main.UI.OpenWindow(WindowAbout) }),
-		),
-	))
-
 	// closing the main window should quit the application
 	w.SetCloseIntercept(func() {
-		// Close "About" if it's open
-		if win := main.UI.Windows[WindowAbout].GetWindow(); win != nil {
-			win.Close()
-		}
-
-		win := main.UI.Windows[WindowSettings]
-		if win.GetWindow() != nil {
-			settings := win.(*windowSettings)
-			if settings.unsaved {
-				settings.onClose()
-				return
-			}
-			settings.GetWindow().Close()
+		if main.settings.unsaved {
+			main.settings.onClose()
+			return
 		}
 
 		if main.watcher != nil {
@@ -100,7 +79,7 @@ func (main *windowMain) Init() {
 
 	main.Refresh()
 
-	w.Resize(fyne.NewSize(420, 360))
+	w.Resize(fyne.NewSize(700, 600))
 	w.CenterOnScreen()
 	w.Show()
 
@@ -124,18 +103,61 @@ func (main *windowMain) Refresh() {
 	tblStatus := newText("Status", 1, true)
 	tblStatus.Move(fyne.NewPos(334, 3))
 
-	main.GetWindow().SetContent(container.NewAppTabs(
-		container.NewTabItem("Accounts",
+	sourceURL, _ := url.Parse(ghLink(""))
+
+	if main.settings == nil {
+		main.settings = &tabSettings{Window: main}
+	}
+
+	main.tabs = container.NewAppTabs(
+		container.NewTabItemWithIcon("", theme.HomeIcon(),
+			container.NewVScroll(
+				layout.NewSpacer(),
+			),
+		),
+
+		container.NewTabItemWithIcon("", accIcon,
 			container.NewVScroll(main.accList),
 		),
-		container.NewTabItem("Uploads",
+
+		container.NewTabItemWithIcon("", uploadIcon,
 			container.NewBorder(
 				fyne.NewContainerWithoutLayout(
 					tblName, tblID, tblStatus,
 				), nil, nil, nil, main.uploadList,
 			),
 		),
-	))
+
+		container.NewTabItemWithIcon("", theme.SettingsIcon(),
+			container.NewVScroll(main.settings.Init()),
+		),
+
+		container.NewTabItemWithIcon("", theme.InfoIcon(),
+			container.NewCenter(widget.NewVBox(
+				widget.NewHBox(
+					layout.NewSpacer(),
+					widget.NewVBox(
+						newHeader(PROGRAM),
+						widget.NewHyperlink("Browse Source", sourceURL),
+					),
+					layout.NewSpacer(),
+					widget.NewForm(
+						widget.NewFormItem("Author", widget.NewLabel(ghOwner)),
+						widget.NewFormItem("Version", widget.NewLabel(VERSION)),
+					),
+					layout.NewSpacer(),
+				),
+				widget.NewVBox(
+					widget.NewButtonWithIcon("Check for Updates", theme.ViewRefreshIcon(), func() { go main.checkUpdate() }),
+					widget.NewButtonWithIcon("Request Feedback", feedbackIcon, main.OpenGitHub("issues/new?assignees=AlbinoGeek&labels=enhancement&template=feature-request.md&title=%5BFEATURE+REQUEST%5D")),
+					widget.NewButtonWithIcon("Report A Bug", reportBugIcon, main.OpenGitHub("issues/new?assignees=AlbinoGeek&labels=bug&template=bug-report.md&title=%5BBUG%5D")),
+				),
+			)),
+		),
+	)
+
+	main.tabs.SetTabLocation(widget.TabLocationTrailing)
+	main.GetWindow().SetContent(main.tabs)
 }
 
 func (main *windowMain) WizardModal(skipText, nextText string, skipFn, nextFn func(), contents ...fyne.CanvasObject) {
@@ -212,8 +234,7 @@ func (main *windowMain) checkUpdate() {
 	dlg.Hide()
 
 	if rel == nil {
-		dialog.ShowInformation("Check for Updates",
-			fmt.Sprintf("You are running version %s.\nNo updates are available at this time.", VERSION), w)
+		dialog.ShowInformation("Check for Updates", "No updates are available at this time.", w)
 		return
 	}
 
@@ -247,61 +268,6 @@ func (main *windowMain) doUpdate(rel *github.RepositoryRelease) func(bool) {
 				dialog.ShowInformation("Update Complete!", "Please close the program and start the new binary.", w)
 			}
 		}()
-	}
-}
-
-func (main *windowMain) genAccountList() {
-	if main.accList != nil {
-		objects := main.accList.Objects
-		for _, o := range objects {
-			main.accList.Remove(o)
-		}
-	} else {
-		main.accList = container.NewVBox()
-	}
-
-	players, err := sc2api.GetAccountPlayers()
-	if err != nil {
-		golog.Errorf("GetAccountPlayers: %v", err)
-		return
-	}
-
-	accounts, err := sc2utils.EnumerateAccounts(viper.GetString("replaysRoot"))
-	if err != nil {
-		accounts = []string{"No Accounts Found/"}
-	}
-
-	for acc, list := range toonList(accounts) {
-		header := newHeader(acc)
-		header.Move(fyne.NewPos(main.UI.Theme.Padding()/2, 1+main.UI.Theme.Padding()/2))
-		main.accList.Add(fyne.NewContainerWithoutLayout(header))
-
-		for _, toon := range list {
-			parts := strings.Split(toon, "-")
-
-			aLabel := newText("Unknown Character", 1, false)
-
-			for _, p := range players {
-				if parts[len(parts)-1] == strconv.Itoa(int(p.Player.CharacterID)) {
-					aLabel.Text = p.Player.Name
-				}
-			}
-
-			toggleBtn := widget.NewButtonWithIcon("", theme.MediaPauseIcon(), nil)
-			toggleBtn.Importance = widget.HighImportance
-
-			id := fmt.Sprintf("%s/%s", acc, toon)
-			toggleBtn.OnTapped = main.toggleUploading(toggleBtn, id)
-			main.uploadEnabled[id] = true
-
-			main.accList.Add(
-				container.NewBorder(nil, nil,
-					toggleBtn,
-					newText(sc2utils.RegionsMap[parts[0]], .9, false),
-					aLabel,
-				),
-			)
-		}
 	}
 }
 
@@ -585,21 +551,4 @@ func (main *windowMain) watchReplayStatus(entry *uploadRecord) error {
 
 		golog.Debugf("sc2replaystats process..: [%v] %s", entry.QueueID, rid)
 	}
-}
-
-func toonList(accounts []string) (toons map[string][]string) {
-	toons = make(map[string][]string)
-
-	for _, acc := range accounts {
-		parts := strings.Split(acc[1:], string(filepath.Separator))
-		toonList, ok := toons[parts[0]]
-
-		if !ok {
-			toons[parts[0]] = []string{parts[1]}
-		} else {
-			toons[parts[0]] = append(toonList, parts[1])
-		}
-	}
-
-	return toons
 }
