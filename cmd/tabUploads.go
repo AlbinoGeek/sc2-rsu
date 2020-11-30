@@ -7,6 +7,7 @@ import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/container"
+	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
 	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
@@ -64,15 +65,16 @@ func (t *tabUploads) Init() {
 	t.table.SetColumnWidth(0, 230)
 	t.table.SetColumnWidth(1, 86)
 	t.table.SetColumnWidth(2, 90)
+	pad := theme.Padding()
 
 	tblName := fynewidget.NewText("Map Name", 1, true)
-	tblName.Move(fyne.NewPos(main.UI.Theme.Padding()*2, 3))
+	tblName.Move(fyne.NewPos(pad*2, 3))
 
 	tblID := fynewidget.NewText("ID", 1, true)
-	tblID.Move(fyne.NewPos(228+main.UI.Theme.Padding()*5, 3))
+	tblID.Move(fyne.NewPos(228+pad*5, 3))
 
 	tblStatus := fynewidget.NewText("Status", 1, true)
-	tblStatus.Move(fyne.NewPos(312+main.UI.Theme.Padding()*7, 3))
+	tblStatus.Move(fyne.NewPos(312+pad*7, 3))
 
 	t.SetContent(container.NewBorder(
 		fyne.NewContainerWithoutLayout(

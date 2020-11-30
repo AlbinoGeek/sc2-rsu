@@ -62,12 +62,13 @@ func (t *tabAccounts) Refresh() {
 		accounts = []string{"No Accounts Found/"}
 	}
 
+	pad := theme.Padding()
 	spacer := canvas.NewRectangle(color.Transparent)
-	spacer.SetMinSize(fyne.NewSize(main.UI.Theme.Padding(), main.UI.Theme.Padding()))
+	spacer.SetMinSize(fyne.NewSize(pad, pad))
 
 	for acc, list := range toonList(accounts) {
 		header := fynewidget.NewHeader(acc)
-		header.Move(fyne.NewPos(main.UI.Theme.Padding()/2, 0))
+		header.Move(fyne.NewPos(pad/2, 0))
 		t.container.Add(fyne.NewContainerWithoutLayout(header))
 		for _, toon := range list {
 			parts := strings.Split(toon, "-")

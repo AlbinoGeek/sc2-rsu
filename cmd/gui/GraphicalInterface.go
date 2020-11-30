@@ -10,8 +10,8 @@ func New() *GraphicalInterface {
 	ui := new(GraphicalInterface)
 	ui.App = app.New()
 
-	ui.Theme = DarkerTheme()
-	ui.App.Settings().SetTheme(ui.Theme)
+	// ui.Theme = DarkerTheme()
+	ui.App.Settings().SetTheme(DarkerTheme())
 
 	return ui
 }
@@ -19,7 +19,6 @@ func New() *GraphicalInterface {
 // GraphicalInterface represents a wrapped fyne.App
 type GraphicalInterface struct {
 	App     fyne.App
-	Theme   fyne.Theme
 	Primary Window
 	Windows map[string]Window
 }

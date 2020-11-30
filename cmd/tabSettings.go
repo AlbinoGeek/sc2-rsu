@@ -96,8 +96,9 @@ func (settings *tabSettings) Init() *fyne.Container {
 	btnSave := widget.NewButtonWithIcon("Save", theme.DocumentSaveIcon(), settings.save)
 	btnSave.Importance = widget.HighImportance
 
+	pad := theme.Padding()
 	spacer := canvas.NewRectangle(color.Transparent)
-	spacer.SetMinSize(fyne.NewSize(GUI.Theme.Padding(), GUI.Theme.Padding()))
+	spacer.SetMinSize(fyne.NewSize(pad, pad))
 
 	// w.SetCloseIntercept(settings.onClose)
 
