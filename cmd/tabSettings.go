@@ -19,6 +19,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
+	"github.com/AlbinoGeek/sc2-rsu/cmd/gui/fynewidget"
 	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
 	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
 )
@@ -39,8 +40,6 @@ type tabSettings struct {
 
 // TODO: candidate for refactor
 func (settings *tabSettings) Init() *fyne.Container {
-	w := settings.GetWindow()
-
 	settings.apiKey = widget.NewEntry()
 	settings.apiKey.SetText(viper.GetString("apiKey"))
 	settings.apiKey.Validator = func(key string) (err error) {
@@ -94,30 +93,13 @@ func (settings *tabSettings) Init() *fyne.Container {
 		settings.unsaved = true
 	}
 
-	replaysRootSection := widget.NewVBox(
-		fyne.NewContainerWithLayout(
-			layout.NewFormLayout(),
-			widget.NewLabel("Replays Root"),
-			widget.NewHScrollContainer(settings.replaysRoot),
-		),
-		fyne.NewContainerWithLayout(
-			layout.NewGridLayout(2),
-			widget.NewButtonWithIcon("Find it for me...", theme.SearchIcon(), func() { go settings.findReplaysRoot() }),
-			widget.NewButtonWithIcon("Select folder...", theme.FolderOpenIcon(), func() {
-				dlg := dialog.NewFolderOpen(settings.browseReplaysRoot, settings.GetWindow())
-				dlg.Resize(settings.GetWindow().Canvas().Size().Subtract(fyne.NewSize(20, 20))) // ! can't be larger than the settings window
-				dlg.Show()
-			}),
-		),
-	)
-
 	btnSave := widget.NewButtonWithIcon("Save", theme.DocumentSaveIcon(), settings.save)
 	btnSave.Importance = widget.HighImportance
 
 	spacer := canvas.NewRectangle(color.Transparent)
-	spacer.SetMinSize(fyne.NewSize(5, 5))
+	spacer.SetMinSize(fyne.NewSize(GUI.Theme.Padding(), GUI.Theme.Padding()))
 
-	w.SetCloseIntercept(settings.onClose)
+	// w.SetCloseIntercept(settings.onClose)
 
 	return container.NewBorder(
 		nil,
@@ -128,16 +110,23 @@ func (settings *tabSettings) Init() *fyne.Container {
 		nil,
 		nil,
 		widget.NewVScrollContainer(widget.NewVBox(
-			newHeader(PROGRAM),
-			settings.checkUpdates,
-			settings.autoDownload,
+			fynewidget.NewHeader("StarCraft II"),
 			fyne.NewContainerWithLayout(
 				layout.NewFormLayout(),
-				widget.NewLabel("Check Every"),
-				settings.updatePeriod,
+				widget.NewLabel("Replays Root"),
+				widget.NewHScrollContainer(settings.replaysRoot),
+			),
+			fyne.NewContainerWithLayout(
+				layout.NewGridLayout(2),
+				widget.NewButtonWithIcon("Find it for me...", theme.SearchIcon(), func() { go settings.findReplaysRoot() }),
+				widget.NewButtonWithIcon("Select folder...", theme.FolderOpenIcon(), func() {
+					dlg := dialog.NewFolderOpen(settings.browseReplaysRoot, settings.GetWindow())
+					dlg.Resize(settings.GetWindow().Canvas().Size().Subtract(fyne.NewSize(20, 20))) // ! can't be larger than the settings window
+					dlg.Show()
+				}),
 			),
 			spacer,
-			newHeader("sc2ReplayStats"),
+			fynewidget.NewHeader("sc2ReplayStats"),
 			fyne.NewContainerWithLayout(
 				layout.NewFormLayout(),
 				widget.NewLabel("API Key"),
@@ -145,8 +134,14 @@ func (settings *tabSettings) Init() *fyne.Container {
 			),
 			widget.NewButtonWithIcon("Login and Generate it for me...", theme.ComputerIcon(), settings.openLogin),
 			spacer,
-			newHeader("StarCraft II"),
-			replaysRootSection,
+			fynewidget.NewHeader("Updates"),
+			settings.checkUpdates,
+			settings.autoDownload,
+			fyne.NewContainerWithLayout(
+				layout.NewFormLayout(),
+				widget.NewLabel("Check Every"),
+				settings.updatePeriod,
+			),
 		)),
 	)
 }
@@ -360,11 +355,13 @@ func (settings *tabSettings) save() {
 
 	main := settings.Window.(*windowMain)
 	if main.gettingStarted == 3 && settings.apiKey.Text != "" {
-		main.openGettingStarted4()
+		main.nav.Select(3) // ! ID BASED IS ERROR PRONE
+		// main.openGettingStarted4()
 	}
 
 	if main.gettingStarted == 2 && settings.replaysRoot.Text != "" {
-		main.openGettingStarted3()
+		main.nav.Select(3) // ! ID BASED IS ERROR PRONE
+		// main.openGettingStart/ed3()
 	}
 
 	var changes bool
@@ -385,7 +382,7 @@ func (settings *tabSettings) save() {
 	}
 
 	if changes {
-		main.genAccountList()
+		main.accounts.Refresh()
 		main.setupUploader()
 	}
 

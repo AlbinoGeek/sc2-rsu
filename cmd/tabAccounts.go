@@ -2,11 +2,13 @@ package cmd
 
 import (
 	"fmt"
+	"image/color"
 	"path/filepath"
 	"strconv"
 	"strings"
 
 	"fyne.io/fyne"
+	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/container"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -14,18 +16,40 @@ import (
 	"github.com/kataras/golog"
 	"github.com/spf13/viper"
 
+	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
+	"github.com/AlbinoGeek/sc2-rsu/cmd/gui/fynewidget"
 	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
 )
 
-func (main *windowMain) genAccountList() {
-	if main.accList != nil {
-		objects := main.accList.Objects
-		for _, o := range objects {
-			main.accList.Remove(o)
-		}
-	} else {
-		main.accList = container.NewVBox()
+type tabAccounts struct {
+	*gui.TabBase
+
+	container *fyne.Container
+}
+
+func makeTabAccounts(w gui.Window) gui.Tab {
+	tab := &tabAccounts{
+		TabBase: gui.NewTabWithIcon("", accIcon, w),
 	}
+
+	tab.Init()
+	tab.Refresh()
+	return tab
+}
+
+func (t *tabAccounts) Init() {
+	t.container = container.NewVBox()
+	t.SetContent(container.NewVScroll(t.container))
+}
+
+func (t *tabAccounts) Refresh() {
+	// Clear container if it has objects
+	objects := t.container.Objects
+	for _, o := range objects {
+		t.container.Remove(o)
+	}
+
+	main := t.GetWindow().(*windowMain)
 
 	players, err := sc2api.GetAccountPlayers()
 	if err != nil {
@@ -38,14 +62,17 @@ func (main *windowMain) genAccountList() {
 		accounts = []string{"No Accounts Found/"}
 	}
 
+	spacer := canvas.NewRectangle(color.Transparent)
+	spacer.SetMinSize(fyne.NewSize(main.UI.Theme.Padding(), main.UI.Theme.Padding()))
+
 	for acc, list := range toonList(accounts) {
-		header := newHeader(acc)
-		header.Move(fyne.NewPos(main.UI.Theme.Padding()/2, 1+main.UI.Theme.Padding()/2))
-		main.accList.Add(fyne.NewContainerWithoutLayout(header))
+		header := fynewidget.NewHeader(acc)
+		header.Move(fyne.NewPos(main.UI.Theme.Padding()/2, 0))
+		t.container.Add(fyne.NewContainerWithoutLayout(header))
 		for _, toon := range list {
 			parts := strings.Split(toon, "-")
 
-			aLabel := newText("Unknown Character", 1, false)
+			aLabel := fynewidget.NewText("Unknown Character", 1, false)
 			for _, p := range players {
 				if parts[len(parts)-1] == strconv.Itoa(int(p.Player.CharacterID)) {
 					aLabel.Text = p.Player.Name
@@ -59,10 +86,10 @@ func (main *windowMain) genAccountList() {
 			toggleBtn.OnTapped = main.toggleUploading(toggleBtn, id)
 			main.uploadEnabled[id] = true
 
-			main.accList.Add(
+			t.container.Add(
 				container.NewBorder(nil, nil,
 					toggleBtn,
-					newText(sc2utils.RegionsMap[parts[0]], .9, false),
+					container.NewHBox(fynewidget.NewText(sc2utils.RegionsMap[parts[0]], .9, false), spacer),
 					aLabel,
 				),
 			)
