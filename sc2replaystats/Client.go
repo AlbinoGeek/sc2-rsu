@@ -66,6 +66,9 @@ func (client *Client) doRequest(method, slug, contentType string, data io.Reader
 
 func (client *Client) requestBytes(method, slug, contentType string, data io.Reader) (result []byte, err error) {
 	resp, err := client.doRequest(method, slug, contentType, data)
+	if err != nil {
+		return nil, err
+	}
 	defer resp.Body.Close()
 
 	result, err = ioutil.ReadAll(resp.Body)
