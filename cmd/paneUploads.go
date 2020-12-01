@@ -23,7 +23,7 @@ type paneUploads struct {
 
 func makePaneUploads(w gui.Window) fynewidget.Pane {
 	p := &paneUploads{
-		Pane: fynewidget.NewPaneWithIcon("", uploadIcon, w),
+		Pane: fynewidget.NewPaneWithIcon("Uploads", uploadIcon, w),
 	}
 
 	p.Init()

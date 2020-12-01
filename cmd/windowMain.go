@@ -84,22 +84,11 @@ func (main *windowMain) Init() {
 	main.nav = fynewidget.NewNavigationDrawer(
 		PROGRAM,
 		"",
-		// NewNavigationLabelWithIcon("Overview", theme.HomeIcon(),
-		// 	widget.NewLabel("Overview Contents"),
-		// ),
-		fynewidget.NewNavigationLabelWithIcon("Accounts", accIcon,
-			main.accounts.GetContent(),
-		),
-		fynewidget.NewNavigationLabelWithIcon("Uploads", uploadIcon,
-			main.uploads.GetContent(),
-		),
+		main.accounts,
+		main.uploads,
 		fynewidget.NewNavigationSeparator(),
-		fynewidget.NewNavigationLabelWithIcon("Settings", theme.SettingsIcon(),
-			main.settings.GetContent(),
-		),
-		fynewidget.NewNavigationLabelWithIcon("Help & Feedback", feedbackIcon,
-			makePaneAbout(main).GetContent(),
-		),
+		main.settings,
+		makePaneAbout(main),
 	)
 	main.nav.SetImage(theme.InfoIcon())
 
