@@ -9,47 +9,38 @@ import (
 	"fyne.io/fyne/widget"
 
 	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
+	"github.com/AlbinoGeek/sc2-rsu/cmd/gui/fynewidget"
 	"github.com/google/go-github/v32/github"
 )
 
-type tabAbout struct {
-	*gui.TabBase
+type paneAbout struct {
+	fynewidget.Pane
 }
 
-func makeTabAbout(w gui.Window) gui.Tab {
-	tab := &tabAbout{
-		TabBase: gui.NewTabWithIcon("", theme.InfoIcon(), w),
+func makePaneAbout(w gui.Window) fynewidget.Pane {
+	p := &paneAbout{
+		fynewidget.NewPaneWithIcon("Help & Feedback", feedbackIcon, w),
 	}
 
-	tab.Init()
-	tab.Refresh()
-	return tab
-}
-
-func (t *tabAbout) Init() {
-	main := t.GetWindow().(*windowMain)
+	main := w.(*windowMain)
 	sourceURL, _ := url.Parse(ghLink(""))
 
-	t.SetContent(widget.NewVBox(
-		// widget.NewHBox(
-		// layout.NewSpacer(),
-		// newHeader(PROGRAM),
-		// layout.NewSpacer(),
-		// layout.NewSpacer(),
-		// ),
+	p.SetContent(widget.NewVBox(
 		widget.NewForm(
 			widget.NewFormItem("Author", widget.NewLabel(ghOwner)),
 			widget.NewFormItem("Version", widget.NewLabel(VERSION)),
 		),
-		widget.NewButtonWithIcon("Check for Updates", theme.ViewRefreshIcon(), func() { go t.checkUpdate() }),
+		widget.NewButtonWithIcon("Check for Updates", theme.ViewRefreshIcon(), func() { go p.checkUpdate() }),
 		widget.NewButtonWithIcon("Request Feedback", feedbackIcon, main.OpenGitHub("issues/new?assignees=AlbinoGeek&labels=enhancement&template=feature-request.md&title=%5BFEATURE+REQUEST%5D")),
 		widget.NewButtonWithIcon("Report A Bug", reportBugIcon, main.OpenGitHub("issues/new?assignees=AlbinoGeek&labels=bug&template=bug-report.md&title=%5BBUG%5D")),
 		widget.NewHyperlink("Browse Source", sourceURL),
 	))
+
+	return p
 }
 
-func (t *tabAbout) checkUpdate() {
-	w := t.GetWindow().GetWindow()
+func (p *paneAbout) checkUpdate() {
+	w := p.GetWindow().GetWindow()
 
 	dlg := dialog.NewProgressInfinite("Check for Updates", "Checking for new releases...", w)
 	dlg.Show()
@@ -63,16 +54,16 @@ func (t *tabAbout) checkUpdate() {
 
 	dialog.ShowConfirm("Update Available!",
 		fmt.Sprintf("You are running version %s.\nAn update is available: %s\nWould you like us to download it now?", VERSION, rel.GetTagName()),
-		t.doUpdate(rel), w)
+		p.doUpdate(rel), w)
 }
 
-func (t *tabAbout) doUpdate(rel *github.RepositoryRelease) func(bool) {
+func (p *paneAbout) doUpdate(rel *github.RepositoryRelease) func(bool) {
 	return func(ok bool) {
 		if !ok {
 			return
 		}
 
-		w := t.GetWindow().GetWindow()
+		w := p.GetWindow().GetWindow()
 
 		// otherwise we might block the fyne event queue...
 		go func() {

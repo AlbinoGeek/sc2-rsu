@@ -15,23 +15,22 @@ import (
 	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
 )
 
-type tabUploads struct {
-	*gui.TabBase
+type paneUploads struct {
+	fynewidget.Pane
 
 	table *widget.Table
 }
 
-func makeTabUploads(w gui.Window) gui.Tab {
-	tab := &tabUploads{
-		TabBase: gui.NewTabWithIcon("", uploadIcon, w),
+func makePaneUploads(w gui.Window) fynewidget.Pane {
+	p := &paneUploads{
+		Pane: fynewidget.NewPaneWithIcon("", uploadIcon, w),
 	}
 
-	tab.Init()
-	tab.Refresh()
-	return tab
+	p.Init()
+	return p
 }
 
-func (t *tabUploads) Init() {
+func (t *paneUploads) Init() {
 	main := t.GetWindow().(*windowMain)
 
 	t.table = widget.NewTable(
@@ -83,6 +82,6 @@ func (t *tabUploads) Init() {
 	))
 }
 
-func (t *tabUploads) Refresh() {
+func (t *paneUploads) Refresh() {
 	t.table.Refresh()
 }

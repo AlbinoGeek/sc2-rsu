@@ -21,33 +21,29 @@ import (
 	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
 )
 
-type tabAccounts struct {
-	*gui.TabBase
+type paneAccounts struct {
+	fynewidget.Pane
 
 	container *fyne.Container
 }
 
-func makeTabAccounts(w gui.Window) gui.Tab {
-	tab := &tabAccounts{
-		TabBase: gui.NewTabWithIcon("", accIcon, w),
+func makePaneAccounts(w gui.Window) fynewidget.Pane {
+	p := &paneAccounts{
+		Pane: fynewidget.NewPaneWithIcon("Accounts", accIcon, w),
 	}
 
-	tab.Init()
-	tab.Refresh()
-	return tab
+	p.Init()
+	return p
 }
 
-func (t *tabAccounts) Init() {
+func (t *paneAccounts) Init() {
 	t.container = container.NewVBox()
-	t.SetContent(container.NewVScroll(t.container))
-}
 
-func (t *tabAccounts) Refresh() {
-	// Clear container if it has objects
-	objects := t.container.Objects
-	for _, o := range objects {
-		t.container.Remove(o)
-	}
+	// // Clear container if it has objects
+	// objects := t.container.Objects
+	// for _, o := range objects {
+	// 	t.container.Remove(o)
+	// }
 
 	main := t.GetWindow().(*windowMain)
 
@@ -96,6 +92,12 @@ func (t *tabAccounts) Refresh() {
 			)
 		}
 	}
+
+	t.SetContent(container.NewVScroll(t.container))
+}
+
+func (t *paneAccounts) Refresh() {
+	t.container.Refresh()
 }
 
 func toonList(accounts []string) (toons map[string][]string) {

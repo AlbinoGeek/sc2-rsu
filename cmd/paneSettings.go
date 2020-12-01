@@ -24,8 +24,8 @@ import (
 	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
 )
 
-type tabSettings struct {
-	gui.Window
+type paneSettings struct {
+	fynewidget.Pane
 
 	// do we have unsaved changes in the form?
 	unsaved bool
@@ -38,8 +38,17 @@ type tabSettings struct {
 	updatePeriod *widget.Entry
 }
 
+func makePaneSettings(w gui.Window) fynewidget.Pane {
+	p := &paneSettings{
+		Pane: fynewidget.NewPaneWithIcon("Settings", theme.SettingsIcon(), w),
+	}
+
+	p.Init()
+	return p
+}
+
 // TODO: candidate for refactor
-func (settings *tabSettings) Init() *fyne.Container {
+func (settings *paneSettings) Init() {
 	settings.apiKey = widget.NewEntry()
 	settings.apiKey.SetText(viper.GetString("apiKey"))
 	settings.apiKey.Validator = func(key string) (err error) {
@@ -102,7 +111,8 @@ func (settings *tabSettings) Init() *fyne.Container {
 
 	// w.SetCloseIntercept(settings.onClose)
 
-	return container.NewBorder(
+	w := settings.GetWindow().GetWindow()
+	settings.SetContent(container.NewBorder(
 		nil,
 		container.NewVBox(
 			widget.NewSeparator(),
@@ -121,8 +131,8 @@ func (settings *tabSettings) Init() *fyne.Container {
 				layout.NewGridLayout(2),
 				widget.NewButtonWithIcon("Find it for me...", theme.SearchIcon(), func() { go settings.findReplaysRoot() }),
 				widget.NewButtonWithIcon("Select folder...", theme.FolderOpenIcon(), func() {
-					dlg := dialog.NewFolderOpen(settings.browseReplaysRoot, settings.GetWindow())
-					dlg.Resize(settings.GetWindow().Canvas().Size().Subtract(fyne.NewSize(20, 20))) // ! can't be larger than the settings window
+					dlg := dialog.NewFolderOpen(settings.browseReplaysRoot, w)
+					dlg.Resize(w.Canvas().Size().Subtract(fyne.NewSize(20, 20))) // ! can't be larger than the settings window
 					dlg.Show()
 				}),
 			),
@@ -144,13 +154,13 @@ func (settings *tabSettings) Init() *fyne.Container {
 				settings.updatePeriod,
 			),
 		)),
-	)
+	))
 }
 
 // TODO: candidate for refactor
-func (settings *tabSettings) browseReplaysRoot(uri fyne.ListableURI, err error) {
+func (settings *paneSettings) browseReplaysRoot(uri fyne.ListableURI, err error) {
 	if err != nil {
-		dialog.ShowError(err, settings.GetWindow())
+		dialog.ShowError(err, settings.GetWindow().GetWindow())
 		return
 	}
 
@@ -170,7 +180,7 @@ func (settings *tabSettings) browseReplaysRoot(uri fyne.ListableURI, err error) 
 // confirmValidReplaysRoot checks whether there are any accounts found at a
 // given root, and if not, asks the user if they would like to use this root
 // regardless. If they confirm, or accounts were found, callback is called.
-func (settings *tabSettings) confirmValidReplaysRoot(root string, callback func()) {
+func (settings *paneSettings) confirmValidReplaysRoot(root string, callback func()) {
 	if accs, err := sc2utils.EnumerateAccounts(root); err == nil && len(accs) > 0 {
 		callback()
 		return
@@ -182,12 +192,12 @@ func (settings *tabSettings) confirmValidReplaysRoot(root string, callback func(
 			if ok {
 				callback()
 			}
-		}, settings.GetWindow())
+		}, settings.GetWindow().GetWindow())
 }
 
 // TODO: candidate for refactor
-func (settings *tabSettings) findReplaysRoot() {
-	w := settings.GetWindow()
+func (settings *paneSettings) findReplaysRoot() {
+	w := settings.GetWindow().GetWindow()
 	scanRoot := "/"
 
 	if home, err := os.UserHomeDir(); err == nil {
@@ -251,7 +261,7 @@ func (settings *tabSettings) findReplaysRoot() {
 				settings.unsaved = true
 				settings.replaysRoot.SetText(roots[selected])
 			})
-		}, settings.GetWindow())
+		}, w)
 
 	size := fyne.MeasureText(longest, theme.TextSize(), fyne.TextStyle{})
 	size.Height *= len(roots)
@@ -260,9 +270,8 @@ func (settings *tabSettings) findReplaysRoot() {
 	dlg2.Show()
 }
 
-func (settings *tabSettings) onClose() {
-	w := settings.GetWindow()
-
+func (settings *paneSettings) onClose() {
+	w := settings.GetWindow().GetWindow()
 	if !settings.unsaved {
 		return
 	}
@@ -273,8 +282,8 @@ func (settings *tabSettings) onClose() {
 		}, w)
 }
 
-func (settings *tabSettings) openLogin() {
-	w := settings.GetWindow()
+func (settings *paneSettings) openLogin() {
+	w := settings.GetWindow().GetWindow()
 	user := widget.NewEntry()
 	pass := widget.NewPasswordEntry()
 
@@ -346,15 +355,14 @@ func (settings *tabSettings) openLogin() {
 	dlg.Show()
 }
 
-func (settings *tabSettings) save() {
-	w := settings.GetWindow()
-
+func (settings *paneSettings) save() {
+	w := settings.GetWindow().GetWindow()
 	if err := settings.validate(); err != nil {
 		dialog.ShowError(err, w)
 		return
 	}
 
-	main := settings.Window.(*windowMain)
+	main := settings.GetWindow().(*windowMain)
 	if main.gettingStarted == 3 && settings.apiKey.Text != "" {
 		main.nav.Select(3) // ! ID BASED IS ERROR PRONE
 		// main.openGettingStarted4()
@@ -401,7 +409,7 @@ func (settings *tabSettings) save() {
 	settings.unsaved = false
 }
 
-func (settings *tabSettings) validate() error {
+func (settings *paneSettings) validate() error {
 	if err := settings.apiKey.Validate(); settings.apiKey.Text != "" && err != nil {
 		return fmt.Errorf("invalid value for \"API Key\": %v", err)
 	}

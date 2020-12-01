@@ -37,9 +37,9 @@ type windowMain struct {
 	nav *fynewidget.NavigationDrawer
 
 	// Tabs
-	accounts *tabAccounts
-	uploads  *tabUploads
-	settings *tabSettings
+	accounts *paneAccounts
+	uploads  *paneUploads
+	settings *paneSettings
 }
 
 type uploadRecord struct {
@@ -77,9 +77,9 @@ func (main *windowMain) Init() {
 		sc2api = sc2replaystats.New(viper.GetString("apikey"))
 	}
 
-	main.accounts = makeTabAccounts(main).(*tabAccounts)
-	main.uploads = makeTabUploads(main).(*tabUploads)
-	main.settings = &tabSettings{Window: main}
+	main.accounts = makePaneAccounts(main).(*paneAccounts)
+	main.uploads = makePaneUploads(main).(*paneUploads)
+	main.settings = makePaneSettings(main).(*paneSettings)
 
 	main.nav = fynewidget.NewNavigationDrawer(
 		PROGRAM,
@@ -88,17 +88,17 @@ func (main *windowMain) Init() {
 		// 	widget.NewLabel("Overview Contents"),
 		// ),
 		fynewidget.NewNavigationLabelWithIcon("Accounts", accIcon,
-			main.accounts.GetTab().Content,
+			main.accounts.GetContent(),
 		),
 		fynewidget.NewNavigationLabelWithIcon("Uploads", uploadIcon,
-			main.uploads.GetTab().Content,
+			main.uploads.GetContent(),
 		),
 		fynewidget.NewNavigationSeparator(),
 		fynewidget.NewNavigationLabelWithIcon("Settings", theme.SettingsIcon(),
-			main.settings.Init(),
+			main.settings.GetContent(),
 		),
 		fynewidget.NewNavigationLabelWithIcon("Help & Feedback", feedbackIcon,
-			makeTabAbout(main).GetTab().Content,
+			makePaneAbout(main).GetContent(),
 		),
 	)
 	main.nav.SetImage(theme.InfoIcon())
