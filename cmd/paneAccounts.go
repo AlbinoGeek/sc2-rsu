@@ -38,6 +38,7 @@ func makePaneAccounts(w gui.Window) fynewidget.Pane {
 
 func (t *paneAccounts) Init() {
 	t.container = container.NewVBox()
+	t.SetContent(container.NewVScroll(t.container))
 
 	// // Clear container if it has objects
 	// objects := t.container.Objects
@@ -92,8 +93,6 @@ func (t *paneAccounts) Init() {
 			)
 		}
 	}
-
-	t.SetContent(container.NewVScroll(t.container))
 }
 
 func (t *paneAccounts) Refresh() {
