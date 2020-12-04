@@ -20,7 +20,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
-	"github.com/AlbinoGeek/sc2-rsu/cmd/gui/fynewidget"
+	"github.com/AlbinoGeek/sc2-rsu/cmd/gui/fynemd"
 	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
 	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
 	"github.com/AlbinoGeek/sc2-rsu/utils"
@@ -34,9 +34,10 @@ type windowMain struct {
 	uploadStatus   []*uploadRecord
 	watcher        *fsnotify.Watcher
 
-	nav *fynewidget.NavigationDrawer
+	nav    *fynemd.NavigationDrawer
+	topbar *fynemd.AppBar
 
-	// Tabs
+	// Panes
 	accounts *paneAccounts
 	uploads  *paneUploads
 	settings *paneSettings
@@ -52,11 +53,14 @@ type uploadRecord struct {
 }
 
 func (main *windowMain) Init() {
-	w := main.App.NewWindow("SC2ReplayStats Uploader")
-	main.SetWindow(w)
-
 	main.uploadEnabled = make(map[string]bool)
 	main.uploadStatus = make([]*uploadRecord, 0)
+
+	w := main.App.NewWindow("SC2ReplayStats Uploader")
+	w.SetPadded(false)
+	w.Resize(fyne.NewSize(630, 500))
+	w.CenterOnScreen()
+	main.SetWindow(w)
 
 	// closing the main window should quit the application
 	w.SetCloseIntercept(func() {
@@ -81,31 +85,59 @@ func (main *windowMain) Init() {
 	main.uploads = makePaneUploads(main).(*paneUploads)
 	main.settings = makePaneSettings(main).(*paneSettings)
 
-	main.nav = fynewidget.NewNavigationDrawer(
+	main.topbar = fynemd.NewAppBar(PROGRAM)
+	main.nav = fynemd.NewNavigationDrawer(
 		PROGRAM,
 		"",
 		main.accounts,
 		main.uploads,
-		fynewidget.NewNavigationSeparator(),
+		fynemd.NewNavigationSeparator(),
 		main.settings,
 		makePaneAbout(main),
 	)
-	main.nav.SetImage(theme.InfoIcon())
+	// main.nav.SetImage(theme.InfoIcon())
+	main.topbar.SetNavigation(main.nav)
 
+	mobile := fyne.CurrentDevice().IsMobile()
 	content := container.NewMax(layout.NewSpacer()) // ? what's a better way ?
-	main.nav.OnSelect = func(ni fynewidget.NavigationItem) {
+	main.nav.OnSelect = func(ni fynemd.NavigationItem) {
 		content.Objects = []fyne.CanvasObject{ni.GetContent()}
+		if mobile {
+			main.topbar.SetTitle(ni.GetTitle())
+		}
 	}
-	main.nav.Select(0)
 
-	main.GetWindow().SetContent(container.NewBorder(nil, nil,
-		main.nav, nil,
-		content))
+	if mobile {
+		main.GetWindow().SetContent(
+			container.NewBorder(
+				nil, nil, main.nav, nil,
+				container.NewBorder(
+					main.topbar,
+					nil,
+					nil,
+					nil,
+					content,
+				),
+			),
+		)
 
-	w.Resize(fyne.NewSize(600, 480))
-	w.CenterOnScreen()
+		main.nav.Hide()
+	} else {
+		main.GetWindow().SetContent(
+			container.NewBorder(
+				main.topbar,
+				nil,
+				main.nav,
+				nil,
+				content,
+			),
+		)
+
+		main.nav.SetTitle("")
+	}
 	w.Show()
 
+	main.nav.Select(0) // Cannot select before window is shown!
 	main.setupUploader()
 
 	if viper.GetString("version") == "" || viper.GetString("apikey") == "" {

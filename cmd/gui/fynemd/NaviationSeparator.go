@@ -1,4 +1,4 @@
-package fynewidget
+package fynemd
 
 import (
 	"fyne.io/fyne"
@@ -22,3 +22,9 @@ func (*NavigationSeparator) GetContent() fyne.CanvasObject { return nil }
 
 // GetLabel ...
 func (l *NavigationSeparator) GetLabel() fyne.CanvasObject { return l.res }
+
+// GetIcon ...
+func (*NavigationSeparator) GetIcon() fyne.Resource { return nil }
+
+// GetTitle ...
+func (*NavigationSeparator) GetTitle() string { return "" }

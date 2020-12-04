@@ -1,4 +1,4 @@
-package fynewidget
+package fynemd
 
 import (
 	"fyne.io/fyne"
@@ -11,6 +11,9 @@ import (
 type NavigationDrawer struct {
 	widget.BaseWidget
 
+	OnDeselect func(NavigationItem) bool
+	OnSelect   func(NavigationItem)
+
 	items    []NavigationItem
 	objects  []fyne.CanvasObject
 	selected int
@@ -19,9 +22,6 @@ type NavigationDrawer struct {
 	separator *widget.Separator // dup: objects[3]
 	subtitle  *canvas.Text      // dup: objects[2]
 	title     *canvas.Text      // dup: objects[1]
-
-	OnDeselect func(NavigationItem) bool
-	OnSelect   func(NavigationItem)
 }
 
 // NewNavigationDrawer ...
@@ -31,10 +31,15 @@ func NewNavigationDrawer(title, subtitle string, items ...NavigationItem) *Navig
 
 	ret := &NavigationDrawer{
 		items:     items,
-		image:     widget.NewIcon(nil),
+		image:     widget.NewIcon(theme.CancelIcon()),
 		separator: widget.NewSeparator(),
 		subtitle:  sub,
-		title:     NewHeader(title),
+		title:     NewText(title, 1.43, true), // approx 20dp
+	}
+	ret.objects = []fyne.CanvasObject{
+		ret.title,
+		ret.subtitle,
+		ret.separator,
 	}
 
 	ret.image.Hide()
@@ -83,18 +88,20 @@ func (nav *NavigationDrawer) Select(id int) {
 // SetImage ...
 func (nav *NavigationDrawer) SetImage(image fyne.Resource) {
 	nav.image.SetResource(image)
-	nav.image.Show()
+	nav.image.Hidden = image == nil
 	nav.Refresh()
 }
 
 // SetSubtitle ...
 func (nav *NavigationDrawer) SetSubtitle(subtitle string) {
+	nav.subtitle.Hidden = subtitle == ""
 	nav.subtitle.Text = subtitle
 	nav.Refresh()
 }
 
 // SetTitle ...
 func (nav *NavigationDrawer) SetTitle(title string) {
+	nav.title.Hidden = title == ""
 	nav.title.Text = title
 	nav.Refresh()
 }

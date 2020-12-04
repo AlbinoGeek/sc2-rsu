@@ -1,4 +1,4 @@
-package fynewidget
+package fynemd
 
 import (
 	"fyne.io/fyne"

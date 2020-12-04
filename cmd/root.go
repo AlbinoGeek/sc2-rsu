@@ -40,7 +40,7 @@ var (
 			}
 
 			if !textMode {
-				GUI = gui.New()
+				GUI = gui.New(PROGRAM)
 				GUI.Init(map[string]gui.Window{
 					"main": &windowMain{WindowBase: &gui.WindowBase{App: GUI.App, UI: GUI}},
 				}, "main")

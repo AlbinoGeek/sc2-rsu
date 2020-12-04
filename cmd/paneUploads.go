@@ -11,19 +11,19 @@ import (
 	"fyne.io/fyne/widget"
 
 	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
-	"github.com/AlbinoGeek/sc2-rsu/cmd/gui/fynewidget"
+	"github.com/AlbinoGeek/sc2-rsu/cmd/gui/fynemd"
 	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
 )
 
 type paneUploads struct {
-	fynewidget.Pane
+	fynemd.Pane
 
 	table *widget.Table
 }
 
-func makePaneUploads(w gui.Window) fynewidget.Pane {
+func makePaneUploads(w gui.Window) fynemd.Pane {
 	p := &paneUploads{
-		Pane: fynewidget.NewPaneWithIcon("Uploads", uploadIcon, w),
+		Pane: fynemd.NewPaneWithIcon("Uploads", uploadIcon, w),
 	}
 
 	p.Init()
@@ -36,7 +36,7 @@ func (t *paneUploads) Init() {
 	t.table = widget.NewTable(
 		func() (int, int) { return len(main.uploadStatus), 3 },
 		func() fyne.CanvasObject {
-			return fynewidget.NewText("@@@@@@@@", 1, false)
+			return fynemd.NewText("@@@@@@@@", 1, false)
 		},
 		func(tci widget.TableCellID, f fyne.CanvasObject) {
 			l := f.(*canvas.Text)
@@ -66,13 +66,13 @@ func (t *paneUploads) Init() {
 	t.table.SetColumnWidth(2, 90)
 	pad := theme.Padding()
 
-	tblName := fynewidget.NewText("Map Name", 1, true)
+	tblName := fynemd.NewText("Map Name", 1, true)
 	tblName.Move(fyne.NewPos(pad*2, 3))
 
-	tblID := fynewidget.NewText("ID", 1, true)
+	tblID := fynemd.NewText("ID", 1, true)
 	tblID.Move(fyne.NewPos(228+pad*5, 3))
 
-	tblStatus := fynewidget.NewText("Status", 1, true)
+	tblStatus := fynemd.NewText("Status", 1, true)
 	tblStatus.Move(fyne.NewPos(312+pad*7, 3))
 
 	t.SetContent(container.NewBorder(

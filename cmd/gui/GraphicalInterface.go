@@ -6,9 +6,9 @@ import (
 )
 
 // New returns a wrapped fyne.App
-func New() *GraphicalInterface {
+func New(id string) *GraphicalInterface {
 	ui := new(GraphicalInterface)
-	ui.App = app.New()
+	ui.App = app.NewWithID(id)
 
 	// ui.Theme = DarkerTheme()
 	ui.App.Settings().SetTheme(DarkerTheme())

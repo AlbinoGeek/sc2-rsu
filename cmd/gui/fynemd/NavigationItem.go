@@ -1,4 +1,4 @@
-package fynewidget
+package fynemd
 
 import "fyne.io/fyne"
 
@@ -6,4 +6,6 @@ import "fyne.io/fyne"
 type NavigationItem interface {
 	GetContent() fyne.CanvasObject
 	GetLabel() fyne.CanvasObject
+	GetIcon() fyne.Resource
+	GetTitle() string
 }

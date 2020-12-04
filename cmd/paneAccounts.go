@@ -17,19 +17,19 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
-	"github.com/AlbinoGeek/sc2-rsu/cmd/gui/fynewidget"
+	"github.com/AlbinoGeek/sc2-rsu/cmd/gui/fynemd"
 	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
 )
 
 type paneAccounts struct {
-	fynewidget.Pane
+	fynemd.Pane
 
 	container *fyne.Container
 }
 
-func makePaneAccounts(w gui.Window) fynewidget.Pane {
+func makePaneAccounts(w gui.Window) fynemd.Pane {
 	p := &paneAccounts{
-		Pane: fynewidget.NewPaneWithIcon("Accounts", accIcon, w),
+		Pane: fynemd.NewPaneWithIcon("Accounts", accIcon, w),
 	}
 
 	p.Init()
@@ -64,13 +64,13 @@ func (t *paneAccounts) Init() {
 	spacer.SetMinSize(fyne.NewSize(pad, pad))
 
 	for acc, list := range toonList(accounts) {
-		header := fynewidget.NewHeader(acc)
+		header := fynemd.NewHeader(acc)
 		header.Move(fyne.NewPos(pad/2, 0))
 		t.container.Add(fyne.NewContainerWithoutLayout(header))
 		for _, toon := range list {
 			parts := strings.Split(toon, "-")
 
-			aLabel := fynewidget.NewText("Unknown Character", 1, false)
+			aLabel := fynemd.NewText("Unknown Character", 1, false)
 			for _, p := range players {
 				if parts[len(parts)-1] == strconv.Itoa(int(p.Player.CharacterID)) {
 					aLabel.Text = p.Player.Name
@@ -87,7 +87,7 @@ func (t *paneAccounts) Init() {
 			t.container.Add(
 				container.NewBorder(nil, nil,
 					toggleBtn,
-					container.NewHBox(fynewidget.NewText(sc2utils.RegionsMap[parts[0]], .9, false), spacer),
+					container.NewHBox(fynemd.NewText(sc2utils.RegionsMap[parts[0]], .9, false), spacer),
 					aLabel,
 				),
 			)

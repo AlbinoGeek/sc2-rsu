@@ -1,4 +1,4 @@
-package fynewidget
+package fynemd
 
 import (
 	"fyne.io/fyne"
@@ -10,7 +10,7 @@ import (
 type NavigationLabel struct {
 	content fyne.CanvasObject
 	icon    fyne.Resource
-	label   string
+	text    string
 
 	res fyne.CanvasObject
 }
@@ -19,7 +19,7 @@ type NavigationLabel struct {
 func NewNavigationLabel(label string, content fyne.CanvasObject) NavigationItem {
 	return &NavigationLabel{
 		content: content,
-		label:   label,
+		text:    label,
 	}
 }
 
@@ -28,7 +28,7 @@ func NewNavigationLabelWithIcon(label string, icon fyne.Resource, content fyne.C
 	return &NavigationLabel{
 		content: content,
 		icon:    theme.NewThemedResource(icon, nil),
-		label:   label,
+		text:    label,
 	}
 }
 
@@ -44,8 +44,8 @@ func (l *NavigationLabel) GetLabel() fyne.CanvasObject {
 				b.Icon = l.icon
 				refresh = true
 			}
-			if b.Text != l.label {
-				b.Text = l.label
+			if b.Text != l.text {
+				b.Text = l.text
 			}
 			if refresh {
 				b.Refresh()
@@ -55,10 +55,16 @@ func (l *NavigationLabel) GetLabel() fyne.CanvasObject {
 		return l.res
 	}
 
-	b := widget.NewButtonWithIcon(l.label, l.icon, nil)
+	b := widget.NewButtonWithIcon(l.text, l.icon, nil)
 	b.Alignment = widget.ButtonAlignLeading
 	b.HideShadow = true
 	b.Importance = widget.LowImportance
 	l.res = b
 	return b
 }
+
+// GetIcon ...
+func (l *NavigationLabel) GetIcon() fyne.Resource { return l.icon }
+
+// GetTitle ...
+func (l *NavigationLabel) GetTitle() string { return l.text }

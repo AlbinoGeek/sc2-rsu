@@ -19,13 +19,13 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
-	"github.com/AlbinoGeek/sc2-rsu/cmd/gui/fynewidget"
+	"github.com/AlbinoGeek/sc2-rsu/cmd/gui/fynemd"
 	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
 	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
 )
 
 type paneSettings struct {
-	fynewidget.Pane
+	fynemd.Pane
 
 	// do we have unsaved changes in the form?
 	unsaved bool
@@ -38,9 +38,9 @@ type paneSettings struct {
 	updatePeriod *widget.Entry
 }
 
-func makePaneSettings(w gui.Window) fynewidget.Pane {
+func makePaneSettings(w gui.Window) fynemd.Pane {
 	p := &paneSettings{
-		Pane: fynewidget.NewPaneWithIcon("Settings", theme.SettingsIcon(), w),
+		Pane: fynemd.NewPaneWithIcon("Settings", theme.SettingsIcon(), w),
 	}
 
 	p.Init()
@@ -121,7 +121,7 @@ func (settings *paneSettings) Init() {
 		nil,
 		nil,
 		widget.NewVScrollContainer(widget.NewVBox(
-			fynewidget.NewHeader("StarCraft II"),
+			fynemd.NewHeader("StarCraft II"),
 			fyne.NewContainerWithLayout(
 				layout.NewFormLayout(),
 				widget.NewLabel("Replays Root"),
@@ -137,7 +137,7 @@ func (settings *paneSettings) Init() {
 				}),
 			),
 			spacer,
-			fynewidget.NewHeader("sc2ReplayStats"),
+			fynemd.NewHeader("sc2ReplayStats"),
 			fyne.NewContainerWithLayout(
 				layout.NewFormLayout(),
 				widget.NewLabel("API Key"),
@@ -145,7 +145,7 @@ func (settings *paneSettings) Init() {
 			),
 			widget.NewButtonWithIcon("Login and Generate it for me...", theme.ComputerIcon(), settings.openLogin),
 			spacer,
-			fynewidget.NewHeader("Updates"),
+			fynemd.NewHeader("Updates"),
 			settings.checkUpdates,
 			settings.autoDownload,
 			fyne.NewContainerWithLayout(
