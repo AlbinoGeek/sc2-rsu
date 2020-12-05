@@ -40,16 +40,19 @@ func NewAppBar(title string) *AppBar {
 	return bar
 }
 
+// SetDense ...
 func (bar *AppBar) SetDense(dense bool) {
 	bar.Dense = dense
 	bar.Refresh()
 }
 
+// SetExtended ...
 func (bar *AppBar) SetExtended(extended bool) {
 	bar.Extended = extended
 	bar.Refresh()
 }
 
+// SetTitle ...
 func (bar *AppBar) SetTitle(title string) {
 	bar.Title = title
 	bar.Refresh()
