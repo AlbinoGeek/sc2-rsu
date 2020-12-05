@@ -32,14 +32,13 @@ func makePaneAccounts(w gui.Window) fynemd.Pane {
 		Pane: fynemd.NewPaneWithIcon("Accounts", accIcon, w),
 	}
 
-	p.Init()
+	p.container = container.NewVBox()
+	p.SetContent(container.NewVScroll(p.container))
+	go p.Init() // takes hundreds of ms
 	return p
 }
 
 func (t *paneAccounts) Init() {
-	t.container = container.NewVBox()
-	t.SetContent(container.NewVScroll(t.container))
-
 	// // Clear container if it has objects
 	// objects := t.container.Objects
 	// for _, o := range objects {
@@ -93,6 +92,8 @@ func (t *paneAccounts) Init() {
 			)
 		}
 	}
+
+	t.container.Refresh()
 }
 
 func (t *paneAccounts) Refresh() {
