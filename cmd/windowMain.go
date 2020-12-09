@@ -20,7 +20,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
-	"github.com/AlbinoGeek/sc2-rsu/cmd/gui/fynemd"
+	"github.com/AlbinoGeek/sc2-rsu/fynemd"
 	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
 	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
 	"github.com/AlbinoGeek/sc2-rsu/utils"

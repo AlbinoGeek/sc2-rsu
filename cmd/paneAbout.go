@@ -9,7 +9,7 @@ import (
 	"fyne.io/fyne/widget"
 
 	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
-	"github.com/AlbinoGeek/sc2-rsu/cmd/gui/fynemd"
+	"github.com/AlbinoGeek/sc2-rsu/fynemd"
 	"github.com/google/go-github/v32/github"
 )
 
