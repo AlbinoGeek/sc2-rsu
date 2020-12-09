@@ -2,13 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"image/color"
 	"path/filepath"
 	"strconv"
 	"strings"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/container"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
@@ -39,14 +37,15 @@ func makePaneAccounts(w gui.Window) fynemd.Pane {
 }
 
 func (t *paneAccounts) Init() {
-	// // Clear container if it has objects
-	// objects := t.container.Objects
-	// for _, o := range objects {
-	// 	t.container.Remove(o)
-	// }
+	t.Update()
+	t.container.Refresh()
+}
 
-	main := t.GetWindow().(*windowMain)
+func (t *paneAccounts) Refresh() {
+	t.container.Refresh()
+}
 
+func (t *paneAccounts) Update() {
 	players, err := sc2api.GetAccountPlayers()
 	if err != nil {
 		golog.Errorf("GetAccountPlayers: %v", err)
@@ -58,46 +57,39 @@ func (t *paneAccounts) Init() {
 		accounts = []string{"No Accounts Found/"}
 	}
 
-	pad := theme.Padding()
-	spacer := canvas.NewRectangle(color.Transparent)
-	spacer.SetMinSize(fyne.NewSize(pad, pad))
+	// Clear container if it has objects
+	objects := t.container.Objects
+	for _, o := range objects {
+		t.container.Remove(o)
+	}
+	objects = nil
 
+	main := t.GetWindow().(*windowMain)
 	for acc, list := range toonList(accounts) {
-		header := fynemd.NewScaledText(fynemd.TextSizeHeading6, acc)
-		header.Move(fyne.NewPos(pad/2, 0))
-		t.container.Add(fyne.NewContainerWithoutLayout(header))
 		for _, toon := range list {
-			parts := strings.Split(toon, "-")
+			name := ""
 
-			aLabel := fynemd.NewScaledText(fynemd.TextSizeBody1, "Unknown Character")
+			// find toon name via sc2replaystats account players
+			parts := strings.Split(toon, "-")
 			for _, p := range players {
 				if parts[len(parts)-1] == strconv.Itoa(int(p.Player.CharacterID)) {
-					aLabel.Text = p.Player.Name
+					name = p.Player.Name
 				}
 			}
 
-			toggleBtn := widget.NewButtonWithIcon("", theme.MediaPauseIcon(), nil)
-			toggleBtn.Importance = widget.HighImportance
-
+			card := widget.NewCard(name, sc2utils.RegionsMap[parts[0]], nil)
 			id := fmt.Sprintf("%s/%s", acc, toon)
-			toggleBtn.OnTapped = main.toggleUploading(toggleBtn, id)
+
+			btnToggle := widget.NewButtonWithIcon("", theme.MediaPauseIcon(), nil)
+			btnToggle.Importance = widget.HighImportance
+			btnToggle.OnTapped = main.toggleUploading(btnToggle, id)
+
+			// todo: reverse this map ( disableUpload )
 			main.uploadEnabled[id] = true
 
-			t.container.Add(
-				container.NewBorder(nil, nil,
-					toggleBtn,
-					container.NewHBox(fynemd.NewScaledText(fynemd.TextSizeBody2, sc2utils.RegionsMap[parts[0]]), spacer),
-					aLabel,
-				),
-			)
+			t.container.Add(container.NewBorder(nil, nil, btnToggle, nil, card))
 		}
 	}
-
-	t.container.Refresh()
-}
-
-func (t *paneAccounts) Refresh() {
-	t.container.Refresh()
 }
 
 func toonList(accounts []string) (toons map[string][]string) {
