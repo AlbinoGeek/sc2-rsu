@@ -36,18 +36,21 @@ func (l *navigationDrawerRenderer) Destroy() {}
 // Implements: fyne.WidgetRenderer
 // TODO : ALIGN ELEMENTS ACCORDING TO MATERIAL DESIGN SPECS
 func (l *navigationDrawerRenderer) Layout(space fyne.Size) {
-	pos := fyne.NewPos(Padding, Padding/2)
+	var (
+		hasImage    = l.nav.image.Visible()
+		hasTitle    = l.nav.title.Text != ""
+		hasSubtitle = l.nav.subtitle.Text != ""
+		hasSep      = hasSubtitle
+	)
 
-	resetY := true
-	if l.nav.image.Visible() {
-		resetY = false
+	pos := fyne.NewPos(Padding, Padding/2)
+	if hasImage {
 		l.nav.image.Resize(fyne.NewSize(40, 40))
 		l.nav.image.Move(pos)
 		pos.Y += l.nav.image.Size().Height + Padding/2
 	}
 
-	if l.nav.title.Text != "" {
-		resetY = false
+	if hasTitle {
 		l.nav.title.Resize(l.nav.title.MinSize())
 		l.nav.title.Move(pos)
 		pos.Y += l.nav.title.Size().Height + Padding/2
@@ -62,10 +65,10 @@ func (l *navigationDrawerRenderer) Layout(space fyne.Size) {
 	l.nav.separator.Move(pos)
 
 	qpad := Padding / 4
-	if l.nav.subtitle.Text == "" {
+	if !hasSep {
 		l.nav.subtitle.Hide()
 		l.nav.separator.Hide()
-		if resetY {
+		if !hasImage && !hasTitle {
 			pos.Y = 0
 		}
 	} else {
