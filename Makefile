@@ -93,7 +93,7 @@ all: "$(TARGETDIR)/$(BINARYNAME)"
 
 "$(TARGETDIR)/$(BINARYNAME)":
 	if [ ! -d "$(TARGETDIR)" ]; then mkdir "$(TARGETDIR)"; fi
-	go build -ldflags "-s -w -X main.PROGRAM=$(BINARYNAME) -X main.VERSION=$(CURRENT_VERSION_MICRO)" -o "$(TARGETDIR)/$(BINARYNAME)" "$(MODNAME)"
+	go build -ldflags "-X main.PROGRAM=$(BINARYNAME) -X main.VERSION=$(CURRENT_VERSION_MICRO)" -o "$(TARGETDIR)/$(BINARYNAME)" "$(MODNAME)" # -s -w
 
 .PHONY: release
 release:
