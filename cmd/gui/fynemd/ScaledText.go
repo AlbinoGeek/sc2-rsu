@@ -8,18 +8,38 @@ import (
 // ! Material Design base font size is 16 but fyne is 14 ...
 // ! until fyne changes this, we're going scale them up.
 
+// TextSize refers to a Typgraphical Sizing defined by Material Design
 type TextSize uint8
 
 const (
+	// TextSizeBody1 is 16dp and represents regular body type
 	TextSizeBody1 TextSize = iota
+
+	// TextSizeBody2 is 14dp and represents condensed body type
 	TextSizeBody2
+
+	// TextSizeSubtitle1 is 16dp and represents a medium subtitle
 	TextSizeSubtitle1
+
+	// TextSizeSubtitle2 is 14dp and represents a light subtitle
 	TextSizeSubtitle2
+
+	// TextSizeHeading1 is 96dp and represents hero type
 	TextSizeHeading1
+
+	// TextSizeHeading2 is 60dp and represents a primary heading
 	TextSizeHeading2
+
+	// TextSizeHeading3 is 48dp and represents a secondary heading
 	TextSizeHeading3
+
+	// TextSizeHeading4 is 34dp
 	TextSizeHeading4
+
+	// TextSizeHeading5 is 24dp
 	TextSizeHeading5
+
+	// TextSizeHeading6 is 20dp and used by component Titles
 	TextSizeHeading6
 )
 
