@@ -121,7 +121,7 @@ func (settings *paneSettings) Init() {
 		nil,
 		nil,
 		widget.NewVScrollContainer(widget.NewVBox(
-			fynemd.NewScaledText(fynemd.TextSizeHeading6, "StarCraft II"),
+			fynemd.NewScaledText(fynemd.TextSizeHeading5, "StarCraft II"),
 			fyne.NewContainerWithLayout(
 				layout.NewFormLayout(),
 				widget.NewLabel("Replays Root"),
@@ -137,7 +137,7 @@ func (settings *paneSettings) Init() {
 				}),
 			),
 			spacer,
-			fynemd.NewScaledText(fynemd.TextSizeHeading6, "sc2ReplayStats"),
+			fynemd.NewScaledText(fynemd.TextSizeHeading5, "sc2ReplayStats"),
 			fyne.NewContainerWithLayout(
 				layout.NewFormLayout(),
 				widget.NewLabel("API Key"),
@@ -145,7 +145,7 @@ func (settings *paneSettings) Init() {
 			),
 			widget.NewButtonWithIcon("Login and Generate it for me...", theme.ComputerIcon(), settings.openLogin),
 			spacer,
-			fynemd.NewScaledText(fynemd.TextSizeHeading6, "Updates"),
+			fynemd.NewScaledText(fynemd.TextSizeHeading5, "Updates"),
 			settings.checkUpdates,
 			settings.autoDownload,
 			fyne.NewContainerWithLayout(
