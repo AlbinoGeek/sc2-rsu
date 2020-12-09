@@ -36,7 +36,7 @@ func (t *paneUploads) Init() {
 	t.table = widget.NewTable(
 		func() (int, int) { return len(main.uploadStatus), 3 },
 		func() fyne.CanvasObject {
-			return fynemd.NewText("@@@@@@@@", 1, false)
+			return fynemd.NewScaledText(fynemd.TextSizeBody1, "@@@@@@@@")
 		},
 		func(tci widget.TableCellID, f fyne.CanvasObject) {
 			l := f.(*canvas.Text)
@@ -66,13 +66,16 @@ func (t *paneUploads) Init() {
 	t.table.SetColumnWidth(2, 90)
 	pad := theme.Padding()
 
-	tblName := fynemd.NewText("Map Name", 1, true)
+	tblName := fynemd.NewScaledText(fynemd.TextSizeSubtitle1, "Map Name")
+	// tblName.TextStyle.Bold = true
 	tblName.Move(fyne.NewPos(pad*2, 3))
 
-	tblID := fynemd.NewText("ID", 1, true)
+	tblID := fynemd.NewScaledText(fynemd.TextSizeSubtitle1, "ID")
+	// tblID.TextStyle.Bold = true
 	tblID.Move(fyne.NewPos(228+pad*5, 3))
 
-	tblStatus := fynemd.NewText("Status", 1, true)
+	tblStatus := fynemd.NewScaledText(fynemd.TextSizeSubtitle1, "Status")
+	// tblStatus.TextStyle.Bold = true
 	tblStatus.Move(fyne.NewPos(312+pad*7, 3))
 
 	t.SetContent(container.NewBorder(

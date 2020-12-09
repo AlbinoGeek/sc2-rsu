@@ -61,6 +61,7 @@ func (bar *AppBar) SetTitle(title string) {
 // SetNavigation ...
 func (bar *AppBar) SetNavigation(nav *NavigationDrawer) {
 	bar.nav = nav
+	bar.Refresh()
 }
 
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
@@ -68,8 +69,7 @@ func (bar *AppBar) SetNavigation(nav *NavigationDrawer) {
 // Implements: fyne.Widget
 func (bar *AppBar) CreateRenderer() fyne.WidgetRenderer {
 	rend := &appBarRenderer{
-		bar:        bar,
-		titleStyle: fyne.TextStyle{Bold: true},
+		bar: bar,
 	}
 	rend.Init()
 	return rend
@@ -80,9 +80,8 @@ func (bar *AppBar) CreateRenderer() fyne.WidgetRenderer {
 type appBarRenderer struct {
 	bar *AppBar
 
-	navIcon    *widget.Button
-	title      *canvas.Text
-	titleStyle fyne.TextStyle
+	navIcon *widget.Button
+	title   *canvas.Text
 }
 
 // BackgroundColor
@@ -103,9 +102,8 @@ func (br *appBarRenderer) Init() {
 			br.bar.nav.Show()
 		}
 	})
-	br.title = canvas.NewText(br.bar.Title, theme.TextColor())
-	br.title.TextStyle = br.titleStyle
-	br.title.TextSize = int(float32(theme.TextSize()) * 1.43) // approx 20dp
+	br.title = NewScaledText(TextSizeHeading5, br.bar.Title)
+	// br.title.TextStyle.Bold = true
 	br.bar.objects = []fyne.CanvasObject{
 		br.navIcon, br.title,
 	}
@@ -142,6 +140,8 @@ func (br *appBarRenderer) Layout(space fyne.Size) {
 	}
 
 	// TODO: Layout actions from right
+
+	// TODO: if len(actions) > 3 { actionsMenu = actions[2:] } ...
 }
 
 // MinSize
@@ -157,10 +157,12 @@ func (br *appBarRenderer) MinSize() fyne.Size {
 		size.Height = 128
 	}
 
-	// enough space for the text
-	size = size.Max(fyne.MeasureText(br.bar.Title, theme.TextSize(), br.titleStyle))
+	// TODO: enough space for navigationIcon if visible
 
-	// include action space
+	// enough space for the text
+	size = size.Max(fyne.MeasureText(br.bar.Title, theme.TextSize(), br.bar.nav.title.TextStyle))
+
+	// TODO: enough space for action buttons when implemented
 
 	return size
 }
@@ -177,6 +179,7 @@ func (br *appBarRenderer) Objects() []fyne.CanvasObject {
 // Implements: fyne.WidgetRenderer
 func (br *appBarRenderer) Refresh() {
 	for _, o := range br.Objects() {
+		// ? should eventually look into why these are nil
 		if o == nil || !o.Visible() {
 			continue
 		}

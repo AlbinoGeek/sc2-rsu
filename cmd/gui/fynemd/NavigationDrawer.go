@@ -26,7 +26,7 @@ type NavigationDrawer struct {
 
 // NewNavigationDrawer ...
 func NewNavigationDrawer(title, subtitle string, items ...NavigationItem) *NavigationDrawer {
-	sub := NewText(subtitle, 0.9, false)
+	sub := NewScaledText(TextSizeBody2, subtitle)
 	sub.Color = theme.DisabledTextColor()
 
 	ret := &NavigationDrawer{
@@ -34,7 +34,7 @@ func NewNavigationDrawer(title, subtitle string, items ...NavigationItem) *Navig
 		image:     widget.NewIcon(theme.CancelIcon()),
 		separator: widget.NewSeparator(),
 		subtitle:  sub,
-		title:     NewText(title, 1.43, true), // approx 20dp
+		title:     NewScaledText(TextSizeHeading5, title),
 	}
 	ret.objects = []fyne.CanvasObject{
 		ret.title,

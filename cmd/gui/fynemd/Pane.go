@@ -8,16 +8,14 @@ import (
 )
 
 // Pane ...
+//
+// Implements: NavigationItem
 type Pane interface {
 	GetWindow() gui.Window
 
-	// GetContent() implements fynewidget.NavigationItem
 	GetContent() fyne.CanvasObject
 	SetContent(fyne.CanvasObject)
-
-	// GetLabel() implements fynewidget.NavigationItem
 	GetLabel() fyne.CanvasObject
-
 	GetIcon() fyne.Resource
 	SetIcon(fyne.Resource)
 	GetTitle() string

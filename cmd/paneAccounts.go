@@ -63,13 +63,13 @@ func (t *paneAccounts) Init() {
 	spacer.SetMinSize(fyne.NewSize(pad, pad))
 
 	for acc, list := range toonList(accounts) {
-		header := fynemd.NewHeader(acc)
+		header := fynemd.NewScaledText(fynemd.TextSizeHeading6, acc)
 		header.Move(fyne.NewPos(pad/2, 0))
 		t.container.Add(fyne.NewContainerWithoutLayout(header))
 		for _, toon := range list {
 			parts := strings.Split(toon, "-")
 
-			aLabel := fynemd.NewText("Unknown Character", 1, false)
+			aLabel := fynemd.NewScaledText(fynemd.TextSizeBody1, "Unknown Character")
 			for _, p := range players {
 				if parts[len(parts)-1] == strconv.Itoa(int(p.Player.CharacterID)) {
 					aLabel.Text = p.Player.Name
@@ -86,7 +86,7 @@ func (t *paneAccounts) Init() {
 			t.container.Add(
 				container.NewBorder(nil, nil,
 					toggleBtn,
-					container.NewHBox(fynemd.NewText(sc2utils.RegionsMap[parts[0]], .9, false), spacer),
+					container.NewHBox(fynemd.NewScaledText(fynemd.TextSizeBody2, sc2utils.RegionsMap[parts[0]]), spacer),
 					aLabel,
 				),
 			)
