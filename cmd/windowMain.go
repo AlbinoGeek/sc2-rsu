@@ -99,7 +99,7 @@ func (main *windowMain) Init() {
 	main.topbar.SetNavigation(main.nav)
 
 	mobile := fyne.CurrentDevice().IsMobile()
-	content := container.NewMax(layout.NewSpacer()) // ? what's a better way ?
+	content := container.NewPadded(layout.NewSpacer()) // ? what's a better way ?
 	main.nav.OnSelect = func(ni fynemd.NavigationItem) {
 		content.Objects = []fyne.CanvasObject{ni.GetContent()}
 		if mobile {

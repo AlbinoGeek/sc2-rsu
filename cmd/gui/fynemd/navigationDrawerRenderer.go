@@ -76,7 +76,7 @@ func (l *navigationDrawerRenderer) Layout(space fyne.Size) {
 		if sep, ok := o.(*widget.Separator); ok {
 			sep.Resize(sepSize)
 			sep.Move(fyne.NewPos(0, pos.Y+qpad-1))
-			pos.Y += Padding / 2
+			pos.Y += Padding
 			continue
 		}
 
@@ -95,7 +95,7 @@ func (l *navigationDrawerRenderer) Layout(space fyne.Size) {
 		size.Height += Padding
 		o.Resize(size)
 		o.Move(pos)
-		pos.Y += size.Height
+		pos.Y += size.Height + Padding/2
 	}
 }
 

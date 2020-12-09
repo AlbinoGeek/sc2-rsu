@@ -67,16 +67,16 @@ func (t *paneUploads) Init() {
 	pad := theme.Padding()
 
 	tblName := fynemd.NewScaledText(fynemd.TextSizeSubtitle1, "Map Name")
-	// tblName.TextStyle.Bold = true
-	tblName.Move(fyne.NewPos(pad*2, 3))
+	tblName.TextStyle.Bold = true
+	tblName.Move(fyne.NewPos(pad*2, 0))
 
 	tblID := fynemd.NewScaledText(fynemd.TextSizeSubtitle1, "ID")
-	// tblID.TextStyle.Bold = true
-	tblID.Move(fyne.NewPos(228+pad*5, 3))
+	tblID.TextStyle.Bold = true
+	tblID.Move(fyne.NewPos(228+pad*5, 0))
 
 	tblStatus := fynemd.NewScaledText(fynemd.TextSizeSubtitle1, "Status")
-	// tblStatus.TextStyle.Bold = true
-	tblStatus.Move(fyne.NewPos(312+pad*7, 3))
+	tblStatus.TextStyle.Bold = true
+	tblStatus.Move(fyne.NewPos(312+pad*7, 0))
 
 	t.SetContent(container.NewBorder(
 		fyne.NewContainerWithoutLayout(
