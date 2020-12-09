@@ -121,13 +121,14 @@ func (l *navigationDrawerRenderer) MinSize() fyne.Size {
 //
 // Implements: fyne.WidgetRenderer
 func (l *navigationDrawerRenderer) Objects() []fyne.CanvasObject {
+	l.nav.objectLock.Lock()
 	l.nav.objects = []fyne.CanvasObject{l.nav.image, l.nav.title, l.nav.subtitle, l.nav.separator}
 	for _, o := range l.nav.items {
 		if o != nil {
 			l.nav.objects = append(l.nav.objects, o.GetLabel())
 		}
 	}
-
+	l.nav.objectLock.Unlock()
 	return l.nav.objects
 }
 

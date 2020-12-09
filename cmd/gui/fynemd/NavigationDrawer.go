@@ -1,6 +1,8 @@
 package fynemd
 
 import (
+	"sync"
+
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
@@ -14,9 +16,10 @@ type NavigationDrawer struct {
 	OnDeselect func(NavigationItem) bool
 	OnSelect   func(NavigationItem)
 
-	items    []NavigationItem
-	objects  []fyne.CanvasObject
-	selected int
+	items      []NavigationItem
+	objects    []fyne.CanvasObject
+	objectLock sync.RWMutex
+	selected   int
 
 	image     *widget.Icon      // dup: objects[0]
 	separator *widget.Separator // dup: objects[3]
@@ -64,6 +67,8 @@ func (nav *NavigationDrawer) Select(id int) {
 		}
 	}
 
+	nav.objectLock.RLock()
+
 	// ! 4+ hard-coded
 	// ! (*widget.Button) hard-coded
 	if b, ok := nav.objects[4+nav.selected].(*widget.Button); ok {
@@ -83,6 +88,8 @@ func (nav *NavigationDrawer) Select(id int) {
 	if nav.OnSelect != nil {
 		nav.OnSelect(nav.items[nav.selected])
 	}
+
+	nav.objectLock.RUnlock()
 }
 
 // SetImage ...
