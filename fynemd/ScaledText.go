@@ -59,12 +59,16 @@ var styleSize = map[TextSize]float64{
 // NewScaledText returns a canvas.Text element with a given Material
 // Design type scale applied to it.
 func NewScaledText(level TextSize, text string) *canvas.Text {
-	return newText(text, 1.14*styleSize[level], false)
+	return newText(text, styleSize[level], false)
 }
 
 func newText(text string, scale float64, bold bool) *canvas.Text {
 	t := canvas.NewText(text, theme.TextColor())
-	t.TextSize = int(float64(t.TextSize) * scale)
+	if t.TextSize == 14 {
+		t.TextSize = int(1.14 * float64(t.TextSize) * scale)
+	} else {
+		t.TextSize = int(float64(t.TextSize) * scale)
+	}
 	t.TextStyle.Bold = bold
 	return t
 }

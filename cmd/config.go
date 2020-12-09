@@ -23,7 +23,7 @@ var (
 		"theme.padding":            4,
 		"theme.scrollBarSize":      12, // 16
 		"theme.scrollBarSmallSize": 3,
-		"theme.textSize":           14,
+		"theme.textSize":           16,
 		"update.automatic.enabled": false,
 		"update.check.enabled":     true,
 		"update.check.period":      time.Duration(minimumUpdatePeriod).String(),
