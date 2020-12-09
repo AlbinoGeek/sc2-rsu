@@ -50,6 +50,7 @@ func makePaneSettings(w gui.Window) fynemd.Pane {
 // TODO: candidate for refactor
 func (settings *paneSettings) Init() {
 	settings.apiKey = widget.NewEntry()
+	settings.apiKey.SetPlaceHolder("API Key")
 	settings.apiKey.SetText(viper.GetString("apiKey"))
 	settings.apiKey.Validator = func(key string) (err error) {
 		if !sc2replaystats.ValidAPIKey(key) {
@@ -97,6 +98,7 @@ func (settings *paneSettings) Init() {
 	settings.unsaved = false // otherwise set by the above line
 
 	settings.replaysRoot = widget.NewEntry()
+	settings.replaysRoot.SetPlaceHolder("Replays Root")
 	settings.replaysRoot.SetText(viper.GetString("replaysRoot"))
 	settings.replaysRoot.OnChanged = func(string) {
 		settings.unsaved = true
@@ -120,13 +122,9 @@ func (settings *paneSettings) Init() {
 		),
 		nil,
 		nil,
-		widget.NewVScrollContainer(widget.NewVBox(
+		container.NewVScroll(widget.NewVBox(
 			fynemd.NewScaledText(fynemd.TextSizeHeading5, "StarCraft II"),
-			fyne.NewContainerWithLayout(
-				layout.NewFormLayout(),
-				widget.NewLabel("Replays Root"),
-				widget.NewHScrollContainer(settings.replaysRoot),
-			),
+			widget.NewHScrollContainer(settings.replaysRoot),
 			fyne.NewContainerWithLayout(
 				layout.NewGridLayout(2),
 				widget.NewButtonWithIcon("Find it for me...", theme.SearchIcon(), func() { go settings.findReplaysRoot() }),
@@ -138,11 +136,7 @@ func (settings *paneSettings) Init() {
 			),
 			spacer,
 			fynemd.NewScaledText(fynemd.TextSizeHeading5, "sc2ReplayStats"),
-			fyne.NewContainerWithLayout(
-				layout.NewFormLayout(),
-				widget.NewLabel("API Key"),
-				widget.NewHScrollContainer(settings.apiKey),
-			),
+			widget.NewHScrollContainer(settings.apiKey),
 			widget.NewButtonWithIcon("Login and Generate it for me...", theme.ComputerIcon(), settings.openLogin),
 			spacer,
 			fynemd.NewScaledText(fynemd.TextSizeHeading5, "Updates"),
