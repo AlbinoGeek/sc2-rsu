@@ -5,9 +5,6 @@ import (
 	"fyne.io/fyne/theme"
 )
 
-// ! Material Design base font size is 16 but fyne is 14 ...
-// ! until fyne changes this, we're going scale them up.
-
 // TextSize refers to a Typgraphical Sizing defined by Material Design
 type TextSize uint8
 
@@ -62,6 +59,8 @@ func NewScaledText(level TextSize, text string) *canvas.Text {
 	return newText(text, styleSize[level], false)
 }
 
+// ! Material Design base font size is 16 but fyne is 14 ...
+// ! until fyne changes this, we're going to scale them up.
 func newText(text string, scale float64, bold bool) *canvas.Text {
 	t := canvas.NewText(text, theme.TextColor())
 	if t.TextSize == 14 {

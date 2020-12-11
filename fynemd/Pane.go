@@ -48,7 +48,9 @@ func newNavigationLabel(title string, icon fyne.Resource) fyne.CanvasObject {
 	return b
 }
 
-// PaneBase implements Pane
+// PaneBase ...
+//
+// Implements: Pane
 type PaneBase struct {
 	content fyne.CanvasObject
 	icon    fyne.Resource
@@ -72,11 +74,6 @@ func (p *PaneBase) SetContent(content fyne.CanvasObject) {
 	p.content = content
 }
 
-// GetLabel returns the assemebled label element for this pane
-func (p *PaneBase) GetLabel() fyne.CanvasObject {
-	return p.label
-}
-
 // GetIcon returns the icon shown in labels associated with this pane
 func (p *PaneBase) GetIcon() fyne.Resource {
 	return p.icon
@@ -86,6 +83,11 @@ func (p *PaneBase) GetIcon() fyne.Resource {
 func (p *PaneBase) SetIcon(icon fyne.Resource) {
 	p.icon = icon
 	p.label.(*widget.Button).SetIcon(icon)
+}
+
+// GetLabel returns the assemebled label element for this pane
+func (p *PaneBase) GetLabel() fyne.CanvasObject {
+	return p.label
 }
 
 // GetTitle returns the text shown in labels associated with this pane
