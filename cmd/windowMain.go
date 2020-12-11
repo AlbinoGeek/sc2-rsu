@@ -58,7 +58,7 @@ func (main *windowMain) Init() {
 
 	w := main.App.NewWindow("SC2ReplayStats Uploader")
 	w.SetPadded(false)
-	w.Resize(fyne.NewSize(640, 540))
+	w.Resize(fyne.NewSize(640, 560))
 	w.CenterOnScreen()
 	main.SetWindow(w)
 
