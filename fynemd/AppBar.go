@@ -64,7 +64,8 @@ func (bar *AppBar) SetNavigation(nav *NavigationDrawer) {
 	bar.Refresh()
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to its renderer
+// CreateRenderer returns a new WidgetRenderer for this widget.
+// This should not be called by regular code, it is used internally to render a widget.
 //
 // Implements: fyne.Widget
 func (bar *AppBar) CreateRenderer() fyne.WidgetRenderer {
@@ -77,6 +78,11 @@ func (bar *AppBar) CreateRenderer() fyne.WidgetRenderer {
 
 // --
 
+// appBarRenderer defines the behaviour of a widget's implementation.
+// This is returned from a widget's declarative object through the CreateRenderer()
+// function and should be exactly one instance per widget in memory.
+//
+// Implements: fyne.WidgetRenderer
 type appBarRenderer struct {
 	bar *AppBar
 
@@ -84,16 +90,16 @@ type appBarRenderer struct {
 	title   *canvas.Text
 }
 
-// BackgroundColor
+// BackgroundColor returns the color that should be used to draw the background of this renderer’s widget.
 //
-// Implements: fyne.WidgetRenderer
+// Deprecated: Widgets will no longer have a background to support hover and selection indication in collection widgets.
+// If a widget requires a background color or image, this can be achieved by using a canvas.Rect or canvas.Image
+// as the first child of a MaxLayout, followed by the rest of the widget components.
 func (*appBarRenderer) BackgroundColor() color.Color {
 	return theme.PrimaryColor()
 }
 
-// Destroy
-//
-// Implements: fyne.WidgetRenderer
+// Destroy is for internal use.
 func (*appBarRenderer) Destroy() {}
 
 func (br *appBarRenderer) Init() {
@@ -109,9 +115,8 @@ func (br *appBarRenderer) Init() {
 	}
 }
 
-// Layout
-//
-// Implements: fyne.WidgetRenderer
+// Layout is a hook that is called if the widget needs to be laid out.
+// This should never call Refresh.
 // ! should respond to theme values
 func (br *appBarRenderer) Layout(space fyne.Size) {
 	pos := fyne.NewPos(Padding, Padding)
@@ -144,9 +149,7 @@ func (br *appBarRenderer) Layout(space fyne.Size) {
 	// TODO: if len(actions) > 3 { actionsMenu = actions[2:] } ...
 }
 
-// MinSize
-//
-// Implements: fyne.WidgetRenderer
+// MinSize returns the minimum size of the widget that is rendered by this renderer.
 func (br *appBarRenderer) MinSize() fyne.Size {
 	// pad := theme.Padding()
 
@@ -167,16 +170,13 @@ func (br *appBarRenderer) MinSize() fyne.Size {
 	return size
 }
 
-// Objects
-//
-// Implements: fyne.WidgetRenderer
+// Objects returns all objects that should be drawn.
 func (br *appBarRenderer) Objects() []fyne.CanvasObject {
 	return br.bar.objects
 }
 
-// Refresh
-//
-// Implements: fyne.WidgetRenderer
+// Refresh is a hook that is called if the widget has updated and needs to be redrawn.
+// This might trigger a Layout.
 func (br *appBarRenderer) Refresh() {
 	for _, o := range br.Objects() {
 		// ? should eventually look into why these are nil
