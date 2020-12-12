@@ -12,7 +12,7 @@
       "program": "${workspaceRoot}",
       "env": {},
       "args": [],
-      "buildFlags": "-ldflags=\"-X main.PROGRAM=sc2-rsu -X main.VERSION=1.debug\"",
+      "buildFlags": "-ldflags='-X main.PROGRAM=sc2-rsu -X main.VERSION=1.debug'",
       "cwd": "/home/damon/go/src/sc2-rsu/_dist",
     }
   ]
