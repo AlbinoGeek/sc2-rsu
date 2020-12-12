@@ -15,12 +15,12 @@ func prepareMultipartUpload(filename string) (buf bytes.Buffer, contentType stri
 
 	w, err := mpw.CreateFormFile("replay_file", filename)
 	if err != nil {
-		return buf, "", err
+		return buf, "", fmt.Errorf("create form file: %v", err)
 	}
 
 	f, err := os.Open(filename)
 	if err != nil {
-		return buf, "", err
+		return buf, "", fmt.Errorf("open form file: %v", err)
 	}
 	defer f.Close()
 

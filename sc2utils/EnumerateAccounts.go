@@ -32,5 +32,5 @@ func EnumerateAccounts(replaysRoot string) (accountIDs []string, err error) {
 		}
 	}
 
-	return paths[:i], err
+	return paths[:i], nil
 }

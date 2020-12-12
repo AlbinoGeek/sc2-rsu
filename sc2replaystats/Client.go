@@ -88,7 +88,7 @@ func (client *Client) requestMap(method, slug, contentType string, data io.Reade
 
 	result = make(map[string]string)
 	if err = jsoniter.NewDecoder(resp.Body).Decode(&result); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("decode response: %v", err)
 	}
 
 	if resp.StatusCode != http.StatusOK {

@@ -176,7 +176,7 @@ func getWatchPaths() ([]string, error) {
 	accs, err := sc2utils.EnumerateAccounts(replaysRoot)
 	golog.Debugf("account scan returned: %v toons", len(accs))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("getWatchPaths: %v", err)
 	}
 
 	paths := make([]string, 0)
