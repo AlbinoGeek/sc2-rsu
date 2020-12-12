@@ -6,8 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 // Execute executes the root command once Initialize has been called
@@ -18,7 +17,7 @@ func Execute() error {
 	rootCmd.Version = fmt.Sprintf("%s, version %s-(%s-%s)", PROGRAM, VERSION, runtime.GOARCH, runtime.GOOS)
 
 	// ? should not require RAW mode just go get the dimensions...
-	if w, _, err := terminal.GetSize(0); err == nil {
+	if w, _, err := term.GetSize(0); err == nil {
 		termWidth = w
 	}
 
