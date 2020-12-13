@@ -3,6 +3,8 @@ package utils_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/AlbinoGeek/sc2-rsu/utils"
 )
 
@@ -21,9 +23,7 @@ func TestCompareSemVer(t *testing.T) {
 		{-1, "1-beta", "1.1.2"},
 	}
 
-	for i, c := range cases {
-		if res := utils.CompareSemVer(c.Old, c.New); res != c.Expect {
-			t.Errorf("Case %d failed: \"%s\" > \"%s\" = %d (expected: %d)", 1+i, c.New, c.Old, res, c.Expect)
-		}
+	for _, c := range cases {
+		assert.Equal(t, utils.CompareSemVer(c.Old, c.New), c.Expect, "result must match")
 	}
 }

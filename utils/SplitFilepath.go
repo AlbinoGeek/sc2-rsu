@@ -1,6 +1,9 @@
 package utils
 
-import "path/filepath"
+import (
+	"path/filepath"
+	"strings"
+)
 
 // SplitFilepath takes a relative or absolute path to a file, and returns the
 // separated path, filename, and file extension. If an extension is present,
@@ -8,7 +11,15 @@ import "path/filepath"
 func SplitFilepath(name string) (fpath, fname, ext string) {
 	fpath = filepath.Dir(name)
 	ext = filepath.Ext(name)
-	fname = name[len(fpath)+1 : len(name)-len(ext)]
+
+	// Trim path
+	fname = strings.TrimPrefix(name, fpath)
+
+	// Trim path sep
+	fname = strings.TrimPrefix(fname, string(filepath.Separator))
+
+	// Trim extention
+	fname = strings.TrimSuffix(fname, ext)
 
 	return
 }

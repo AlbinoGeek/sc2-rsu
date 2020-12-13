@@ -3,6 +3,8 @@ package utils_test
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/AlbinoGeek/sc2-rsu/utils"
 )
 
@@ -26,9 +28,7 @@ func TestStripPathParts(t *testing.T) {
 		{"usr/var", 2, ""},                   // (5)
 	}
 
-	for i, c := range cases {
-		if res := utils.StripPathParts(c.Path, c.Strip); res != c.Result {
-			t.Errorf("Case %d failed: StripPathParts(\"%s\", \"%d\") = %s (expected: %s)", 1+i, c.Path, c.Strip, res, c.Result)
-		}
+	for _, c := range cases {
+		assert.Equal(t, utils.StripPathParts(c.Path, c.Strip), c.Result, "result must match")
 	}
 }
