@@ -26,10 +26,10 @@ func (b *WindowBase) Init() {
 
 // Show does what it says on the tin
 func (b *WindowBase) Show() {
-	b.Show()
+	b.w.Show()
 }
 
 // Hide does what it says on the tin
 func (b *WindowBase) Hide() {
-	b.Hide()
+	b.w.Hide()
 }
