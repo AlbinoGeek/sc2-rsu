@@ -180,10 +180,7 @@ func (settings *windowSettings) browseReplaysRoot(uri fyne.ListableURI, err erro
 		return // cancelled
 	}
 
-	root := uri.String()
-	if strings.HasPrefix(root, "file://") {
-		root = root[7:] // ? is this reliable
-	}
+	root := strings.TrimPrefix(uri.String(), "file://")
 
 	// TODO: record the newly found accounts if confirmed
 	settings.confirmValidReplaysRoot(root, func() {
