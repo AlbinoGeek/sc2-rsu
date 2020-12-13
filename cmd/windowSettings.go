@@ -47,6 +47,7 @@ func (settings *windowSettings) Init() {
 		if !sc2replaystats.ValidAPIKey(key) {
 			err = errors.New("invalid API key format")
 		}
+
 		return
 	}
 	settings.apiKey.OnChanged = func(string) {
@@ -79,10 +80,12 @@ func (settings *windowSettings) Init() {
 		}
 	})
 	settings.checkUpdates.SetChecked(viper.GetBool("update.check.enabled"))
+
 	if !settings.checkUpdates.Checked {
 		settings.autoDownload.Disable()
 		settings.updatePeriod.Disable()
 	}
+
 	settings.unsaved = false // otherwise set by the above line
 
 	settings.replaysRoot = widget.NewEntry()
@@ -211,6 +214,7 @@ func (settings *windowSettings) confirmValidReplaysRoot(root string, callback fu
 func (settings *windowSettings) findReplaysRoot() {
 	w := settings.GetWindow()
 	scanRoot := "/"
+
 	if home, err := os.UserHomeDir(); err == nil {
 		scanRoot = home
 	}
@@ -218,7 +222,9 @@ func (settings *windowSettings) findReplaysRoot() {
 	dlg := dialog.NewProgressInfinite("Searching for Replays Root...",
 		"Please wait while we search for a valid Replays folder.\nThis could take several minutes.", w)
 	dlg.Show()
+
 	roots, err := sc2utils.FindReplaysRoot(scanRoot)
+
 	dlg.Hide()
 
 	if err != nil {
@@ -237,11 +243,13 @@ func (settings *windowSettings) findReplaysRoot() {
 			settings.replaysRoot.SetText(roots[0])
 			dialog.ShowInformation("Replays Root Found!", "We found your replays directory!", w)
 		})
+
 		return
 	}
 
 	selected := -1
 	longest := ""
+
 	for _, s := range roots {
 		if l := len(s); l > len(longest) {
 			longest = s
@@ -279,6 +287,7 @@ func (settings *windowSettings) findReplaysRoot() {
 
 func (settings *windowSettings) onClose() {
 	w := settings.GetWindow()
+
 	if !settings.unsaved {
 		w.Close()
 		return
@@ -316,15 +325,19 @@ func (settings *windowSettings) openLogin() {
 			dlg2 := dialog.NewProgressInfinite("1) Login", "Setting up our login browser...", w)
 			dlg2.Show()
 			pw, browser, page, err := newBrowser()
+
 			if pw != nil {
 				defer pw.Stop()
 			}
+
 			if browser != nil {
 				defer browser.Close()
 			}
+
 			if page != nil {
 				defer page.Close()
 			}
+
 			dlg2.Hide()
 
 			if err != nil {
@@ -336,14 +349,17 @@ func (settings *windowSettings) openLogin() {
 			dlg2.Show()
 			accid, err := login(page, user.Text, pass.Text)
 			dlg2.Hide()
+
 			if err != nil {
 				dialog.ShowError(fmt.Errorf("login error: %v", err), w)
 				return
 			}
+
 			dlg2 = dialog.NewProgressInfinite("3) Login", "Finding or Generating API Key...", w)
 			dlg2.Show()
 			key, err := extractAPIKey(page, accid)
 			dlg2.Hide()
+
 			if err != nil {
 				dialog.ShowError(fmt.Errorf("failed to get API key: %v", err), w)
 				return
@@ -361,6 +377,7 @@ func (settings *windowSettings) openLogin() {
 
 func (settings *windowSettings) save() {
 	w := settings.GetWindow()
+
 	if err := settings.validate(); err != nil {
 		dialog.ShowError(err, w)
 		return
@@ -370,6 +387,7 @@ func (settings *windowSettings) save() {
 	if main.gettingStarted == 3 && settings.apiKey.Text != "" {
 		main.openGettingStarted4()
 	}
+
 	if main.gettingStarted == 2 && settings.replaysRoot.Text != "" {
 		main.openGettingStarted3()
 	}
@@ -378,6 +396,7 @@ func (settings *windowSettings) save() {
 
 	if oldKey := viper.Get("apikey"); oldKey != settings.apiKey.Text {
 		viper.Set("apikey", settings.apiKey.Text)
+
 		changes = true
 
 		// Use the new apiKey immediately
@@ -386,6 +405,7 @@ func (settings *windowSettings) save() {
 
 	if oldRoot := viper.Get("replaysRoot"); oldRoot != settings.replaysRoot.Text {
 		viper.Set("replaysRoot", settings.replaysRoot.Text)
+
 		changes = true
 	}
 
@@ -400,11 +420,13 @@ func (settings *windowSettings) save() {
 
 	if err := saveConfig(); err != nil {
 		dialog.ShowError(err, w)
+
 		return
 	}
 
 	dialog.ShowInformation("Saved!", "Your settings have been saved.", settings.UI.Windows[WindowMain].GetWindow())
 	settings.unsaved = false
+
 	w.Close()
 }
 
@@ -412,9 +434,11 @@ func (settings *windowSettings) validate() error {
 	if err := settings.apiKey.Validate(); settings.apiKey.Text != "" && err != nil {
 		return fmt.Errorf("invalid value for \"API Key\": %v", err)
 	}
+
 	if err := settings.replaysRoot.Validate(); err != nil {
 		return fmt.Errorf("invalid value for \"Replays Root\": %v", err)
 	}
+
 	if err := settings.updatePeriod.Validate(); err != nil {
 		return fmt.Errorf("invalid value for \"Check Every\": %v", err)
 	}

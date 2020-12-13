@@ -9,6 +9,7 @@ import (
 func labelWithWrapping(text string) *widget.Label {
 	label := widget.NewLabel(text)
 	label.Wrapping = fyne.TextWrapWord
+
 	return label
 }
 

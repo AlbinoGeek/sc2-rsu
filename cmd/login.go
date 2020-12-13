@@ -104,32 +104,44 @@ func extractAPIKey(page *playwright.Page, accountID string) (string, error) {
 	}
 
 	golog.Debug("Waiting for settings page to load...")
+
 	e, err := page.WaitForSelector("*css=a[data-toggle='tab'] >> text=API Access")
 	if err != nil {
 		return "", fmt.Errorf("[settings] failed to locate API Access section: %v", err)
 	}
+
 	golog.Debug("Clicking 'API Access'...")
+
 	if err = e.Click(); err != nil {
 		return "", fmt.Errorf("[settings] failed to click API Access: %v", err)
 	}
+
 	golog.Debug("Finding API key...")
+
 	e, err = page.QuerySelector("*css=.form-group >> text=Authorization Key")
+
 	if e == nil || err != nil {
 		golog.Info("Generating new API key...")
+
 		e, err = page.QuerySelector("text=Generate New API Key")
+
 		if err != nil {
 			return "", fmt.Errorf("[settings] failed to locate Generate New API Key button: %v", err)
 		}
+
 		if err = e.Click(); err != nil {
 			return "", fmt.Errorf("[settings] failed to click Generate New API Key button: %v", err)
 		}
+
 		e, err = page.WaitForSelector("*css=.form-group >> text=Authorization Key")
 	}
+
 	if err != nil || e == nil {
 		return "", fmt.Errorf("[settings] failed to locate \"Authorization Key\" (API Key): %v", err)
 	}
 
 	t, err := e.InnerText()
+
 	if err != nil {
 		return "", fmt.Errorf("[settings] failed to resolve \"Authorization Key\" (API Key) Text: %v", err)
 	}
@@ -139,15 +151,19 @@ func extractAPIKey(page *playwright.Page, accountID string) (string, error) {
 
 func login(page *playwright.Page, email string, password string) (accountID string, err error) {
 	golog.Debug("Navigating to login page...")
+
 	if _, err := page.Goto(fmt.Sprintf("%s/Account/signin", sc2replaystats.WebRoot)); err != nil {
 		return "", fmt.Errorf("failed to navigate to signin page: %v", err)
 	}
 
 	golog.Debug("Filling login form...")
+
 	input, err := page.QuerySelector("css=input[name='email']")
+
 	if err != nil || input == nil {
 		return "", fmt.Errorf("[signin] failed to locate email field: %v", err)
 	}
+
 	if err = input.Fill(email); err != nil {
 		return "", fmt.Errorf("[signin] failed to fill email field: %v", err)
 	}
@@ -155,19 +171,23 @@ func login(page *playwright.Page, email string, password string) (accountID stri
 	if input, err = page.QuerySelector("css=input[name='password']"); err != nil || input == nil {
 		return "", fmt.Errorf("[signin] failed to locate password field: %v", err)
 	}
+
 	if err = input.Fill(password); err != nil {
 		return "", fmt.Errorf("[signin] failed to fill password field: %v", err)
 	}
 
 	golog.Debugf("Submitting login form...")
+
 	if input, err = page.QuerySelector("css=input[value='Sign In']"); err != nil || input == nil {
 		return "", fmt.Errorf("[signin] failed to locate submit button: %v", err)
 	}
+
 	if err = input.Click(); err != nil {
 		return "", fmt.Errorf("[signin] failed to click submit button: %v", err)
 	}
 
 	url := page.URL()
+
 	if !strings.Contains(url, "display") {
 		if alert, err := page.QuerySelector("css=.alert-danger"); err == nil && alert != nil {
 			if text, err := alert.InnerText(); err == nil {
@@ -179,6 +199,7 @@ func login(page *playwright.Page, email string, password string) (accountID stri
 	}
 
 	parts := strings.Split(url, "/")
+
 	return strings.Split(parts[len(parts)-1], "#")[0], nil
 }
 

@@ -16,6 +16,7 @@ func TestCompareSemVer(t *testing.T) {
 		{1, "1.2", "1-alpha"},
 		{-1, "1-beta", "1.1.2"},
 	}
+
 	for i, c := range cases {
 		if res := CompareSemVer(c.Old, c.New); res != c.Expect {
 			t.Errorf("Case %d failed: \"%s\" > \"%s\" = %d (expected: %d)", 1+i, c.New, c.Old, res, c.Expect)

@@ -9,5 +9,6 @@ func SplitFilepath(name string) (fpath, fname, ext string) {
 	fpath = filepath.Dir(name)
 	ext = filepath.Ext(name)
 	fname = name[len(fpath)+1 : len(name)-len(ext)]
+
 	return
 }

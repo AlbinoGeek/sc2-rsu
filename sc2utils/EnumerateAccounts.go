@@ -19,6 +19,7 @@ func EnumerateAccounts(replaysRoot string) (accountIDs []string, err error) {
 
 	i := 0
 	uniq := make(map[string]struct{})
+
 	for _, p := range paths {
 		// strip "/Replays/Multiplayer" suffix
 		p = utils.StripPathParts(p, 2)

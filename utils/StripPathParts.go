@@ -18,6 +18,7 @@ func StripPathParts(path string, stripRight int) string {
 	}
 
 	parts := strings.Split(path, string(filepath.Separator))
+
 	if stripRight < 0 {
 		// stripping more parts than we have
 		if len(parts) <= -stripRight {
@@ -33,6 +34,7 @@ func StripPathParts(path string, stripRight int) string {
 			if abs {
 				return "/"
 			}
+
 			return ""
 		}
 

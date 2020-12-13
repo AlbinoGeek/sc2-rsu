@@ -111,6 +111,7 @@ var (
 			golog.Debugf("Startup took: %v", time.Since(startTime))
 			golog.Info("Ready!")
 			<-done
+
 			return nil
 		},
 	}
@@ -132,18 +133,25 @@ func findReplaysRoot() (string, error) {
 	}
 
 	root := roots[0]
+
 	if len(roots) > 1 {
 		line := strings.Repeat("=", termWidth/2)
 		fmt.Printf("\n%s\n%s\n", line, wordwrap.WrapString("More than one possible replay directory was located while we scanned for your StarCraft II installation's Accounts folder.\n\nPlease select which directory we should be watching below:", uint(termWidth/2)))
+
 		for i, p := range roots {
 			fmt.Printf("\n  %d: %s", 1+i, p)
 		}
+
 		fmt.Printf("\n%s\n", line)
+
 		consoleReader := bufio.NewReaderSize(os.Stdin, 1)
+
 		for {
 			fmt.Printf("Your Choice [1-%d]: ", len(roots))
+
 			input, _, _ := consoleReader.ReadLine()
 			choice, err := strconv.Atoi(string(input))
+
 			if err == nil && choice > 0 && choice-1 < len(roots) {
 				root = roots[choice-1]
 				break
@@ -166,20 +174,24 @@ func getWatchPaths() ([]string, error) {
 		}
 
 		viper.Set("replaysRoot", root)
+
 		if err := saveConfig(); err != nil {
 			return nil, err
 		}
+
 		golog.Infof("Using replays directory: %v", root)
 		replaysRoot = root
 	}
 
 	accs, err := sc2utils.EnumerateAccounts(replaysRoot)
 	golog.Debugf("account scan returned: %v toons", len(accs))
+
 	if err != nil {
 		return nil, fmt.Errorf("getWatchPaths: %v", err)
 	}
 
 	paths := make([]string, 0)
+
 	for _, a := range accs {
 		p := filepath.Join(replaysRoot, a, "Replays", "Multiplayer")
 		if f, err := os.Stat(p); err == nil && f.IsDir() {
@@ -195,6 +207,7 @@ func handleReplay(replayFilename string) {
 
 	// wait for the replay to have finished being written (large enough filesize)
 	var lastSize int64
+
 	for {
 		time.Sleep(time.Millisecond * 250)
 
@@ -211,11 +224,14 @@ func handleReplay(replayFilename string) {
 
 	rqid, err := sc2api.UploadReplay(replayFilename)
 	_, mapName, _ := utils.SplitFilepath(replayFilename)
+
 	if err != nil {
 		golog.Errorf("failed to upload replay: %v: %v", mapName, err)
 		return
 	}
+
 	golog.Infof("sc2replaystats accepted : [%v] %s", rqid, mapName)
+
 	go watchReplayStatus(rqid)
 }
 
@@ -227,6 +243,7 @@ func newWatcher(paths []string) (w *fsnotify.Watcher, err error) {
 
 	for _, p := range paths {
 		golog.Debugf("Watching replays directory: %v", p)
+
 		if err = watcher.Add(p); err != nil {
 			golog.Fatalf("failed to watch replay directory: %v: %v", p, err)
 		}
@@ -238,7 +255,9 @@ func newWatcher(paths []string) (w *fsnotify.Watcher, err error) {
 func watchReplayStatus(rqid string) {
 	for {
 		time.Sleep(time.Second)
+
 		rid, err := sc2api.GetReplayStatus(rqid)
+
 		if err != nil {
 			golog.Errorf("error checking reply status: %v: %v", rqid, err)
 			return // could not check status

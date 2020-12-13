@@ -14,6 +14,7 @@ func CompareSemVer(old, new string) int {
 	if new == "" {
 		return -1
 	}
+
 	if old == "" {
 		return 1
 	}
@@ -22,6 +23,7 @@ func CompareSemVer(old, new string) int {
 	if new[0] == 'v' {
 		new = new[1:]
 	}
+
 	if old[0] == 'v' {
 		old = old[1:]
 	}
@@ -39,6 +41,7 @@ func CompareSemVer(old, new string) int {
 		// parts should be numeric, otherwise they are skipped
 		n, err1 := strconv.Atoi(nparts[i])
 		o, err2 := strconv.Atoi(oparts[i])
+
 		if err1 == nil && err2 == nil && n > o {
 			return 1
 		}

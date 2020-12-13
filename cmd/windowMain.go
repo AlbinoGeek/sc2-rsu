@@ -97,6 +97,7 @@ func (main *windowMain) Init() {
 	if sc2api == nil {
 		sc2api = sc2replaystats.New(viper.GetString("apikey"))
 	}
+
 	main.Refresh()
 
 	w.Resize(fyne.NewSize(420, 360))
@@ -141,16 +142,19 @@ func (main *windowMain) WizardModal(skipText, nextText string, skipFn, nextFn fu
 	if skipFn == nil {
 		skipFn = func() { main.modal.Hide() }
 	}
+
 	if nextFn == nil {
 		nextFn = func() { main.modal.Hide() }
 	}
 
 	buttons := make([]fyne.CanvasObject, 0)
+
 	if skipText != "" {
 		btn := widget.NewButtonWithIcon(skipText, theme.CancelIcon(), skipFn)
 		btn.Importance = widget.LowImportance
 		buttons = append(buttons, btn)
 	}
+
 	if nextText != "" {
 		btn := widget.NewButtonWithIcon(nextText, theme.NavigateNextIcon(), nextFn)
 		btn.Importance = widget.HighImportance
@@ -168,6 +172,7 @@ func (main *windowMain) WizardModal(skipText, nextText string, skipFn, nextFn fu
 
 		main.modal.Show()
 		main.modal.Refresh()
+
 		return
 	}
 
@@ -201,7 +206,9 @@ func (main *windowMain) checkUpdate() {
 	w := main.GetWindow()
 	dlg := dialog.NewProgressInfinite("Check for Updates", "Checking for new releases...", w)
 	dlg.Show()
+
 	rel := checkUpdate()
+
 	dlg.Hide()
 
 	if rel == nil {
@@ -220,6 +227,7 @@ func (main *windowMain) doUpdate(rel *github.RepositoryRelease) func(bool) {
 		if !ok {
 			return
 		}
+
 		w := main.GetWindow()
 
 		// otherwise we might block the fyne event queue...
@@ -228,7 +236,9 @@ func (main *windowMain) doUpdate(rel *github.RepositoryRelease) func(bool) {
 			dlg := dialog.NewProgressInfinite("Downloading Update",
 				fmt.Sprintf("Downloading version %s nomain...", rel.GetTagName()), w)
 			dlg.Show()
+
 			err := downloadUpdate(rel)
+
 			dlg.Hide()
 
 			if err != nil {
@@ -265,10 +275,12 @@ func (main *windowMain) genAccountList() {
 		header := newHeader(acc)
 		header.Move(fyne.NewPos(main.UI.Theme.Padding()/2, 1+main.UI.Theme.Padding()/2))
 		main.accList.Add(fyne.NewContainerWithoutLayout(header))
+
 		for _, toon := range list {
 			parts := strings.Split(toon, "-")
 
 			aLabel := newText("Unknown Character", 1, false)
+
 			for _, p := range players {
 				if parts[len(parts)-1] == strconv.Itoa(int(p.Player.CharacterID)) {
 					aLabel.Text = p.Player.Name
@@ -336,9 +348,12 @@ func (main *windowMain) handleReplay(replayFilename string) {
 	}
 
 	golog.Debugf("uploading replay: %v", replayFilename)
+
 	main.uploadStatus = append(main.uploadStatus, entry)
+
 	tries := 0
 	wait := time.Second * 3
+
 	// naive retry logic
 	for {
 		tries++
@@ -350,6 +365,7 @@ func (main *windowMain) handleReplay(replayFilename string) {
 
 		// wait for the replay to have finished being written (large enough filesize)
 		var lastSize int64
+
 		for {
 			time.Sleep(time.Millisecond * 250)
 
@@ -365,6 +381,7 @@ func (main *windowMain) handleReplay(replayFilename string) {
 		}
 
 		entry.Status = "uploading"
+
 		main.uploadList.Refresh()
 
 		rqid, err := sc2api.UploadReplay(replayFilename)
@@ -372,6 +389,7 @@ func (main *windowMain) handleReplay(replayFilename string) {
 
 		if err != nil {
 			entry.Status = "u failed"
+
 			main.uploadList.Refresh()
 
 			dialog.NewError(fmt.Errorf("replay upload failed:%v\n%v", mapName, err), main.GetWindow())
@@ -392,6 +410,7 @@ func (main *windowMain) handleReplay(replayFilename string) {
 // this project's repository root
 func (main *windowMain) OpenGitHub(slug string) func() {
 	u, _ := url.Parse(ghLink(slug))
+
 	return func() {
 		if err := main.UI.App.OpenURL(u); err != nil {
 			dialog.ShowError(err, main.GetWindow())
@@ -460,6 +479,7 @@ func (main *windowMain) openGettingStarted4() {
 func (main *windowMain) setupUploader() {
 	w := main.GetWindow()
 	replaysRoot := viper.GetString("replaysRoot")
+
 	if replaysRoot == "" {
 		return
 	}
@@ -485,6 +505,7 @@ func (main *windowMain) setupUploader() {
 		dialog.NewError(fmt.Errorf("Failed to start uploader:\n%v", err), w)
 		return
 	}
+
 	main.watcher = watch
 
 	go func() {
@@ -541,18 +562,24 @@ func (main *windowMain) toggleUploading(btn *widget.Button, id string) func() {
 func (main *windowMain) watchReplayStatus(entry *uploadRecord) error {
 	for {
 		time.Sleep(time.Second)
+
 		rid, err := sc2api.GetReplayStatus(entry.QueueID)
+
 		if err != nil {
 			golog.Errorf("error checking reply status: %v: %v", entry.QueueID, err)
 			entry.Status = "p failed"
+
 			main.uploadList.Refresh()
+
 			return err // could not check status
 		}
 
 		if rid != "" {
 			entry.Status = "success"
 			entry.ReplayID = rid
+
 			main.uploadList.Refresh()
+
 			return nil // replay parsed!
 		}
 
@@ -562,9 +589,11 @@ func (main *windowMain) watchReplayStatus(entry *uploadRecord) error {
 
 func toonList(accounts []string) (toons map[string][]string) {
 	toons = make(map[string][]string)
+
 	for _, acc := range accounts {
 		parts := strings.Split(acc[1:], string(filepath.Separator))
 		toonList, ok := toons[parts[0]]
+
 		if !ok {
 			toons[parts[0]] = []string{parts[1]}
 		} else {

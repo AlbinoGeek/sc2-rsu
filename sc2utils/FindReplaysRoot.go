@@ -17,6 +17,7 @@ func FindReplaysRoot(scanRoot string) (replayRoots []string, err error) {
 
 	i := 0
 	uniq := make(map[string]struct{})
+
 	for _, p := range paths {
 		// strip "accountID/toonID/Replays/Multiplayer" suffix
 		p = utils.StripPathParts(p, 4)

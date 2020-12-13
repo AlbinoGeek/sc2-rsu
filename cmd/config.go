@@ -84,6 +84,7 @@ func saveConfig() error {
 	if cfgFile == "" {
 		cfgFile = viper.ConfigFileUsed()
 	}
+
 	if cfgFile == "" {
 		cfgFile = defaultCfgFile
 	}
@@ -93,6 +94,7 @@ func saveConfig() error {
 	}
 
 	golog.Debugf("Wrote Configuration: %v", cfgFile)
+
 	return nil
 }
 
@@ -107,10 +109,12 @@ func setAPIkey(key string) error {
 	}
 
 	viper.Set("apikey", key)
+
 	if err := saveConfig(); err != nil {
 		return err
 	}
 
 	golog.Info("API Key set in configuration!")
+
 	return nil
 }

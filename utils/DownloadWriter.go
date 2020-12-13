@@ -14,10 +14,12 @@ func DownloadWriter(URL string, w io.Writer) error {
 		return err
 	}
 	defer resp.Body.Close()
+
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("status != 200")
 	}
 
 	_, err = io.Copy(w, resp.Body)
+
 	return err
 }

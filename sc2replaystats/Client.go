@@ -51,6 +51,7 @@ func (client *Client) doRequest(method, slug, contentType string, data io.Reader
 	}
 
 	req.Header.Set("Authorization", client.apikey)
+
 	if contentType != "" {
 		req.Header.Set("Content-Type", contentType)
 	}

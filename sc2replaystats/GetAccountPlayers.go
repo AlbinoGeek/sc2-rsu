@@ -13,5 +13,6 @@ func (client *Client) GetAccountPlayers() (players []AccountPlayer, err error) {
 
 	players = make([]AccountPlayer, 0)
 	err = jsoniter.Unmarshal(result, &players)
+
 	return
 }

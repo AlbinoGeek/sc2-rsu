@@ -19,6 +19,7 @@ func (client *Client) GetReplayStatus(replayQueueID string) (replayID string, er
 
 	if e, ok := res["error"]; ok {
 		golog.Debugf("sc2replaystats failure: %v", e)
+
 		err = fmt.Errorf("replay processing failed")
 	}
 

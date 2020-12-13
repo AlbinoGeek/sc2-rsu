@@ -38,6 +38,7 @@ func prepareMultipartUpload(filename string) (buf bytes.Buffer, contentType stri
 // UploadReplay sends the specified replay to sc2replaystats queue for processing
 func (client *Client) UploadReplay(filename string) (replayQueueID string, err error) {
 	buf, contentType, err := prepareMultipartUpload(filename)
+
 	if err != nil {
 		return "", fmt.Errorf("failed to prepare formdata: %v", err)
 	}

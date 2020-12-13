@@ -21,6 +21,7 @@ func TestStripPathParts(t *testing.T) {
 		{"usr/var", 1, "usr"},                // 5: relative paths stay relative
 		{"usr/var", 2, ""},                   // (5)
 	}
+
 	for i, c := range cases {
 		if res := StripPathParts(c.Path, c.Strip); res != c.Result {
 			t.Errorf("Case %d failed: StripPathParts(\"%s\", \"%d\") = %s (expected: %s)", 1+i, c.Path, c.Strip, res, c.Result)

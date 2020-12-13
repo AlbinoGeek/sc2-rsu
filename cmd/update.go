@@ -68,6 +68,7 @@ func checkUpdateEvery(period time.Duration) {
 	func() {
 		for {
 			tt := time.Now()
+
 			if rel := checkUpdate(); rel != nil {
 				printUpdateNotice(rel)
 
@@ -76,8 +77,10 @@ func checkUpdateEvery(period time.Duration) {
 						golog.Errorf("failed to download update: %s", err)
 					}
 				}
+
 				break // only notify the user once
 			}
+
 			golog.Debugf("update check took: %v", time.Since(tt))
 			time.Sleep(period)
 		}
@@ -104,16 +107,20 @@ func downloadUpdate(rel *github.RepositoryRelease) error {
 	golog.Info("Starting update...")
 
 	var asset *github.ReleaseAsset
+
 	for _, a := range rel.Assets {
 		if name := a.GetName(); strings.Contains(name, runtime.GOARCH) &&
 			strings.Contains(name, runtime.GOOS) {
 			if a.GetBrowserDownloadURL() != "" {
 				golog.Debugf("candidate release asset: %v", name)
+
 				asset = a
+
 				break
 			}
 		}
 	}
+
 	if asset == nil {
 		return fmt.Errorf("found no suitable packages for your OS/ARCH -- please report this bug")
 	}
@@ -125,19 +132,23 @@ func downloadUpdate(rel *github.RepositoryRelease) error {
 
 	fpath, fname, ext := utils.SplitFilepath(absName)
 	tag := rel.GetTagName()
+
 	if tag[0] == 'v' {
 		tag = tag[1:]
 	}
+
 	fname = filepath.Join(fpath, fmt.Sprintf("%s-%s%s", fname, tag, ext))
 
 	golog.Debugf("creating file: %v", fname)
 	tmp, err := os.Create(fname)
+
 	if err != nil {
 		return fmt.Errorf("failed to create file: %v", err)
 	}
 	defer tmp.Close()
 
 	golog.Infof("Downloading %s update: %v", humanize.Bytes(uint64(asset.GetSize())), asset.GetName())
+
 	if err = utils.DownloadWriter(asset.GetBrowserDownloadURL(), tmp); err != nil {
 		return err
 	}
@@ -147,14 +158,17 @@ func downloadUpdate(rel *github.RepositoryRelease) error {
 	}
 
 	golog.Infof("Update complete!\n\nPlease close the program and start the new version: %s", fname)
+
 	return nil
 }
 
 func getUpdateDuration() time.Duration {
 	dur := viper.GetString("update.check.period")
 	period, err := time.ParseDuration(dur)
+
 	if err != nil || period < minimumUpdatePeriod {
 		golog.Warnf("update.check.period invalid or too short: %v", err)
+
 		period = time.Duration(minimumUpdatePeriod)
 	}
 
