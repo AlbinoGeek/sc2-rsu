@@ -57,7 +57,6 @@ func (l *NavigationLabel) GetLabel() fyne.CanvasObject {
 
 	b := widget.NewButtonWithIcon(l.text, l.icon, nil)
 	b.Alignment = widget.ButtonAlignLeading
-	b.HideShadow = true
 	b.Importance = widget.LowImportance
 	l.res = b
 	return b

@@ -124,7 +124,7 @@ func (settings *paneSettings) Init() {
 		nil,
 		container.NewVScroll(widget.NewVBox(
 			fynemd.NewScaledText(fynemd.TextSizeHeading5, "StarCraft II"),
-			widget.NewHScrollContainer(settings.replaysRoot),
+			container.NewHScroll(settings.replaysRoot),
 			fyne.NewContainerWithLayout(
 				layout.NewGridLayout(2),
 				widget.NewButtonWithIcon("Find it for me...", theme.SearchIcon(), func() { go settings.findReplaysRoot() }),
@@ -136,7 +136,7 @@ func (settings *paneSettings) Init() {
 			),
 			spacer,
 			fynemd.NewScaledText(fynemd.TextSizeHeading5, "sc2ReplayStats"),
-			widget.NewHScrollContainer(settings.apiKey),
+			container.NewHScroll(settings.apiKey),
 			widget.NewButtonWithIcon("Login and Generate it for me...", theme.ComputerIcon(), settings.openLogin),
 			spacer,
 			fynemd.NewScaledText(fynemd.TextSizeHeading5, "Updates"),
@@ -246,7 +246,7 @@ func (settings *paneSettings) findReplaysRoot() {
 		selected = id
 	}
 	dlg2 := dialog.NewCustomConfirm("Multiple Possible Roots Found",
-		"Select", "Cancel", widget.NewHScrollContainer(listWidget), func(ok bool) {
+		"Select", "Cancel", container.NewHScroll(listWidget), func(ok bool) {
 			if !ok {
 				return
 			}
