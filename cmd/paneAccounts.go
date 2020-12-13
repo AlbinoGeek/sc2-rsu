@@ -32,7 +32,9 @@ func makePaneAccounts(w gui.Window) fynemd.Pane {
 
 	p.container = container.NewVBox()
 	p.SetContent(container.NewVScroll(p.container))
+
 	go p.Init() // takes hundreds of ms
+
 	return p
 }
 
@@ -47,6 +49,7 @@ func (t *paneAccounts) Refresh() {
 
 func (t *paneAccounts) Update() {
 	players, err := sc2api.GetAccountPlayers()
+
 	if err != nil {
 		golog.Errorf("GetAccountPlayers: %v", err)
 		return
@@ -59,12 +62,15 @@ func (t *paneAccounts) Update() {
 
 	// Clear container if it has objects
 	objects := t.container.Objects
+
 	for _, o := range objects {
 		t.container.Remove(o)
 	}
+
 	objects = nil
 
 	main := t.GetWindow().(*windowMain)
+
 	for acc, list := range toonList(accounts) {
 		for _, toon := range list {
 			name := ""
@@ -94,9 +100,11 @@ func (t *paneAccounts) Update() {
 
 func toonList(accounts []string) (toons map[string][]string) {
 	toons = make(map[string][]string)
+
 	for _, acc := range accounts {
 		parts := strings.Split(acc[1:], string(filepath.Separator))
 		toonList, ok := toons[parts[0]]
+
 		if !ok {
 			toons[parts[0]] = []string{parts[1]}
 		} else {

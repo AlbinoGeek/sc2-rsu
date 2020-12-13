@@ -102,6 +102,7 @@ func (main *windowMain) Init() {
 	content := container.NewPadded(layout.NewSpacer()) // ? what's a better way ?
 	main.nav.OnSelect = func(ni fynemd.NavigationItem) {
 		content.Objects = []fyne.CanvasObject{ni.GetContent()}
+
 		if mobile {
 			main.topbar.SetTitle(ni.GetTitle())
 		}
@@ -135,6 +136,7 @@ func (main *windowMain) Init() {
 
 		main.nav.SetTitle("")
 	}
+
 	w.Show()
 
 	main.nav.Select(0) // Cannot select before window is shown!
@@ -250,6 +252,7 @@ func (main *windowMain) handleReplay(replayFilename string) {
 		}
 
 		entry.Status = "uploading"
+
 		main.uploads.Refresh()
 
 		rqid, err := sc2api.UploadReplay(replayFilename)
@@ -257,11 +260,13 @@ func (main *windowMain) handleReplay(replayFilename string) {
 
 		if err != nil {
 			entry.Status = "u failed"
+
 			main.uploads.Refresh()
 
 			dialog.NewError(fmt.Errorf("replay upload failed:%v\n%v", mapName, err), main.GetWindow())
 		} else {
 			entry.Status = "processing"
+
 			main.uploads.Refresh()
 
 			if err := main.watchReplayStatus(entry); err == nil {
@@ -358,6 +363,7 @@ func (main *windowMain) setupUploader() {
 	}
 
 	paths := make([]string, len(accs))
+
 	for i, a := range accs {
 		paths[i] = filepath.Join(replaysRoot, a, "Replays", "Multiplayer")
 	}
@@ -369,6 +375,7 @@ func (main *windowMain) setupUploader() {
 	}
 
 	watch, err := newWatcher(paths)
+
 	if err != nil {
 		dialog.NewError(fmt.Errorf("Failed to start uploader:\n%v", err), w)
 		return
@@ -407,9 +414,11 @@ func (main *windowMain) toggleUploading(btn *widget.Button, id string) func() {
 		replaysRoot := viper.GetString("replaysRoot")
 
 		main.uploadEnabled[id] = !main.uploadEnabled[id]
+
 		if main.uploadEnabled[id] {
 			if err := main.watcher.Remove(filepath.Join(replaysRoot, id, "Replays", "Multiplayer")); err != nil {
 				dialog.NewError(err, w)
+
 				return
 			}
 
@@ -418,6 +427,7 @@ func (main *windowMain) toggleUploading(btn *widget.Button, id string) func() {
 		} else {
 			if err := main.watcher.Add(filepath.Join(replaysRoot, id, "Replays", "Multiplayer")); err != nil {
 				dialog.NewError(err, w)
+
 				return
 			}
 
@@ -429,6 +439,7 @@ func (main *windowMain) toggleUploading(btn *widget.Button, id string) func() {
 
 func (main *windowMain) watchReplayStatus(entry *uploadRecord) error {
 	defer main.uploads.Refresh()
+
 	for {
 		time.Sleep(time.Second)
 
@@ -437,12 +448,14 @@ func (main *windowMain) watchReplayStatus(entry *uploadRecord) error {
 		if err != nil {
 			golog.Errorf("error checking reply status: %v: %v", entry.QueueID, err)
 			entry.Status = "p failed"
+
 			return err // could not check status
 		}
 
 		if rid != "" {
 			entry.Status = "success"
 			entry.ReplayID = rid
+
 			return nil // replay parsed!
 		}
 

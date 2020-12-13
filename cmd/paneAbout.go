@@ -44,11 +44,14 @@ func (p *paneAbout) checkUpdate() {
 
 	dlg := dialog.NewProgressInfinite("Check for Updates", "Checking for new releases...", w)
 	dlg.Show()
+
 	rel := checkUpdate()
+
 	dlg.Hide()
 
 	if rel == nil {
 		dialog.ShowInformation("Check for Updates", "No updates are available at this time.", w)
+
 		return
 	}
 
@@ -71,7 +74,9 @@ func (p *paneAbout) doUpdate(rel *github.RepositoryRelease) func(bool) {
 			dlg := dialog.NewProgressInfinite("Downloading Update",
 				fmt.Sprintf("Downloading version %s nomain...", rel.GetTagName()), w)
 			dlg.Show()
+
 			err := downloadUpdate(rel)
+
 			dlg.Hide()
 
 			if err != nil {

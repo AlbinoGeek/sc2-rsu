@@ -37,6 +37,7 @@ func NewPaneWithIcon(title string, icon fyne.Resource, window gui.Window) Pane {
 	}
 
 	pane.label = newNavigationLabel(title, icon)
+
 	return pane
 }
 
@@ -44,6 +45,7 @@ func newNavigationLabel(title string, icon fyne.Resource) fyne.CanvasObject {
 	b := widget.NewButtonWithIcon(title, icon, nil)
 	b.Alignment = widget.ButtonAlignLeading
 	b.Importance = widget.LowImportance
+
 	return b
 }
 

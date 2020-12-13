@@ -63,11 +63,14 @@ func NewScaledText(level TextSize, text string) *canvas.Text {
 // ! until fyne changes this, we're going to scale them up.
 func newText(text string, scale float64, bold bool) *canvas.Text {
 	t := canvas.NewText(text, theme.TextColor())
+
 	if t.TextSize == 14 {
 		t.TextSize = int(1.14 * float64(t.TextSize) * scale)
 	} else {
 		t.TextSize = int(float64(t.TextSize) * scale)
 	}
+
 	t.TextStyle.Bold = bold
+
 	return t
 }

@@ -266,6 +266,7 @@ func (settings *paneSettings) findReplaysRoot() {
 
 func (settings *paneSettings) onClose() {
 	w := settings.GetWindow().GetWindow()
+
 	if !settings.unsaved {
 		return
 	}
@@ -331,7 +332,9 @@ func (settings *paneSettings) openLogin() {
 
 			dlg2 = dialog.NewProgressInfinite("3) Login", "Finding or Generating API Key...", w)
 			dlg2.Show()
+
 			key, err := extractAPIKey(page, accid)
+
 			dlg2.Hide()
 
 			if err != nil {
@@ -351,6 +354,7 @@ func (settings *paneSettings) openLogin() {
 
 func (settings *paneSettings) save() {
 	w := settings.GetWindow().GetWindow()
+
 	if err := settings.validate(); err != nil {
 		dialog.ShowError(err, w)
 		return
@@ -400,6 +404,7 @@ func (settings *paneSettings) save() {
 	}
 
 	dialog.ShowInformation("Saved!", "Your settings have been saved.", w)
+
 	settings.unsaved = false
 }
 

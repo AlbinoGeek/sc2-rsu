@@ -40,13 +40,16 @@ func (l *NavigationLabel) GetLabel() fyne.CanvasObject {
 	if l.res != nil {
 		if b, ok := l.res.(*widget.Button); ok {
 			refresh := false
+
 			if b.Icon != l.icon {
 				b.Icon = l.icon
 				refresh = true
 			}
+
 			if b.Text != l.text {
 				b.Text = l.text
 			}
+
 			if refresh {
 				b.Refresh()
 			}
@@ -59,6 +62,7 @@ func (l *NavigationLabel) GetLabel() fyne.CanvasObject {
 	b.Alignment = widget.ButtonAlignLeading
 	b.Importance = widget.LowImportance
 	l.res = b
+
 	return b
 }
 

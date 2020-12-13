@@ -37,6 +37,7 @@ func NewAppBar(title string) *AppBar {
 	}
 
 	bar.ExtendBaseWidget(bar)
+
 	return bar
 }
 
@@ -72,7 +73,9 @@ func (bar *AppBar) CreateRenderer() fyne.WidgetRenderer {
 	rend := &appBarRenderer{
 		bar: bar,
 	}
+
 	rend.Init()
+
 	return rend
 }
 
@@ -131,15 +134,17 @@ func (br *appBarRenderer) Layout(space fyne.Size) {
 	}
 
 	pos.Y -= Padding / 4
+
 	if br.bar.nav != nil && !br.bar.nav.Visible() {
 		pos.X += br.navIcon.Size().Width + Padding*2
 		br.navIcon.Show()
 	} else {
 		br.navIcon.Hide()
 	}
-	br.title.Move(pos)
 
+	br.title.Move(pos)
 	br.title.Resize(br.title.MinSize())
+
 	if br.bar.Title == "" && br.title.Visible() {
 		br.title.Hide()
 	}
@@ -154,6 +159,7 @@ func (br *appBarRenderer) MinSize() fyne.Size {
 	// pad := theme.Padding()
 
 	size := fyne.NewSize(360, 56) // material specs
+
 	if br.bar.Dense {
 		size.Height = 40
 	} else if br.bar.Extended {

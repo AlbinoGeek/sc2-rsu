@@ -27,6 +27,7 @@ func makePaneUploads(w gui.Window) fynemd.Pane {
 	}
 
 	p.Init()
+
 	return p
 }
 
@@ -64,6 +65,7 @@ func (t *paneUploads) Init() {
 	t.table.SetColumnWidth(0, 230)
 	t.table.SetColumnWidth(1, 86)
 	t.table.SetColumnWidth(2, 90)
+
 	pad := theme.Padding()
 
 	tblName := fynemd.NewScaledText(fynemd.TextSizeSubtitle1, "Map Name")

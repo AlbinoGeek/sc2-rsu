@@ -44,6 +44,7 @@ func (l *navigationDrawerRenderer) Layout(space fyne.Size) {
 	)
 
 	pos := fyne.NewPos(Padding, Padding/2)
+
 	if hasImage {
 		l.nav.image.Resize(fyne.NewSize(40, 40))
 		l.nav.image.Move(pos)
@@ -57,17 +58,22 @@ func (l *navigationDrawerRenderer) Layout(space fyne.Size) {
 	}
 
 	sepSize := fyne.NewSize(space.Width, 1)
+
 	l.nav.subtitle.Resize(l.nav.subtitle.MinSize())
 	l.nav.subtitle.Move(pos)
 
 	l.nav.separator.Resize(sepSize)
+
 	pos.X = 0
+
 	l.nav.separator.Move(pos)
 
 	qpad := Padding / 4
+
 	if !hasSep {
 		l.nav.subtitle.Hide()
 		l.nav.separator.Hide()
+
 		if !hasImage && !hasTitle {
 			pos.Y = 0
 		}
@@ -80,6 +86,7 @@ func (l *navigationDrawerRenderer) Layout(space fyne.Size) {
 			sep.Resize(sepSize)
 			sep.Move(fyne.NewPos(0, pos.Y+qpad-1))
 			pos.Y += Padding
+
 			continue
 		}
 
@@ -107,6 +114,7 @@ func (l *navigationDrawerRenderer) Layout(space fyne.Size) {
 // Implements: fyne.WidgetRenderer
 func (l *navigationDrawerRenderer) MinSize() fyne.Size {
 	size := fyne.NewSize(Padding, Padding)
+
 	for _, o := range l.Objects() {
 		if o == nil || !o.Visible() {
 			continue
@@ -126,12 +134,15 @@ func (l *navigationDrawerRenderer) MinSize() fyne.Size {
 func (l *navigationDrawerRenderer) Objects() []fyne.CanvasObject {
 	l.nav.objectLock.Lock()
 	l.nav.objects = []fyne.CanvasObject{l.nav.image, l.nav.title, l.nav.subtitle, l.nav.separator}
+
 	for _, o := range l.nav.items {
 		if o != nil {
 			l.nav.objects = append(l.nav.objects, o.GetLabel())
 		}
 	}
+
 	l.nav.objectLock.Unlock()
+
 	return l.nav.objects
 }
 
