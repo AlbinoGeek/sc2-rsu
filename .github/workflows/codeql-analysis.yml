@@ -7,8 +7,6 @@ jobs:
 
     strategy:
       fail-fast: false
-      matrix:
-        language: [ 'go' ]
 
     steps:
     - name: Setup Golang 1.15.x
@@ -56,7 +54,7 @@ jobs:
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v1
       with:
-        languages: ${{ matrix.language }}
+        languages: 'go'
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
