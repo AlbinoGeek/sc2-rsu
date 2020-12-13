@@ -22,10 +22,6 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install golang gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
-        GO111MODULE=off go get golang.org/x/tools/cmd/goimports                               
-        GO111MODULE=off go get github.com/fzipp/gocyclo/cmd/gocyclo
-        GO111MODULE=off go get golang.org/x/lint/golint
-        GO111MODULE=off go get honnef.co/go/tools/cmd/staticcheck
     
     - name: Perform make all
       run: make all
@@ -42,6 +38,15 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
     
+    - name: Get dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install golang gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
+        GO111MODULE=off go get golang.org/x/tools/cmd/goimports                               
+        GO111MODULE=off go get github.com/fzipp/gocyclo/cmd/gocyclo
+        GO111MODULE=off go get golang.org/x/lint/golint
+        GO111MODULE=off go get honnef.co/go/tools/cmd/staticcheck
+
     - name: go vet
       run: go vet -tags ci ./...
     
@@ -74,6 +79,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
     
+    - name: Get dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install golang gcc libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev libx11-dev xorg-dev
+
     - name: Calc coverage
       run: |
         go test -v -covermode=count -coverprofile=coverage.out
@@ -85,3 +95,4 @@ jobs:
       uses: coverallsapp/github-action@v1.1.2
       with:
         github-token: ${{ secrets.COVERALLS_GITHUB_TOKEN }}
+        path-to-lcov: coverage.lcov
