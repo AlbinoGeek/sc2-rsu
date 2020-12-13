@@ -1,6 +1,10 @@
-package utils
+package utils_test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/AlbinoGeek/sc2-rsu/utils"
+)
 
 func TestStripPathParts(t *testing.T) {
 	var cases = []struct {
@@ -23,7 +27,7 @@ func TestStripPathParts(t *testing.T) {
 	}
 
 	for i, c := range cases {
-		if res := StripPathParts(c.Path, c.Strip); res != c.Result {
+		if res := utils.StripPathParts(c.Path, c.Strip); res != c.Result {
 			t.Errorf("Case %d failed: StripPathParts(\"%s\", \"%d\") = %s (expected: %s)", 1+i, c.Path, c.Strip, res, c.Result)
 		}
 	}

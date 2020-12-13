@@ -1,6 +1,10 @@
-package utils
+package utils_test
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/AlbinoGeek/sc2-rsu/utils"
+)
 
 func TestCompareSemVer(t *testing.T) {
 	var cases = []struct {
@@ -18,7 +22,7 @@ func TestCompareSemVer(t *testing.T) {
 	}
 
 	for i, c := range cases {
-		if res := CompareSemVer(c.Old, c.New); res != c.Expect {
+		if res := utils.CompareSemVer(c.Old, c.New); res != c.Expect {
 			t.Errorf("Case %d failed: \"%s\" > \"%s\" = %d (expected: %d)", 1+i, c.New, c.Old, res, c.Expect)
 		}
 	}
