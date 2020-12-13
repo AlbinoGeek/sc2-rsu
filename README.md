@@ -5,6 +5,7 @@
 [![GitHub license](https://img.shields.io/github/license/AlbinoGeek/sc2-rsu.svg)](https://github.com/AlbinoGeek/sc2-rsu/blob/master/LICENSE)
 [![GitHub go.mod Go version of a Go module](https://img.shields.io/github/go-mod/go-version/AlbinoGeek/sc2-rsu.svg)](https://github.com/AlbinoGeek/sc2-rsu)
 [![GoReportCard](https://goreportcard.com/badge/github.com/AlbinoGeek/sc2-rsu)](https://goreportcard.com/report/github.com/AlbinoGeek/sc2-rsu)
+[![Coverage Status](https://coveralls.io/repos/github/AlbinoGeek/sc2-rsu/badge.svg?branch=main)](https://coveralls.io/github/AlbinoGeek/sc2-rsu?branch=main)
 
 ![GUI Screenshot](_dist/screen-v0.2.85-gui.gif)
 
