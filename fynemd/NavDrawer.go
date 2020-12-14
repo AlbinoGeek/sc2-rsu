@@ -9,14 +9,14 @@ import (
 	"fyne.io/fyne/widget"
 )
 
-// NavigationDrawer ...
-type NavigationDrawer struct {
+// NavDrawer ...
+type NavDrawer struct {
 	widget.BaseWidget
 
-	OnDeselect func(NavigationItem) bool
-	OnSelect   func(NavigationItem)
+	OnDeselect func(NavItem) bool
+	OnSelect   func(NavItem)
 
-	items      []NavigationItem
+	items      []NavItem
 	objects    []fyne.CanvasObject
 	objectLock sync.RWMutex
 	selected   int
@@ -27,12 +27,12 @@ type NavigationDrawer struct {
 	title     *canvas.Text      // dup: objects[1]
 }
 
-// NewNavigationDrawer ...
-func NewNavigationDrawer(title, subtitle string, items ...NavigationItem) *NavigationDrawer {
+// NewNavDrawer ...
+func NewNavDrawer(title, subtitle string, items ...NavItem) *NavDrawer {
 	sub := NewScaledText(TextSizeBody2, subtitle)
 	sub.Color = theme.DisabledTextColor()
 
-	ret := &NavigationDrawer{
+	ret := &NavDrawer{
 		items:     items,
 		image:     widget.NewIcon(theme.CancelIcon()),
 		separator: widget.NewSeparator(),
@@ -54,12 +54,12 @@ func NewNavigationDrawer(title, subtitle string, items ...NavigationItem) *Navig
 // CreateRenderer is a private method to Fyne which links this widget to its renderer
 //
 // Implements: fyne.Widget
-func (nav *NavigationDrawer) CreateRenderer() fyne.WidgetRenderer {
-	return NavigationDrawerRenderer(nav)
+func (nav *NavDrawer) CreateRenderer() fyne.WidgetRenderer {
+	return &navDrawerRenderer{nav: nav}
 }
 
 // Select ...
-func (nav *NavigationDrawer) Select(id int) {
+func (nav *NavDrawer) Select(id int) {
 	if nav.OnDeselect != nil {
 		// they can keepfocus (example: unsaved changes)
 		if !nav.OnDeselect(nav.items[nav.selected]) {
@@ -93,21 +93,21 @@ func (nav *NavigationDrawer) Select(id int) {
 }
 
 // SetImage ...
-func (nav *NavigationDrawer) SetImage(image fyne.Resource) {
+func (nav *NavDrawer) SetImage(image fyne.Resource) {
 	nav.image.SetResource(image)
 	nav.image.Hidden = image == nil
 	nav.Refresh()
 }
 
 // SetSubtitle ...
-func (nav *NavigationDrawer) SetSubtitle(subtitle string) {
+func (nav *NavDrawer) SetSubtitle(subtitle string) {
 	nav.subtitle.Hidden = subtitle == ""
 	nav.subtitle.Text = subtitle
 	nav.Refresh()
 }
 
 // SetTitle ...
-func (nav *NavigationDrawer) SetTitle(title string) {
+func (nav *NavDrawer) SetTitle(title string) {
 	nav.title.Hidden = title == ""
 	nav.title.Text = title
 	nav.Refresh()

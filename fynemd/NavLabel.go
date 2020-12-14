@@ -6,8 +6,8 @@ import (
 	"fyne.io/fyne/widget"
 )
 
-// NavigationLabel ...
-type NavigationLabel struct {
+// NavLabel ...
+type NavLabel struct {
 	content fyne.CanvasObject
 	icon    fyne.Resource
 	text    string
@@ -15,17 +15,17 @@ type NavigationLabel struct {
 	res fyne.CanvasObject
 }
 
-// NewNavigationLabel ...
-func NewNavigationLabel(label string, content fyne.CanvasObject) NavigationItem {
-	return &NavigationLabel{
+// NewNavLabel ...
+func NewNavLabel(label string, content fyne.CanvasObject) NavItem {
+	return &NavLabel{
 		content: content,
 		text:    label,
 	}
 }
 
-// NewNavigationLabelWithIcon ...
-func NewNavigationLabelWithIcon(label string, icon fyne.Resource, content fyne.CanvasObject) NavigationItem {
-	return &NavigationLabel{
+// NewNavLabelWithIcon ...
+func NewNavLabelWithIcon(label string, icon fyne.Resource, content fyne.CanvasObject) NavItem {
+	return &NavLabel{
 		content: content,
 		icon:    theme.NewThemedResource(icon, nil),
 		text:    label,
@@ -33,10 +33,10 @@ func NewNavigationLabelWithIcon(label string, icon fyne.Resource, content fyne.C
 }
 
 // GetContent ...
-func (l *NavigationLabel) GetContent() fyne.CanvasObject { return l.content }
+func (l *NavLabel) GetContent() fyne.CanvasObject { return l.content }
 
 // GetLabel ...
-func (l *NavigationLabel) GetLabel() fyne.CanvasObject {
+func (l *NavLabel) GetLabel() fyne.CanvasObject {
 	if l.res != nil {
 		if b, ok := l.res.(*widget.Button); ok {
 			refresh := false
@@ -67,7 +67,7 @@ func (l *NavigationLabel) GetLabel() fyne.CanvasObject {
 }
 
 // GetIcon ...
-func (l *NavigationLabel) GetIcon() fyne.Resource { return l.icon }
+func (l *NavLabel) GetIcon() fyne.Resource { return l.icon }
 
 // GetTitle ...
-func (l *NavigationLabel) GetTitle() string { return l.text }
+func (l *NavLabel) GetTitle() string { return l.text }

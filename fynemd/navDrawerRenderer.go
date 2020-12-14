@@ -8,34 +8,27 @@ import (
 	"fyne.io/fyne/widget"
 )
 
-type navigationDrawerRenderer struct {
-	nav *NavigationDrawer
-}
-
-// NavigationDrawerRenderer ...
-func NavigationDrawerRenderer(nav *NavigationDrawer) fyne.WidgetRenderer {
-	return &navigationDrawerRenderer{
-		nav: nav,
-	}
+type navDrawerRenderer struct {
+	nav *NavDrawer
 }
 
 // BackgroundColor
 //
 // Implements: fyne.WidgetRenderer
-func (l *navigationDrawerRenderer) BackgroundColor() color.Color {
+func (l *navDrawerRenderer) BackgroundColor() color.Color {
 	return theme.BackgroundColor()
 }
 
 // Destroy
 //
 // Implements: fyne.WidgetRenderer
-func (l *navigationDrawerRenderer) Destroy() {}
+func (l *navDrawerRenderer) Destroy() {}
 
 // Layout
 //
 // Implements: fyne.WidgetRenderer
 // TODO : ALIGN ELEMENTS ACCORDING TO MATERIAL DESIGN SPECS
-func (l *navigationDrawerRenderer) Layout(space fyne.Size) {
+func (l *navDrawerRenderer) Layout(space fyne.Size) {
 	var (
 		hasImage    = l.nav.image.Visible()
 		hasTitle    = l.nav.title.Text != ""
@@ -112,7 +105,7 @@ func (l *navigationDrawerRenderer) Layout(space fyne.Size) {
 // MinSize
 //
 // Implements: fyne.WidgetRenderer
-func (l *navigationDrawerRenderer) MinSize() fyne.Size {
+func (l *navDrawerRenderer) MinSize() fyne.Size {
 	size := fyne.NewSize(Padding, Padding)
 
 	for _, o := range l.Objects() {
@@ -131,7 +124,7 @@ func (l *navigationDrawerRenderer) MinSize() fyne.Size {
 // Objects
 //
 // Implements: fyne.WidgetRenderer
-func (l *navigationDrawerRenderer) Objects() []fyne.CanvasObject {
+func (l *navDrawerRenderer) Objects() []fyne.CanvasObject {
 	l.nav.objectLock.Lock()
 	l.nav.objects = []fyne.CanvasObject{l.nav.image, l.nav.title, l.nav.subtitle, l.nav.separator}
 
@@ -149,7 +142,7 @@ func (l *navigationDrawerRenderer) Objects() []fyne.CanvasObject {
 // Refresh
 //
 // Implements: fyne.WidgetRenderer
-func (l *navigationDrawerRenderer) Refresh() {
+func (l *navDrawerRenderer) Refresh() {
 	for _, o := range l.Objects() {
 		if o == nil || !o.Visible() {
 			continue

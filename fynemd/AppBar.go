@@ -26,7 +26,7 @@ type AppBar struct {
 	Title    string
 
 	actions []*widget.Button
-	nav     *NavigationDrawer
+	nav     *NavDrawer
 	objects []fyne.CanvasObject
 }
 
@@ -59,8 +59,8 @@ func (bar *AppBar) SetTitle(title string) {
 	bar.Refresh()
 }
 
-// SetNavigation ...
-func (bar *AppBar) SetNavigation(nav *NavigationDrawer) {
+// SetNav ...
+func (bar *AppBar) SetNav(nav *NavDrawer) {
 	bar.nav = nav
 	bar.Refresh()
 }
@@ -166,7 +166,7 @@ func (br *appBarRenderer) MinSize() fyne.Size {
 		size.Height = 128
 	}
 
-	// TODO: enough space for navigationIcon if visible
+	// TODO: enough space for NavIcon if visible
 
 	// enough space for the text
 	size = size.Max(fyne.MeasureText(br.bar.Title, theme.TextSize(), br.bar.nav.title.TextStyle))
