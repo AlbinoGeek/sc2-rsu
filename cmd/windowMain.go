@@ -34,7 +34,7 @@ type windowMain struct {
 	uploadStatus   []*uploadRecord
 	watcher        *fsnotify.Watcher
 
-	nav    *fynemd.NavigationDrawer
+	nav    *fynemd.NavDrawer
 	topbar *fynemd.AppBar
 
 	// Panes
@@ -86,21 +86,21 @@ func (main *windowMain) Init() {
 	main.settings = makePaneSettings(main).(*paneSettings)
 
 	main.topbar = fynemd.NewAppBar(PROGRAM)
-	main.nav = fynemd.NewNavigationDrawer(
+	main.nav = fynemd.NewNavDrawer(
 		PROGRAM,
 		"",
 		main.accounts,
 		main.uploads,
-		fynemd.NewNavigationSeparator(),
+		fynemd.NewNavSeparator(),
 		main.settings,
 		makePaneAbout(main),
 	)
 	// main.nav.SetImage(theme.InfoIcon())
-	main.topbar.SetNavigation(main.nav)
+	main.topbar.SetNav(main.nav)
 
 	mobile := fyne.CurrentDevice().IsMobile()
 	content := container.NewPadded(layout.NewSpacer()) // ? what's a better way ?
-	main.nav.OnSelect = func(ni fynemd.NavigationItem) {
+	main.nav.OnSelect = func(ni fynemd.NavItem) {
 		content.Objects = []fyne.CanvasObject{ni.GetContent()}
 
 		if mobile {
