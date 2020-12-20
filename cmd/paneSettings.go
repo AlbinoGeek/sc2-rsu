@@ -123,7 +123,7 @@ func (settings *paneSettings) Init() {
 		nil,
 		nil,
 		container.NewVScroll(widget.NewVBox(
-			fynemd.NewScaledText(fynemd.TextSizeHeading5, "StarCraft II"),
+			fynemd.NewTextWithStyle("StarCraft II", fyne.TextAlignLeading, fynemd.StyleHeading5()),
 			container.NewHScroll(settings.replaysRoot),
 			fyne.NewContainerWithLayout(
 				layout.NewGridLayout(2),
@@ -135,11 +135,11 @@ func (settings *paneSettings) Init() {
 				}),
 			),
 			spacer,
-			fynemd.NewScaledText(fynemd.TextSizeHeading5, "sc2ReplayStats"),
+			fynemd.NewTextWithStyle("sc2ReplayStats", fyne.TextAlignLeading, fynemd.StyleHeading5()),
 			container.NewHScroll(settings.apiKey),
 			widget.NewButtonWithIcon("Login and Generate it for me...", theme.ComputerIcon(), settings.openLogin),
 			spacer,
-			fynemd.NewScaledText(fynemd.TextSizeHeading5, "Updates"),
+			fynemd.NewTextWithStyle("Updates", fyne.TextAlignLeading, fynemd.StyleHeading5()),
 			settings.checkUpdates,
 			settings.autoDownload,
 			fyne.NewContainerWithLayout(

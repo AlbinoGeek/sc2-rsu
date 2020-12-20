@@ -1,6 +1,7 @@
 package fynemd
 
 import (
+	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/theme"
 )
@@ -57,6 +58,29 @@ var styleSize = map[TextSize]float64{
 // Design type scale applied to it.
 func NewScaledText(level TextSize, text string) *canvas.Text {
 	return newText(text, styleSize[level], false)
+}
+
+type Style struct {
+	Size TextSize
+	fyne.TextStyle
+}
+
+func StyleHeading5() Style {
+	return Style{
+		Size: TextSizeHeading5,
+		TextStyle: fyne.TextStyle{
+			Bold: true,
+		},
+	}
+}
+
+// NewTextWithStyle returns a canvas.Text element with a given alignment
+// and Material Design Style applied to it. Mimics widget.NewLabelWithStyle
+func NewTextWithStyle(text string, alignment fyne.TextAlign, style Style) *canvas.Text {
+	t := newText(text, styleSize[style.Size], false)
+	t.Alignment = alignment
+	t.TextStyle = style.TextStyle
+	return t
 }
 
 // ! Material Design base font size is 16 but fyne is 14 ...
