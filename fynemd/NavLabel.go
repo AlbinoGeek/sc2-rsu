@@ -9,10 +9,9 @@ import (
 // NavLabel ...
 type NavLabel struct {
 	content fyne.CanvasObject
+	label   fyne.CanvasObject
 	icon    fyne.Resource
 	text    string
-
-	res fyne.CanvasObject
 }
 
 // NewNavLabel ...
@@ -37,33 +36,34 @@ func (l *NavLabel) GetContent() fyne.CanvasObject { return l.content }
 
 // GetLabel ...
 func (l *NavLabel) GetLabel() fyne.CanvasObject {
-	if l.res != nil {
-		if b, ok := l.res.(*widget.Button); ok {
-			refresh := false
+	if l.label == nil {
+		b := widget.NewButtonWithIcon(l.text, l.icon, nil)
+		b.Alignment = widget.ButtonAlignLeading
+		b.Importance = widget.LowImportance
+		l.label = b
 
-			if b.Icon != l.icon {
-				b.Icon = l.icon
-				refresh = true
-			}
-
-			if b.Text != l.text {
-				b.Text = l.text
-			}
-
-			if refresh {
-				b.Refresh()
-			}
-		}
-
-		return l.res
+		return b
 	}
 
-	b := widget.NewButtonWithIcon(l.text, l.icon, nil)
-	b.Alignment = widget.ButtonAlignLeading
-	b.Importance = widget.LowImportance
-	l.res = b
+	if b, ok := l.label.(*widget.Button); ok {
+		refresh := false
 
-	return b
+		if b.Icon != l.icon {
+			b.Icon = l.icon
+			refresh = true
+		}
+
+		if b.Text != l.text {
+			b.Text = l.text
+			refresh = true
+		}
+
+		if refresh {
+			b.Refresh()
+		}
+	}
+
+	return l.label
 }
 
 // GetIcon ...
