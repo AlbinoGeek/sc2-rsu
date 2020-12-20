@@ -37,9 +37,15 @@ func (l *NavLabel) GetContent() fyne.CanvasObject { return l.content }
 // GetLabel ...
 func (l *NavLabel) GetLabel() fyne.CanvasObject {
 	if l.label == nil {
-		b := widget.NewButtonWithIcon(l.text, l.icon, nil)
-		b.Alignment = widget.ButtonAlignLeading
-		b.Importance = widget.LowImportance
+		b := &widget.Button{
+			Alignment:  widget.ButtonAlignLeading,
+			Importance: widget.LowImportance,
+			Text:       l.text,
+			Icon:       l.icon,
+		}
+
+		b.ExtendBaseWidget(b)
+
 		l.label = b
 
 		return b
