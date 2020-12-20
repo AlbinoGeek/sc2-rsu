@@ -6,6 +6,6 @@ import "fyne.io/fyne"
 type NavItem interface {
 	GetContent() fyne.CanvasObject
 	GetLabel() fyne.CanvasObject
-	GetIcon() fyne.Resource
+	// GetIcon() fyne.Resource
 	GetTitle() string
 }

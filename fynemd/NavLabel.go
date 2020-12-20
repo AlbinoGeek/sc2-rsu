@@ -72,8 +72,8 @@ func (l *NavLabel) GetLabel() fyne.CanvasObject {
 	return l.label
 }
 
-// GetIcon ...
-func (l *NavLabel) GetIcon() fyne.Resource { return l.icon }
+// // GetIcon ...
+// func (l *NavLabel) GetIcon() fyne.Resource { return l.icon }
 
 // GetTitle ...
 func (l *NavLabel) GetTitle() string { return l.text }

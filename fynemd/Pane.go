@@ -16,7 +16,7 @@ type Pane interface {
 	GetContent() fyne.CanvasObject
 	SetContent(fyne.CanvasObject)
 	GetLabel() fyne.CanvasObject
-	GetIcon() fyne.Resource
+	// GetIcon() fyne.Resource
 	SetIcon(fyne.Resource)
 	GetTitle() string
 	SetTitle(string)
@@ -75,10 +75,10 @@ func (p *PaneBase) SetContent(content fyne.CanvasObject) {
 	p.content = content
 }
 
-// GetIcon returns the icon shown in labels associated with this pane
-func (p *PaneBase) GetIcon() fyne.Resource {
-	return p.icon
-}
+// // GetIcon returns the icon shown in labels associated with this pane
+// func (p *PaneBase) GetIcon() fyne.Resource {
+// 	return p.icon
+// }
 
 // SetIcon changes the icon shown in labels associated with this pane
 func (p *PaneBase) SetIcon(icon fyne.Resource) {
