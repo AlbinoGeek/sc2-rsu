@@ -17,7 +17,7 @@ require (
 	github.com/magiconair/properties v1.8.4 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1
 	github.com/mitchellh/mapstructure v1.4.0 // indirect
-	github.com/mxschmitt/playwright-go v0.0.0-20201022121208-5de08c36d292
+	github.com/mxschmitt/playwright-go v0.0.0-20201220222148-ca80d16b9f60
 	github.com/pelletier/go-toml v1.8.1 // indirect
 	github.com/smartystreets/assertions v1.2.0 // indirect
 	github.com/spf13/afero v1.5.1 // indirect
@@ -27,10 +27,10 @@ require (
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1
 	github.com/writeas/go-strip-markdown v2.0.1+incompatible
-	golang.org/x/crypto v0.0.0-20201208171446-5f87f3452ae9 // indirect
+	golang.org/x/crypto v0.0.0-20201217014255-9d1352758620 // indirect
 	golang.org/x/image v0.0.0-20201208152932-35266b937fa6 // indirect
-	golang.org/x/net v0.0.0-20201209123823-ac852fbbde11 // indirect
-	golang.org/x/sys v0.0.0-20201211090839-8ad439b19e0f
+	golang.org/x/net v0.0.0-20201216054612-986b41b23924 // indirect
+	golang.org/x/sys v0.0.0-20201221093633-bc327ba9c2f0
 	golang.org/x/term v0.0.0-20201210144234-2321bbc49cbf
 	golang.org/x/text v0.3.4 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
