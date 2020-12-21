@@ -423,7 +423,7 @@ func (main *windowMain) toggleUploading(btn *widget.Button, id string) func() {
 		main.uploadEnabled[id] = !main.uploadEnabled[id]
 
 		if main.uploadEnabled[id] {
-			if err := main.watcher.Remove(filepath.Join(replaysRoot, id, "Replays", "Multiplayer")); err != nil {
+			if err := main.watcher.Add(filepath.Join(replaysRoot, id, "Replays", "Multiplayer")); err != nil {
 				dialog.NewError(err, w)
 
 				return
@@ -432,7 +432,7 @@ func (main *windowMain) toggleUploading(btn *widget.Button, id string) func() {
 			btn.Importance = widget.HighImportance
 			btn.Icon = theme.MediaPauseIcon()
 		} else {
-			if err := main.watcher.Add(filepath.Join(replaysRoot, id, "Replays", "Multiplayer")); err != nil {
+			if err := main.watcher.Remove(filepath.Join(replaysRoot, id, "Replays", "Multiplayer")); err != nil {
 				dialog.NewError(err, w)
 
 				return
