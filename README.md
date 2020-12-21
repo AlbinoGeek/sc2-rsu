@@ -1,4 +1,4 @@
-# Unofficial **SC2ReplayStats Uploader** by AlbinoGeek
+# SC2ReplayStats Uploader
 
 [![MIT License](https://img.shields.io/github/license/AlbinoGeek/sc2-rsu.svg)](https://github.com/AlbinoGeek/sc2-rsu/blob/master/LICENSE)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/AlbinoGeek/sc2-rsu.svg)](https://github.com/AlbinoGeek/sc2-rsu)
