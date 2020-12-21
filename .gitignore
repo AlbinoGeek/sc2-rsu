@@ -3,6 +3,7 @@
 
 # Build Artifacts
 _dist/archive
+_dist/checksums.sha512
 _dist/sc2-rsu*
 fyne-cross/bin/**/*
 fyne-cross/dist/**/*
