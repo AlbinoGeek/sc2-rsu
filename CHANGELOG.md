@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased
+
+**Added**
+
+- New "Material Design" GUI layout (using panes instead of tabs/windows)
+- Ability to hide (disable) Toons from having their replays uploaded
+
+**Fixed**
+
+- Multiple bugs leading to the accounts list not being populated or updated
+- Multiple bugs regarding uploading replays while they were still being written
+- Multiple bugs that could lead to program crashes
+
 ## v0.3
 
 **Added**
