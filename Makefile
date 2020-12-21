@@ -1,5 +1,7 @@
 MAKE                = make --no-print-directory
 
+FYNE_CROSS          = $(shell go env | awk -F'"' '/GOPATH/ {print $$2}')/bin/fyne-cross
+
 DESCRIBE           := $(shell git describe --match "v*" --always --tags)
 DESCRIBE_PARTS     := $(subst -, ,$(DESCRIBE))
 
@@ -19,6 +21,7 @@ NEXT_MICRO          = $(shell echo $$(($(MICRO)+$(COMMITS_SINCE_TAG))))
 
 BINARYNAME          = sc2-rsu
 MODNAME             = github.com/AlbinoGeek/sc2-rsu
+APP_NAME            = com.github.albinogeek.sc2-rsu
 TARGETDIR           = _dist
 
 ifeq ($(strip $(COMMITS_SINCE_TAG)),)
@@ -36,6 +39,7 @@ TIME                = $(shell date +'%H:%M:%S')
 COMMIT             := $(shell git rev-parse HEAD)
 AUTHOR             := $(firstword $(subst @, ,$(shell git show --format="%aE" $(COMMIT))))
 BRANCH_NAME        := $(shell git rev-parse --abbrev-ref HEAD)
+NCOMMITS            = $(shell git log --oneline | wc -l)
 
 TAG_MESSAGE         = "$(TIME) $(DATE) $(AUTHOR) $(BRANCH_NAME)"
 COMMIT_MESSAGE     := $(shell git log --format=%B -n 1 $(COMMIT))
@@ -43,6 +47,18 @@ COMMIT_MESSAGE     := $(shell git log --format=%B -n 1 $(COMMIT))
 CURRENT_TAG_MICRO  := "v$(CURRENT_VERSION_MICRO)"
 CURRENT_TAG_MINOR  := "v$(CURRENT_VERSION_MINOR)"
 CURRENT_TAG_MAJOR  := "v$(CURRENT_VERSION_MAJOR)"
+
+# --- Recipes ---
+
+release_build = \
+	$(FYNE_CROSS) $(1) -arch=$(2) \
+		-app-build $(NCOMMITS) \
+		-app-id $(APP_NAME) \
+		-app-version $(CURRENT_VERSION_MICRO) \
+		-ldflags "-s -w -X main.PROGRAM=$(BINARYNAME) -X main.VERSION=$(CURRENT_VERSION_MICRO)" \
+		"$(MODNAME)" && \
+	cp "fyne-cross/bin/$(1)-$(2)/$(BINARYNAME)$(3)" \
+		"$(TARGETDIR)/$(BINARYNAME)-$(CURRENT_VERSION_MICRO)-$(1)-$(2)$(3)"
 
 # --- Version commands ---
 
@@ -97,10 +113,10 @@ all: "$(TARGETDIR)/$(BINARYNAME)"
 
 .PHONY: release
 release:
-	GOOS=linux GOARCH=amd64 go build -ldflags "-s -w -X main.PROGRAM=$(BINARYNAME) -X main.VERSION=$(CURRENT_VERSION_MICRO)" -o "$(TARGETDIR)/$(BINARYNAME)-$(CURRENT_VERSION_MICRO)-linux-amd64" "$(MODNAME)"
-	GOOS=windows GOARCH=amd64 go build -ldflags "-s -w -X main.PROGRAM=$(BINARYNAME) -X main.VERSION=$(CURRENT_VERSION_MICRO)" -o "$(TARGETDIR)/$(BINARYNAME)-$(CURRENT_VERSION_MICRO)-windows-amd64.exe" "$(MODNAME)"
-	GOOS=linux GOARCH=386 go build -ldflags "-s -w -X main.PROGRAM=$(BINARYNAME) -X main.VERSION=$(CURRENT_VERSION_MICRO)" -o "$(TARGETDIR)/$(BINARYNAME)-$(CURRENT_VERSION_MICRO)-linux-386" "$(MODNAME)"
-	GOOS=windows GOARCH=386 go build -ldflags "-s -w -X main.PROGRAM=$(BINARYNAME) -X main.VERSION=$(CURRENT_VERSION_MICRO)" -o "$(TARGETDIR)/$(BINARYNAME)-$(CURRENT_VERSION_MICRO)-windows-386.exe" "$(MODNAME)"
+	$(call release_build,linux,amd64)
+	$(call release_build,linux,386)
+	$(call release_build,windows,amd64,.exe)
+	$(call release_build,windows,386,.exe)
 
 .PHONY: clean
 clean:

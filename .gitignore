@@ -4,6 +4,9 @@
 # Build Artifacts
 _dist/archive
 _dist/sc2-rsu*
+fyne-cross/bin/**/*
+fyne-cross/dist/**/*
+fyne-cross/tmp/**/*
 
 # Configuration Files
 *.yaml
