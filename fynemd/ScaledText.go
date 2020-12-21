@@ -60,11 +60,13 @@ func NewScaledText(level TextSize, text string) *canvas.Text {
 	return newText(text, styleSize[level], false)
 }
 
+// Style is a wrapped fyne.TextStyle with a TextSize
 type Style struct {
 	Size TextSize
 	fyne.TextStyle
 }
 
+// StyleHeading5 is the Material Design standard Heading5 text style
 func StyleHeading5() Style {
 	return Style{
 		Size: TextSizeHeading5,
