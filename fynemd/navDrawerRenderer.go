@@ -75,6 +75,7 @@ func (l *navDrawerRenderer) Layout(space fyne.Size) {
 	}
 
 	for i, o := range l.Objects()[4:] {
+		// object returned by NavSeparator.GetLabel()
 		if sep, ok := o.(*widget.Separator); ok {
 			sep.Resize(sepSize)
 			sep.Move(fyne.NewPos(0, pos.Y+qpad-1))
@@ -83,6 +84,7 @@ func (l *navDrawerRenderer) Layout(space fyne.Size) {
 			continue
 		}
 
+		// object returned by NavLabel.GetLabel()
 		if b, ok := o.(*widget.Button); ok {
 			if b.OnTapped == nil {
 				b.OnTapped = func(j int) func() {
@@ -93,6 +95,7 @@ func (l *navDrawerRenderer) Layout(space fyne.Size) {
 			}
 		}
 
+		// resizing for a button-like object
 		size := o.MinSize()
 		size.Width = space.Width
 		size.Height += Padding
@@ -113,6 +116,7 @@ func (l *navDrawerRenderer) MinSize() fyne.Size {
 			continue
 		}
 
+		// at least as wide as the widest child
 		childSize := o.MinSize()
 		size = size.Max(childSize)
 		size.Height += childSize.Height + Padding/2
