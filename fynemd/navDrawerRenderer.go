@@ -78,7 +78,8 @@ func (l *navDrawerRenderer) Layout(space fyne.Size) {
 		// object returned by NavSeparator.GetLabel()
 		if sep, ok := o.(*widget.Separator); ok {
 			sep.Resize(sepSize)
-			sep.Move(fyne.NewPos(0, pos.Y+qpad-1))
+
+			sep.Move(fyne.NewPos(0, pos.Y+qpad+2))
 			pos.Y += Padding
 
 			continue
@@ -101,7 +102,7 @@ func (l *navDrawerRenderer) Layout(space fyne.Size) {
 		size.Height += Padding
 		o.Resize(size)
 		o.Move(pos)
-		pos.Y += size.Height + Padding/2
+		pos.Y += size.Height + qpad
 	}
 }
 
@@ -111,7 +112,10 @@ func (l *navDrawerRenderer) Layout(space fyne.Size) {
 func (l *navDrawerRenderer) MinSize() fyne.Size {
 	size := fyne.NewSize(Padding, Padding)
 
-	for _, o := range l.Objects() {
+	sep := l.nav.separator.Position()
+	size.Add(fyne.NewSize(sep.X, sep.Y))
+
+	for _, o := range l.Objects()[4:] {
 		if o == nil || !o.Visible() {
 			continue
 		}
@@ -119,10 +123,14 @@ func (l *navDrawerRenderer) MinSize() fyne.Size {
 		// at least as wide as the widest child
 		childSize := o.MinSize()
 		size = size.Max(childSize)
-		size.Height += childSize.Height + Padding/2
+
+		// and the height of the child + padding
+		// TODO: handle separators (which have more padding) vs buttons
+		size.Height += childSize.Height + Padding
 	}
 
-	return size.Max(fyne.NewSize(128, 128)).Add(fyne.NewSize(Padding, 0))
+	// hard minimum size: 128x128
+	return size.Max(fyne.NewSize(128, 128))
 }
 
 // Objects
