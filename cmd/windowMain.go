@@ -292,6 +292,13 @@ func (main *windowMain) OpenGitHub(slug string) func() {
 }
 
 func (main *windowMain) openGettingStarted1() {
+	labelWithWrapping := func(text string) *widget.Label {
+		label := widget.NewLabel(text)
+		label.Wrapping = fyne.TextWrapWord
+
+		return label
+	}
+
 	main.gettingStarted = 1
 	main.WizardModal("Skip", "Next", nil, func() {
 		if viper.GetString("replaysroot") == "" {
