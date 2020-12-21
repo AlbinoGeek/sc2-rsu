@@ -8,6 +8,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/container"
+	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
@@ -92,6 +93,17 @@ func (t *paneAccounts) Update() {
 
 			// todo: reverse this map ( disableUpload )
 			main.uploadEnabled[id] = true
+
+			if !getToonEnabled(id) {
+				if err := main.watcher.Remove(filepath.Join(viper.GetString("replaysRoot"), id, "Replays", "Multiplayer")); err != nil {
+					dialog.NewError(err, t.GetWindow().GetWindow())
+
+					return
+				}
+
+				btnToggle.Importance = widget.MediumImportance
+				btnToggle.Icon = theme.MediaPlayIcon()
+			}
 
 			t.container.Add(container.NewBorder(nil, nil, btnToggle, nil, card))
 		}

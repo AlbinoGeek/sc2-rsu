@@ -441,7 +441,21 @@ func (main *windowMain) toggleUploading(btn *widget.Button, id string) func() {
 			btn.Importance = widget.MediumImportance
 			btn.Icon = theme.MediaPlayIcon()
 		}
+
+		main.updateEnabledToons()
 	}
+}
+
+func (main *windowMain) updateEnabledToons() {
+	enabledToons := make([]string, 0)
+
+	for key, enabled := range main.uploadEnabled {
+		if enabled {
+			enabledToons = append(enabledToons, key)
+		}
+	}
+
+	setToons(enabledToons)
 }
 
 func (main *windowMain) watchReplayStatus(entry *uploadRecord) error {
