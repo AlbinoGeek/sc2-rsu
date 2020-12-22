@@ -149,7 +149,7 @@ func extractAPIKey(page *playwright.Page, accountID string) (string, error) {
 	return strings.Trim(strings.Split(t, ": ")[1], " \r\n\t"), nil
 }
 
-func login(page *playwright.Page, email string, password string) (accountID string, err error) {
+func login(page *playwright.Page, email, password string) (accountID string, err error) {
 	golog.Debug("Navigating to login page...")
 
 	if _, err := page.Goto(fmt.Sprintf("%s/Account/signin", sc2replaystats.WebRoot)); err != nil {
