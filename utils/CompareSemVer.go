@@ -5,36 +5,37 @@ import (
 	"strings"
 )
 
-// CompareSemVer returns 1 if the semantic version `new` is greater than `old`
-// and -1 otherwise. A semantic version is one that follows the format "1.2.3".
-// If either old or new startss with the letter "v", it will be stripped before
-// comparison, along with any hyphenenated (-) suffix. (e.g: "v0.1-alpha")
-func CompareSemVer(old, new string) int {
+// CompareSemVer returns 1 if the semantic version `newVer` is greater than
+// `oldVer` and -1 otherwise. A semantic version is one that follows the
+// format "1.2.3". If either oldVer or newVer startss with the letter "v",
+// it will be stripped before comparison, along with any hyphenenated (-)
+// suffix. (e.g: "v0.1-alpha" becomes "0.1")
+func CompareSemVer(oldVer, newVer string) int {
 	// any version is better than no version
-	if new == "" {
+	if newVer == "" {
 		return -1
 	}
 
-	if old == "" {
+	if oldVer == "" {
 		return 1
 	}
 
 	// strip "v" prefixes
-	if new[0] == 'v' {
-		new = new[1:]
+	if newVer[0] == 'v' {
+		newVer = newVer[1:]
 	}
 
-	if old[0] == 'v' {
-		old = old[1:]
+	if oldVer[0] == 'v' {
+		oldVer = oldVer[1:]
 	}
 
-	nparts := strings.Split(strings.Split(new, "-")[0], ".")
-	oparts := strings.Split(strings.Split(old, "-")[0], ".")
+	nparts := strings.Split(strings.Split(newVer, "-")[0], ".")
+	oparts := strings.Split(strings.Split(oldVer, "-")[0], ".")
 
 	// compare each part
 	for i := range nparts {
 		if len(oparts)-1 < i {
-			// new version is longer
+			// newVer is longer
 			return 1
 		}
 
