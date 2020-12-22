@@ -174,9 +174,5 @@ func setToons(toons []string) error {
 
 	viper.Set("toons", confToons)
 
-	if err := saveConfig(); err != nil {
-		return err
-	}
-
-	return nil
+	return saveConfig()
 }
