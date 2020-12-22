@@ -41,7 +41,7 @@ func StripPathParts(path string, stripRight int) string {
 		path = strings.Join(parts[:len(parts)-stripRight], string(filepath.Separator))
 
 		// restore absolute-ness for re-assembled path
-		if abs && (len(path) == 0 || path[0] != filepath.Separator) {
+		if abs && (path == "" || path[0] != filepath.Separator) {
 			return fmt.Sprintf("%c%s", filepath.Separator, path)
 		}
 	}
