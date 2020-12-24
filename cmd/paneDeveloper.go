@@ -41,7 +41,6 @@ func (t *paneDeveloper) Init() {
 		} else {
 			denseBtn.Importance = widget.HighImportance
 		}
-		// Triggers Layout ...????
 		main.topbar.SetDense(!main.topbar.Dense)
 	}
 	t.container.Add(denseBtn)
@@ -63,21 +62,13 @@ func (t *paneDeveloper) Init() {
 	hideBtn := widget.NewButton("Toggle Visibility", nil)
 	hideBtn.Importance = widget.HighImportance
 	hideBtn.OnTapped = func() {
-		if main.nav.Visible() {
-			hideBtn.Importance = widget.MediumImportance
-			// Does not trigger `Layout`
-			main.nav.Hide()
-		} else {
+		if main.topbar.NavClosed {
 			hideBtn.Importance = widget.HighImportance
-			// Does not trigger `Layout`
-			main.nav.Show()
+			main.topbar.SetNavClosed(false)
+		} else {
+			hideBtn.Importance = widget.MediumImportance
+			main.topbar.SetNavClosed(true)
 		}
-
-		// None of these trigger `Layout`
-		main.topbar.ExtendBaseWidget(main.topbar)
-		main.topbar.SetDense(!main.topbar.Dense)
-		main.topbar.SetDense(!main.topbar.Dense)
-		main.topbar.Refresh()
 	}
 
 	t.container.Add(hideBtn)

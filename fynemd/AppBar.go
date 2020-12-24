@@ -21,9 +21,10 @@ var (
 type AppBar struct {
 	widget.BaseWidget
 
-	Dense    bool
-	Extended bool
-	Title    string
+	Dense     bool
+	Extended  bool
+	NavClosed bool
+	Title     string
 
 	actions []*widget.Button
 	nav     *NavDrawer
@@ -68,6 +69,21 @@ func (bar *AppBar) SetTitle(title string) {
 // SetNav ...
 func (bar *AppBar) SetNav(nav *NavDrawer) {
 	bar.nav = nav
+	bar.Refresh()
+}
+
+// SetNavClosed ...
+func (bar *AppBar) SetNavClosed(closed bool) {
+	if bar.nav == nil {
+		return
+	}
+
+	if bar.NavClosed = closed; bar.NavClosed {
+		bar.nav.Hide()
+	} else {
+		bar.nav.Show()
+	}
+
 	bar.Refresh()
 }
 
@@ -117,12 +133,10 @@ func (*appBarRenderer) Destroy() {}
 
 func (br *appBarRenderer) Init() {
 	br.navIcon = widget.NewButtonWithIcon("", theme.MenuIcon(), func() {
-		if br.bar.nav != nil {
-			if br.bar.nav.Visible() {
-				br.bar.nav.Hide()
-			} else {
-				br.bar.nav.Show()
-			}
+		if br.bar.NavClosed {
+			br.bar.SetNavClosed(false)
+		} else {
+			br.bar.SetNavClosed(true)
 		}
 	})
 	br.title = NewScaledText(TextSizeHeading5, br.bar.Title)
@@ -144,18 +158,16 @@ func (br *appBarRenderer) Layout(space fyne.Size) {
 		pos.Y = Padding / 2
 	}
 
-	if br.navIcon.Visible() {
-		br.navIcon.Move(pos)
-		br.navIcon.Resize(fyne.NewSize(IconSize, IconSize))
-	}
+	br.navIcon.Move(pos)
+	br.navIcon.Resize(fyne.NewSize(IconSize, IconSize))
 
 	pos.Y -= Padding / 3
 
-	if br.bar.nav != nil && !br.bar.nav.Visible() {
+	if br.bar.nav == nil || !br.bar.NavClosed {
+		br.navIcon.Hide()
+	} else {
 		pos.X += br.navIcon.Size().Width + Padding
 		br.navIcon.Show()
-	} else {
-		br.navIcon.Hide()
 	}
 
 	br.title.Move(pos)
@@ -206,6 +218,11 @@ func (br *appBarRenderer) Objects() []fyne.CanvasObject {
 //
 // Implements: fyne.WidgetRenderer
 func (br *appBarRenderer) Refresh() {
+	// state mismatch -- navIcon visibility must change
+	if br.navIcon.Visible() != br.bar.NavClosed {
+		br.Layout(br.bar.Size())
+	}
+
 	for _, o := range br.Objects() {
 		if o == nil || !o.Visible() {
 			continue
