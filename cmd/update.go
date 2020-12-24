@@ -26,7 +26,7 @@ import (
 var (
 	ghClient = github.NewClient(nil)
 	ghOwner  = "AlbinoGeek"
-	ghRepo   = "sc2-rsu"
+	ghRepo   = PROGRAM
 
 	minimumUpdatePeriod = time.Hour
 
