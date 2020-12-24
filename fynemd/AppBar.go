@@ -218,6 +218,8 @@ func (br *appBarRenderer) Objects() []fyne.CanvasObject {
 //
 // Implements: fyne.WidgetRenderer
 func (br *appBarRenderer) Refresh() {
+	br.title.Text = br.bar.Title
+
 	// state mismatch -- navIcon visibility must change
 	if br.navIcon.Visible() != br.bar.NavClosed {
 		br.Layout(br.bar.Size())
