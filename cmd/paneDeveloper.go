@@ -3,6 +3,7 @@ package cmd
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/container"
+	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
 	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
 	"github.com/AlbinoGeek/sc2-rsu/fynemd"
@@ -33,6 +34,10 @@ func (t *paneDeveloper) Init() {
 	var (
 		denseBtn    = widget.NewButton("Toggle Dense", nil)
 		extendedBtn = widget.NewButton("Toggle Extended", nil)
+
+		appTitleEntry    = widget.NewEntry()
+		navTitleEntry    = widget.NewEntry()
+		navSubtitleEntry = widget.NewEntry()
 	)
 
 	denseBtn.OnTapped = func() {
@@ -43,7 +48,6 @@ func (t *paneDeveloper) Init() {
 		}
 		main.topbar.SetDense(!main.topbar.Dense)
 	}
-	t.container.Add(denseBtn)
 
 	extendedBtn.OnTapped = func() {
 		if main.topbar.Extended {
@@ -53,7 +57,22 @@ func (t *paneDeveloper) Init() {
 		}
 		main.topbar.SetExtended(!main.topbar.Extended)
 	}
-	t.container.Add(extendedBtn)
+
+	t.container.Add(fyne.NewContainerWithLayout(
+		layout.NewGridLayout(2),
+		denseBtn,
+		extendedBtn,
+	))
+
+	appTitleEntry.PlaceHolder = "Title Text"
+	appTitleEntry.OnChanged = func(str string) {
+		main.topbar.SetTitle(str)
+	}
+	t.container.Add(fyne.NewContainerWithLayout(
+		layout.NewFormLayout(),
+		widget.NewLabel("Title"),
+		appTitleEntry,
+	))
 
 	// ---
 
@@ -70,8 +89,27 @@ func (t *paneDeveloper) Init() {
 			main.topbar.SetNavClosed(true)
 		}
 	}
-
 	t.container.Add(hideBtn)
+
+	navTitleEntry.PlaceHolder = "Title Text"
+	navTitleEntry.OnChanged = func(str string) {
+		main.nav.SetTitle(str)
+	}
+	t.container.Add(fyne.NewContainerWithLayout(
+		layout.NewFormLayout(),
+		widget.NewLabel("Title"),
+		navTitleEntry,
+	))
+
+	navSubtitleEntry.PlaceHolder = "Subtitle Text"
+	navSubtitleEntry.OnChanged = func(str string) {
+		main.nav.SetSubtitle(str)
+	}
+	t.container.Add(fyne.NewContainerWithLayout(
+		layout.NewFormLayout(),
+		widget.NewLabel("Subtitle"),
+		navSubtitleEntry,
+	))
 
 	t.container.Refresh()
 }
