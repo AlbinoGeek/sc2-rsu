@@ -3,6 +3,7 @@ package sc2replaystats
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/kataras/golog"
 )
@@ -22,6 +23,14 @@ func (client *Client) GetReplayStatus(replayQueueID string) (replayID string, er
 	}
 
 	if e, ok := res["error"]; ok {
+		if strings.HasPrefix(e, "Duplicate Replay") {
+			parts := strings.Split(e, ": ")
+			if len(parts) == 2 {
+				replayID = parts[1]
+				return
+			}
+		}
+
 		golog.Debugf("sc2replaystats failure: %v", e)
 
 		err = fmt.Errorf("replay processing failed")
