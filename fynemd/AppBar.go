@@ -173,10 +173,6 @@ func (br *appBarRenderer) Layout(space fyne.Size) {
 	br.title.Move(pos)
 	br.title.Resize(br.title.MinSize())
 
-	if br.bar.Title == "" && br.title.Visible() {
-		br.title.Hide()
-	}
-
 	// TODO: Layout actions from right
 
 	// TODO: if len(actions) > 3 { actionsMenu = actions[2:] } ...
