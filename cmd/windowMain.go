@@ -124,7 +124,7 @@ func (main *windowMain) Init() {
 			),
 		)
 
-		main.nav.Hide()
+		main.topbar.SetNavClosed(true)
 	} else {
 		main.GetWindow().SetContent(
 			container.NewBorder(
