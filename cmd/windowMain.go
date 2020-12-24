@@ -20,7 +20,7 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
-	"github.com/AlbinoGeek/sc2-rsu/fynemd"
+	"github.com/AlbinoGeek/sc2-rsu/fynex"
 	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
 	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
 	"github.com/AlbinoGeek/sc2-rsu/utils"
@@ -34,8 +34,8 @@ type windowMain struct {
 	uploadStatus   []*uploadRecord
 	watcher        *fsnotify.Watcher
 
-	nav    *fynemd.NavDrawer
-	topbar *fynemd.AppBar
+	nav    *fynex.NavDrawer
+	topbar *fynex.AppBar
 
 	// Panes
 	accounts *paneAccounts
@@ -85,16 +85,16 @@ func (main *windowMain) Init() {
 	main.uploads = makePaneUploads(main).(*paneUploads)
 	main.settings = makePaneSettings(main).(*paneSettings)
 
-	main.topbar = fynemd.NewAppBar(PROGRAM)
-	main.nav = fynemd.NewNavDrawer(
+	main.topbar = fynex.NewAppBar(PROGRAM)
+	main.nav = fynex.NewNavDrawer(
 		PROGRAM,
 		"",
 		main.accounts,
 		main.uploads,
-		fynemd.NewNavSeparator(),
+		fynex.NewNavSeparator(),
 		main.settings,
 		makePaneAbout(main),
-		fynemd.NewNavSeparator(),
+		fynex.NewNavSeparator(),
 		makePaneDeveloper(main),
 	)
 	// main.nav.SetImage(theme.InfoIcon())
@@ -102,7 +102,7 @@ func (main *windowMain) Init() {
 
 	mobile := fyne.CurrentDevice().IsMobile()
 	content := container.NewPadded(layout.NewSpacer()) // ? what's a better way ?
-	main.nav.OnSelect = func(ni fynemd.NavItem) {
+	main.nav.OnSelect = func(ni fynex.NavItem) {
 		content.Objects = []fyne.CanvasObject{ni.GetContent()}
 
 		if mobile {

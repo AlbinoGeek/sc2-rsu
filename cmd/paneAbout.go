@@ -9,17 +9,17 @@ import (
 	"fyne.io/fyne/widget"
 
 	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
-	"github.com/AlbinoGeek/sc2-rsu/fynemd"
+	"github.com/AlbinoGeek/sc2-rsu/fynex"
 	"github.com/google/go-github/v32/github"
 )
 
 type paneAbout struct {
-	fynemd.Pane
+	fynex.Pane
 }
 
-func makePaneAbout(w gui.Window) fynemd.Pane {
+func makePaneAbout(w gui.Window) fynex.Pane {
 	p := &paneAbout{
-		fynemd.NewPaneWithIcon("Help & Feedback", feedbackIcon, w),
+		fynex.NewPaneWithIcon("Help & Feedback", feedbackIcon, w),
 	}
 
 	main := w.(*windowMain)

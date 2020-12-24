@@ -19,13 +19,13 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
-	"github.com/AlbinoGeek/sc2-rsu/fynemd"
+	"github.com/AlbinoGeek/sc2-rsu/fynex"
 	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
 	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
 )
 
 type paneSettings struct {
-	fynemd.Pane
+	fynex.Pane
 
 	// do we have unsaved changes in the form?
 	unsaved bool
@@ -38,9 +38,9 @@ type paneSettings struct {
 	updatePeriod *widget.Entry
 }
 
-func makePaneSettings(w gui.Window) fynemd.Pane {
+func makePaneSettings(w gui.Window) fynex.Pane {
 	p := &paneSettings{
-		Pane: fynemd.NewPaneWithIcon("Settings", theme.SettingsIcon(), w),
+		Pane: fynex.NewPaneWithIcon("Settings", theme.SettingsIcon(), w),
 	}
 
 	p.Init()
@@ -123,7 +123,7 @@ func (settings *paneSettings) Init() {
 		nil,
 		nil,
 		container.NewVScroll(widget.NewVBox(
-			fynemd.NewTextWithStyle("StarCraft II", fyne.TextAlignLeading, fynemd.StyleHeading5()),
+			fynex.NewTextWithStyle("StarCraft II", fyne.TextAlignLeading, fynex.StyleHeading5()),
 			container.NewHScroll(settings.replaysRoot),
 			fyne.NewContainerWithLayout(
 				layout.NewGridLayout(2),
@@ -135,11 +135,11 @@ func (settings *paneSettings) Init() {
 				}),
 			),
 			spacer,
-			fynemd.NewTextWithStyle("sc2ReplayStats", fyne.TextAlignLeading, fynemd.StyleHeading5()),
+			fynex.NewTextWithStyle("sc2ReplayStats", fyne.TextAlignLeading, fynex.StyleHeading5()),
 			container.NewHScroll(settings.apiKey),
 			widget.NewButtonWithIcon("Login and Generate it for me...", theme.ComputerIcon(), settings.openLogin),
 			spacer,
-			fynemd.NewTextWithStyle("Updates", fyne.TextAlignLeading, fynemd.StyleHeading5()),
+			fynex.NewTextWithStyle("Updates", fyne.TextAlignLeading, fynex.StyleHeading5()),
 			settings.checkUpdates,
 			settings.autoDownload,
 			fyne.NewContainerWithLayout(

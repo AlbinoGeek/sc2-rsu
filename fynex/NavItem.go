@@ -1,4 +1,4 @@
-package fynemd
+package fynex
 
 import "fyne.io/fyne"
 

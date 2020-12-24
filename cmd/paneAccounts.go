@@ -16,19 +16,19 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
-	"github.com/AlbinoGeek/sc2-rsu/fynemd"
+	"github.com/AlbinoGeek/sc2-rsu/fynex"
 	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
 )
 
 type paneAccounts struct {
-	fynemd.Pane
+	fynex.Pane
 
 	container *fyne.Container
 }
 
-func makePaneAccounts(w gui.Window) fynemd.Pane {
+func makePaneAccounts(w gui.Window) fynex.Pane {
 	p := &paneAccounts{
-		Pane: fynemd.NewPaneWithIcon("Accounts", accIcon, w),
+		Pane: fynex.NewPaneWithIcon("Accounts", accIcon, w),
 	}
 
 	p.container = container.NewVBox()

@@ -11,19 +11,19 @@ import (
 	"fyne.io/fyne/widget"
 
 	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
-	"github.com/AlbinoGeek/sc2-rsu/fynemd"
+	"github.com/AlbinoGeek/sc2-rsu/fynex"
 	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
 )
 
 type paneUploads struct {
-	fynemd.Pane
+	fynex.Pane
 
 	table *widget.Table
 }
 
-func makePaneUploads(w gui.Window) fynemd.Pane {
+func makePaneUploads(w gui.Window) fynex.Pane {
 	p := &paneUploads{
-		Pane: fynemd.NewPaneWithIcon("Uploads", uploadIcon, w),
+		Pane: fynex.NewPaneWithIcon("Uploads", uploadIcon, w),
 	}
 
 	p.Init()
@@ -37,7 +37,7 @@ func (t *paneUploads) Init() {
 	t.table = widget.NewTable(
 		func() (int, int) { return len(main.uploadStatus), 3 },
 		func() fyne.CanvasObject {
-			return fynemd.NewScaledText(fynemd.TextSizeBody1, "@@@@@@@@")
+			return fynex.NewScaledText(fynex.TextSizeBody1, "@@@@@@@@")
 		},
 		func(tci widget.TableCellID, f fyne.CanvasObject) {
 			l := f.(*canvas.Text)
@@ -70,15 +70,15 @@ func (t *paneUploads) Init() {
 
 	pad := theme.Padding()
 
-	tblName := fynemd.NewScaledText(fynemd.TextSizeSubtitle1, "Map Name")
+	tblName := fynex.NewScaledText(fynex.TextSizeSubtitle1, "Map Name")
 	tblName.TextStyle.Bold = true
 	tblName.Move(fyne.NewPos(pad*2, 0))
 
-	tblID := fynemd.NewScaledText(fynemd.TextSizeSubtitle1, "ID")
+	tblID := fynex.NewScaledText(fynex.TextSizeSubtitle1, "ID")
 	tblID.TextStyle.Bold = true
 	tblID.Move(fyne.NewPos(228+pad*5, 0))
 
-	tblStatus := fynemd.NewScaledText(fynemd.TextSizeSubtitle1, "Status")
+	tblStatus := fynex.NewScaledText(fynex.TextSizeSubtitle1, "Status")
 	tblStatus.TextStyle.Bold = true
 	tblStatus.Move(fyne.NewPos(312+pad*7, 0))
 

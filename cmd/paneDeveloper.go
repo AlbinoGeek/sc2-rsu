@@ -6,18 +6,18 @@ import (
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/widget"
 	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
-	"github.com/AlbinoGeek/sc2-rsu/fynemd"
+	"github.com/AlbinoGeek/sc2-rsu/fynex"
 )
 
 type paneDeveloper struct {
-	fynemd.Pane
+	fynex.Pane
 
 	container *fyne.Container
 }
 
-func makePaneDeveloper(w gui.Window) fynemd.Pane {
+func makePaneDeveloper(w gui.Window) fynex.Pane {
 	p := &paneDeveloper{
-		Pane: fynemd.NewPaneWithIcon("Developer", codeIcon, w),
+		Pane: fynex.NewPaneWithIcon("Developer", codeIcon, w),
 	}
 
 	p.container = container.NewVBox()
@@ -29,7 +29,7 @@ func makePaneDeveloper(w gui.Window) fynemd.Pane {
 func (t *paneDeveloper) Init() {
 	main := t.GetWindow().(*windowMain)
 
-	t.container.Add(fynemd.NewTextWithStyle("AppBar Top", fyne.TextAlignLeading, fynemd.StyleHeading5()))
+	t.container.Add(fynex.NewTextWithStyle("AppBar Top", fyne.TextAlignLeading, fynex.StyleHeading5()))
 
 	var (
 		denseBtn    = widget.NewButton("Toggle Dense", nil)
@@ -76,7 +76,7 @@ func (t *paneDeveloper) Init() {
 
 	// ---
 
-	t.container.Add(fynemd.NewTextWithStyle("NavDrawer Left", fyne.TextAlignLeading, fynemd.StyleHeading5()))
+	t.container.Add(fynex.NewTextWithStyle("NavDrawer Left", fyne.TextAlignLeading, fynex.StyleHeading5()))
 
 	hideBtn := widget.NewButton("Toggle Visibility", nil)
 	hideBtn.Importance = widget.HighImportance
