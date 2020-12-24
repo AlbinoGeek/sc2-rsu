@@ -24,7 +24,8 @@ type AppBar struct {
 	Dense     bool
 	Extended  bool
 	NavClosed bool
-	Title     string
+	navIcon   *widget.Button
+	title     *canvas.Text
 
 	actions []*widget.Button
 	nav     *NavDrawer
@@ -34,8 +35,16 @@ type AppBar struct {
 // NewAppBar ...
 func NewAppBar(title string) *AppBar {
 	bar := &AppBar{
-		Title: title,
+		title: NewTextWithStyle(title, fyne.TextAlignLeading, StyleHeading5()),
 	}
+
+	bar.navIcon = widget.NewButtonWithIcon("", theme.MenuIcon(), func() {
+		if bar.NavClosed {
+			bar.SetNavClosed(false)
+		} else {
+			bar.SetNavClosed(true)
+		}
+	})
 
 	bar.ExtendBaseWidget(bar)
 
@@ -62,7 +71,7 @@ func (bar *AppBar) SetExtended(extended bool) {
 
 // SetTitle ...
 func (bar *AppBar) SetTitle(title string) {
-	bar.Title = title
+	bar.title.Text = title
 	bar.Refresh()
 }
 
@@ -92,13 +101,9 @@ func (bar *AppBar) SetNavClosed(closed bool) {
 //
 // Implements: fyne.Widget
 func (bar *AppBar) CreateRenderer() fyne.WidgetRenderer {
-	rend := &appBarRenderer{
+	return &appBarRenderer{
 		bar: bar,
 	}
-
-	rend.Init()
-
-	return rend
 }
 
 // --
@@ -110,9 +115,6 @@ func (bar *AppBar) CreateRenderer() fyne.WidgetRenderer {
 // Implements: fyne.WidgetRenderer
 type appBarRenderer struct {
 	bar *AppBar
-
-	navIcon *widget.Button
-	title   *canvas.Text
 }
 
 // BackgroundColor returns the color that should be used to draw the background of this renderer’s widget.
@@ -131,21 +133,6 @@ func (*appBarRenderer) BackgroundColor() color.Color {
 // Implements: fyne.WidgetRenderer
 func (*appBarRenderer) Destroy() {}
 
-func (br *appBarRenderer) Init() {
-	br.navIcon = widget.NewButtonWithIcon("", theme.MenuIcon(), func() {
-		if br.bar.NavClosed {
-			br.bar.SetNavClosed(false)
-		} else {
-			br.bar.SetNavClosed(true)
-		}
-	})
-	br.title = NewScaledText(TextSizeHeading5, br.bar.Title)
-	// br.title.TextStyle.Bold = true
-	br.bar.objects = []fyne.CanvasObject{
-		br.navIcon, br.title,
-	}
-}
-
 // Layout is a hook that is called if the widget needs to be laid out.
 // This should never call Refresh.
 //
@@ -158,20 +145,20 @@ func (br *appBarRenderer) Layout(space fyne.Size) {
 		pos.Y = Padding / 2
 	}
 
-	br.navIcon.Move(pos)
-	br.navIcon.Resize(fyne.NewSize(IconSize, IconSize))
+	br.bar.navIcon.Move(pos)
+	br.bar.navIcon.Resize(fyne.NewSize(IconSize, IconSize))
 
 	pos.Y -= Padding / 3
 
 	if br.bar.nav == nil || !br.bar.NavClosed {
-		br.navIcon.Hide()
+		br.bar.navIcon.Hide()
 	} else {
-		pos.X += br.navIcon.Size().Width + Padding
-		br.navIcon.Show()
+		pos.X += br.bar.navIcon.Size().Width + Padding
+		br.bar.navIcon.Show()
 	}
 
-	br.title.Move(pos)
-	br.title.Resize(br.title.MinSize())
+	br.bar.title.Move(pos)
+	br.bar.title.Resize(br.bar.title.MinSize())
 
 	// TODO: Layout actions from right
 
@@ -192,12 +179,10 @@ func (br *appBarRenderer) MinSize() fyne.Size {
 		size.Height = 128
 	}
 
-	// TODO: enough space for NavIcon if visible
-
 	// enough space for the text
-	size = size.Max(fyne.MeasureText(br.bar.Title, theme.TextSize(), br.bar.nav.title.TextStyle))
+	size = size.Max(fyne.MeasureText(br.bar.title.Text, theme.TextSize(), br.bar.title.TextStyle))
 
-	// TODO: enough space for action buttons when implemented
+	// TODO: enough space for Action buttons when implemented
 
 	return size
 }
@@ -206,6 +191,12 @@ func (br *appBarRenderer) MinSize() fyne.Size {
 //
 // Implements: fyne.WidgetRenderer
 func (br *appBarRenderer) Objects() []fyne.CanvasObject {
+	br.bar.objects = []fyne.CanvasObject{
+		br.bar.navIcon, br.bar.title,
+	}
+
+	// TODO: append Action buttons when implemented
+
 	return br.bar.objects
 }
 
@@ -214,10 +205,8 @@ func (br *appBarRenderer) Objects() []fyne.CanvasObject {
 //
 // Implements: fyne.WidgetRenderer
 func (br *appBarRenderer) Refresh() {
-	br.title.Text = br.bar.Title
-
 	// state mismatch -- navIcon visibility must change
-	if br.navIcon.Visible() != br.bar.NavClosed {
+	if br.bar.navIcon.Visible() != br.bar.NavClosed {
 		br.Layout(br.bar.Size())
 	}
 
