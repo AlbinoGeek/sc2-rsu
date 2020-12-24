@@ -51,7 +51,8 @@ func NewNavDrawer(title, subtitle string, items ...NavItem) *NavDrawer {
 	return ret
 }
 
-// CreateRenderer is a private method to Fyne which links this widget to its renderer
+// CreateRenderer returns a new WidgetRenderer for this widget.
+// This should not be called by regular code, it is used internally to render a widget.
 //
 // Implements: fyne.Widget
 func (nav *NavDrawer) CreateRenderer() fyne.WidgetRenderer {

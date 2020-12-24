@@ -8,23 +8,33 @@ import (
 	"fyne.io/fyne/widget"
 )
 
+// navDrawerRenderer defines the behaviour of a NavDraawer's implementation.
+// This is returned from a widget's declarative object through the CreateRenderer()
+// function and should be exactly one instance per widget in memory.
+//
+// Implements: fyne.WidgetRenderer
 type navDrawerRenderer struct {
 	nav *NavDrawer
 }
 
-// BackgroundColor
+// BackgroundColor returns the color that should be used to draw the background of this renderer’s widget.
+//
+// Deprecated: Widgets will no longer have a background to support hover and selection indication in collection widgets.
+// If a widget requires a background color or image, this can be achieved by using a canvas.Rect or canvas.Image
+// as the first child of a MaxLayout, followed by the rest of the widget components.
 //
 // Implements: fyne.WidgetRenderer
 func (l *navDrawerRenderer) BackgroundColor() color.Color {
 	return theme.BackgroundColor()
 }
 
-// Destroy
+// Destroy is for internal use.
 //
 // Implements: fyne.WidgetRenderer
 func (l *navDrawerRenderer) Destroy() {}
 
-// Layout
+// Layout is a hook that is called if the widget needs to be laid out.
+// This should never call Refresh.
 //
 // Implements: fyne.WidgetRenderer
 // TODO : ALIGN ELEMENTS ACCORDING TO MATERIAL DESIGN SPECS
@@ -106,7 +116,7 @@ func (l *navDrawerRenderer) Layout(space fyne.Size) {
 	}
 }
 
-// MinSize
+// MinSize returns the minimum size of the widget that is rendered by this renderer.
 //
 // Implements: fyne.WidgetRenderer
 func (l *navDrawerRenderer) MinSize() fyne.Size {
@@ -133,7 +143,7 @@ func (l *navDrawerRenderer) MinSize() fyne.Size {
 	return size.Max(fyne.NewSize(128, 128))
 }
 
-// Objects
+// Objects returns all objects that should be drawn.
 //
 // Implements: fyne.WidgetRenderer
 func (l *navDrawerRenderer) Objects() []fyne.CanvasObject {
@@ -151,7 +161,8 @@ func (l *navDrawerRenderer) Objects() []fyne.CanvasObject {
 	return l.nav.objects
 }
 
-// Refresh
+// Refresh is a hook that is called if the widget has updated and needs to be redrawn.
+// This might trigger a Layout.
 //
 // Implements: fyne.WidgetRenderer
 func (l *navDrawerRenderer) Refresh() {

@@ -41,6 +41,12 @@ func NewAppBar(title string) *AppBar {
 	return bar
 }
 
+// Refresh ...
+func (bar *AppBar) Refresh() {
+	bar.ExtendBaseWidget(bar)
+	bar.BaseWidget.Refresh()
+}
+
 // SetDense ...
 func (bar *AppBar) SetDense(dense bool) {
 	bar.Dense = dense
@@ -81,7 +87,7 @@ func (bar *AppBar) CreateRenderer() fyne.WidgetRenderer {
 
 // --
 
-// appBarRenderer defines the behaviour of a widget's implementation.
+// appBarRenderer defines the behaviour of a AppBar's implementation.
 // This is returned from a widget's declarative object through the CreateRenderer()
 // function and should be exactly one instance per widget in memory.
 //
@@ -98,17 +104,25 @@ type appBarRenderer struct {
 // Deprecated: Widgets will no longer have a background to support hover and selection indication in collection widgets.
 // If a widget requires a background color or image, this can be achieved by using a canvas.Rect or canvas.Image
 // as the first child of a MaxLayout, followed by the rest of the widget components.
+//
+// Implements: fyne.WidgetRenderer
 func (*appBarRenderer) BackgroundColor() color.Color {
 	return theme.PrimaryColor()
 }
 
 // Destroy is for internal use.
+//
+// Implements: fyne.WidgetRenderer
 func (*appBarRenderer) Destroy() {}
 
 func (br *appBarRenderer) Init() {
 	br.navIcon = widget.NewButtonWithIcon("", theme.MenuIcon(), func() {
 		if br.bar.nav != nil {
-			br.bar.nav.Show()
+			if br.bar.nav.Visible() {
+				br.bar.nav.Hide()
+			} else {
+				br.bar.nav.Show()
+			}
 		}
 	})
 	br.title = NewScaledText(TextSizeHeading5, br.bar.Title)
@@ -120,6 +134,8 @@ func (br *appBarRenderer) Init() {
 
 // Layout is a hook that is called if the widget needs to be laid out.
 // This should never call Refresh.
+//
+// Implements: fyne.WidgetRenderer
 // ! should respond to theme values
 func (br *appBarRenderer) Layout(space fyne.Size) {
 	pos := fyne.NewPos(Padding, Padding)
@@ -133,10 +149,10 @@ func (br *appBarRenderer) Layout(space fyne.Size) {
 		br.navIcon.Resize(fyne.NewSize(IconSize, IconSize))
 	}
 
-	pos.Y -= Padding / 4
+	pos.Y -= Padding / 3
 
 	if br.bar.nav != nil && !br.bar.nav.Visible() {
-		pos.X += br.navIcon.Size().Width + Padding*2
+		pos.X += br.navIcon.Size().Width + Padding
 		br.navIcon.Show()
 	} else {
 		br.navIcon.Hide()
@@ -155,6 +171,8 @@ func (br *appBarRenderer) Layout(space fyne.Size) {
 }
 
 // MinSize returns the minimum size of the widget that is rendered by this renderer.
+//
+// Implements: fyne.WidgetRenderer
 func (br *appBarRenderer) MinSize() fyne.Size {
 	// pad := theme.Padding()
 
@@ -177,15 +195,18 @@ func (br *appBarRenderer) MinSize() fyne.Size {
 }
 
 // Objects returns all objects that should be drawn.
+//
+// Implements: fyne.WidgetRenderer
 func (br *appBarRenderer) Objects() []fyne.CanvasObject {
 	return br.bar.objects
 }
 
 // Refresh is a hook that is called if the widget has updated and needs to be redrawn.
 // This might trigger a Layout.
+//
+// Implements: fyne.WidgetRenderer
 func (br *appBarRenderer) Refresh() {
 	for _, o := range br.Objects() {
-		// ? should eventually look into why these are nil
 		if o == nil || !o.Visible() {
 			continue
 		}

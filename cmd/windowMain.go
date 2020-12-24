@@ -94,6 +94,8 @@ func (main *windowMain) Init() {
 		fynemd.NewNavSeparator(),
 		main.settings,
 		makePaneAbout(main),
+		fynemd.NewNavSeparator(),
+		makePaneDeveloper(main),
 	)
 	// main.nav.SetImage(theme.InfoIcon())
 	main.topbar.SetNav(main.nav)
