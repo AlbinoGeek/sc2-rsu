@@ -45,6 +45,7 @@ func NewAppBar(title string) *AppBar {
 			bar.SetNavClosed(true)
 		}
 	})
+	bar.navIcon.Importance = widget.LowImportance
 
 	bar.ExtendBaseWidget(bar)
 
