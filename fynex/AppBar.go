@@ -79,7 +79,9 @@ func (bar *AppBar) SetTitle(title string) {
 // SetNav ...
 func (bar *AppBar) SetNav(nav *NavDrawer) {
 	bar.nav = nav
-	bar.Refresh()
+
+	// one would expect the Navigation's state to update immediately
+	bar.SetNavClosed(bar.NavClosed)
 }
 
 // SetNavClosed ...
