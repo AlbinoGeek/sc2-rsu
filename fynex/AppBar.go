@@ -52,12 +52,6 @@ func NewAppBar(title string) *AppBar {
 	return bar
 }
 
-// Refresh ...
-func (bar *AppBar) Refresh() {
-	bar.ExtendBaseWidget(bar)
-	bar.BaseWidget.Refresh()
-}
-
 // SetDense ...
 func (bar *AppBar) SetDense(dense bool) {
 	bar.Dense = dense
