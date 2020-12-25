@@ -140,16 +140,14 @@ func (*appBarRenderer) Destroy() {}
 // Implements: fyne.WidgetRenderer
 // ! should respond to theme values
 func (br *appBarRenderer) Layout(space fyne.Size) {
-	pos := fyne.NewPos(Padding, Padding)
+	pos := fyne.NewPos(Padding, (Padding+theme.Padding())/2)
 
 	if br.bar.Dense {
-		pos.Y = Padding / 2
+		pos.Y -= Padding / 2
 	}
 
-	br.bar.navIcon.Move(pos)
+	br.bar.navIcon.Move(pos.Add(fyne.NewPos(0, Padding/2)))
 	br.bar.navIcon.Resize(fyne.NewSize(IconSize, IconSize))
-
-	pos.Y -= Padding / 3
 
 	if br.bar.nav == nil || !br.bar.NavClosed {
 		br.bar.navIcon.Hide()
