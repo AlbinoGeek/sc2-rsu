@@ -7,7 +7,7 @@
 [![GoReportCard](https://goreportcard.com/badge/github.com/AlbinoGeek/sc2-rsu)](https://goreportcard.com/report/github.com/AlbinoGeek/sc2-rsu)
 [![Coverage Status](https://coveralls.io/repos/github/AlbinoGeek/sc2-rsu/badge.svg?branch=gui/v2)](https://coveralls.io/github/AlbinoGeek/sc2-rsu?branch=gui/v2)
 
-![GUI Screenshot](_dist/screen-v0.2.85-gui.gif)
+![GUI Screenshot](_dist/screen-v0.3.78-gui.gif)
 
 ![CLI Screenshot](_dist/screen-v0.2.26.png)
 
