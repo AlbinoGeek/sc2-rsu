@@ -107,6 +107,7 @@ func (main *windowMain) Init() {
 
 		if mobile {
 			main.topbar.SetTitle(ni.GetTitle())
+			main.topbar.SetNavClosed(true)
 		}
 	}
 
