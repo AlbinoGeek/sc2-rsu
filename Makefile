@@ -107,6 +107,7 @@ commit-message:
 all: "$(TARGETDIR)/$(BINARYNAME)"
 
 "$(TARGETDIR)/$(BINARYNAME)":
+	go generate
 	if [ ! -d "$(TARGETDIR)" ]; then mkdir "$(TARGETDIR)"; fi
 	go build -o "$(TARGETDIR)/$(BINARYNAME)" "$(MODNAME)" # -ldflags "-s -w"
 
