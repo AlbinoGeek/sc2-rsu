@@ -55,7 +55,7 @@ release_build = \
 		-app-build $(NCOMMITS) \
 		-app-id $(APP_NAME) \
 		-app-version $(CURRENT_VERSION_MICRO) \
-		"$(MODNAME)" && \
+		$(4) "$(MODNAME)" && \
 	cp "fyne-cross/bin/$(1)-$(2)/$(BINARYNAME)$(3)" \
 		"$(TARGETDIR)/$(BINARYNAME)-$(CURRENT_VERSION_MICRO)-$(1)-$(2)$(3)"
 
@@ -112,8 +112,8 @@ all: "$(TARGETDIR)/$(BINARYNAME)"
 
 .PHONY: release
 release:
-	$(call release_build,linux,amd64)
-	$(call release_build,linux,386)
+	$(call release_build,linux,amd64,,-release)
+	$(call release_build,linux,386,,-release)
 	$(call release_build,windows,amd64,.exe)
 	$(call release_build,windows,386,.exe)
 
