@@ -4,17 +4,8 @@ import (
 	"github.com/AlbinoGeek/sc2-rsu/cmd"
 )
 
-// build-time "constants" (Golang limitation: must be var of type string)
-var (
-	// PROGRAM is the human readable product name
-	PROGRAM = "set-by-Makefile"
-
-	// VERSION is the human readable product version
-	VERSION = "set-by-Makefile"
-)
+//go:generate go run gen.go
 
 func main() {
-	cmd.PROGRAM = PROGRAM
-	cmd.VERSION = VERSION
 	cmd.Execute()
 }

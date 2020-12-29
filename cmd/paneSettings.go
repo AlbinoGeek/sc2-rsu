@@ -10,6 +10,7 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/canvas"
+	"fyne.io/fyne/container"
 	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/layout"
 	"fyne.io/fyne/theme"
@@ -18,12 +19,13 @@ import (
 	"github.com/spf13/viper"
 
 	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
+	"github.com/AlbinoGeek/sc2-rsu/fynex"
 	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
 	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
 )
 
-type windowSettings struct {
-	*gui.WindowBase
+type paneSettings struct {
+	fynex.Pane
 
 	// do we have unsaved changes in the form?
 	unsaved bool
@@ -36,12 +38,19 @@ type windowSettings struct {
 	updatePeriod *widget.Entry
 }
 
-// TODO: candidate for refactor
-func (settings *windowSettings) Init() {
-	w := settings.App.NewWindow("Settings")
-	settings.SetWindow(w)
+func makePaneSettings(w gui.Window) fynex.Pane {
+	p := &paneSettings{
+		Pane: fynex.NewPaneWithIcon("Settings", theme.SettingsIcon(), w),
+	}
 
+	p.Init()
+	return p
+}
+
+// TODO: candidate for refactor
+func (settings *paneSettings) Init() {
 	settings.apiKey = widget.NewEntry()
+	settings.apiKey.SetPlaceHolder("API Key")
 	settings.apiKey.SetText(viper.GetString("apiKey"))
 	settings.apiKey.Validator = func(key string) (err error) {
 		if !sc2replaystats.ValidAPIKey(key) {
@@ -89,36 +98,48 @@ func (settings *windowSettings) Init() {
 	settings.unsaved = false // otherwise set by the above line
 
 	settings.replaysRoot = widget.NewEntry()
+	settings.replaysRoot.SetPlaceHolder("Replays Root")
 	settings.replaysRoot.SetText(viper.GetString("replaysRoot"))
 	settings.replaysRoot.OnChanged = func(string) {
 		settings.unsaved = true
 	}
 
-	replaysRootSection := widget.NewVBox(
-		fyne.NewContainerWithLayout(
-			layout.NewFormLayout(),
-			widget.NewLabel("Replays Root"),
-			widget.NewHScrollContainer(settings.replaysRoot),
-		),
-		fyne.NewContainerWithLayout(
-			layout.NewGridLayout(2),
-			widget.NewButtonWithIcon("Find it for me...", theme.SearchIcon(), func() { go settings.findReplaysRoot() }),
-			widget.NewButtonWithIcon("Browse...", theme.FolderOpenIcon(), func() {
-				dlg := dialog.NewFolderOpen(settings.browseReplaysRoot, w)
-				dlg.Resize(w.Canvas().Size().Subtract(fyne.NewSize(20, 20))) // ! can't be larger than the settings window
-				dlg.Show()
-			}),
-		),
-	)
-
-	spacer := canvas.NewRectangle(color.Transparent)
-	spacer.SetMinSize(fyne.NewSize(5, 5))
-
 	btnSave := widget.NewButtonWithIcon("Save", theme.DocumentSaveIcon(), settings.save)
 	btnSave.Importance = widget.HighImportance
 
-	w.SetContent(widget.NewVBox(
-		widget.NewCard(fmt.Sprintf("%s Settings", PROGRAM), "", widget.NewVBox(
+	pad := theme.Padding()
+	spacer := canvas.NewRectangle(color.Transparent)
+	spacer.SetMinSize(fyne.NewSize(pad, pad))
+
+	// w.SetCloseIntercept(settings.onClose)
+
+	w := settings.GetWindow().GetWindow()
+	settings.SetContent(container.NewBorder(
+		nil,
+		container.NewVBox(
+			widget.NewSeparator(),
+			btnSave,
+		),
+		nil,
+		nil,
+		container.NewVScroll(widget.NewVBox(
+			fynex.NewTextWithStyle("StarCraft II", fyne.TextAlignLeading, fynex.StyleHeading5()),
+			container.NewHScroll(settings.replaysRoot),
+			fyne.NewContainerWithLayout(
+				layout.NewGridLayout(2),
+				widget.NewButtonWithIcon("Find it for me...", theme.SearchIcon(), func() { go settings.findReplaysRoot() }),
+				widget.NewButtonWithIcon("Select folder...", theme.FolderOpenIcon(), func() {
+					dlg := dialog.NewFolderOpen(settings.browseReplaysRoot, w)
+					dlg.Resize(w.Canvas().Size().Subtract(fyne.NewSize(20, 20))) // ! can't be larger than the settings window
+					dlg.Show()
+				}),
+			),
+			spacer,
+			fynex.NewTextWithStyle("sc2ReplayStats", fyne.TextAlignLeading, fynex.StyleHeading5()),
+			container.NewHScroll(settings.apiKey),
+			widget.NewButtonWithIcon("Login and Generate it for me...", theme.ComputerIcon(), settings.openLogin),
+			spacer,
+			fynex.NewTextWithStyle("Updates", fyne.TextAlignLeading, fynex.StyleHeading5()),
 			settings.checkUpdates,
 			settings.autoDownload,
 			fyne.NewContainerWithLayout(
@@ -127,52 +148,13 @@ func (settings *windowSettings) Init() {
 				settings.updatePeriod,
 			),
 		)),
-		spacer,
-		widget.NewCard("sc2ReplayStats Account", "", widget.NewVBox(
-			fyne.NewContainerWithLayout(
-				layout.NewFormLayout(),
-				widget.NewLabel("API Key"),
-				widget.NewHScrollContainer(settings.apiKey),
-			),
-			widget.NewButtonWithIcon("Login and Generate it for me...", theme.ComputerIcon(), settings.openLogin),
-		)),
-		spacer,
-		widget.NewCard("StarCraft II", "", replaysRootSection),
-		spacer,
-		layout.NewSpacer(),
-		widget.NewSeparator(),
-		fyne.NewContainerWithLayout(
-			layout.NewGridLayout(2),
-			widget.NewButtonWithIcon("Cancel", theme.CancelIcon(), func() {
-				settings.onClose()
-			}),
-			btnSave,
-		),
 	))
-
-	w.SetCloseIntercept(settings.onClose)
-	w.SetOnClosed(func() {
-		settings.SetWindow(nil)
-	})
-
-	w.Canvas().SetOnTypedKey(func(k *fyne.KeyEvent) {
-		if k.Name == fyne.KeyEscape {
-			settings.onClose()
-		}
-	})
-
-	w.SetPadded(false)
-	w.SetFixedSize(true)
-
-	w.Resize(fyne.NewSize(600, 600))
-	w.CenterOnScreen()
-	w.Show()
 }
 
 // TODO: candidate for refactor
-func (settings *windowSettings) browseReplaysRoot(uri fyne.ListableURI, err error) {
+func (settings *paneSettings) browseReplaysRoot(uri fyne.ListableURI, err error) {
 	if err != nil {
-		dialog.ShowError(err, settings.GetWindow())
+		dialog.ShowError(err, settings.GetWindow().GetWindow())
 		return
 	}
 
@@ -192,7 +174,7 @@ func (settings *windowSettings) browseReplaysRoot(uri fyne.ListableURI, err erro
 // confirmValidReplaysRoot checks whether there are any accounts found at a
 // given root, and if not, asks the user if they would like to use this root
 // regardless. If they confirm, or accounts were found, callback is called.
-func (settings *windowSettings) confirmValidReplaysRoot(root string, callback func()) {
+func (settings *paneSettings) confirmValidReplaysRoot(root string, callback func()) {
 	if accs, err := sc2utils.EnumerateAccounts(root); err == nil && len(accs) > 0 {
 		callback()
 		return
@@ -204,12 +186,12 @@ func (settings *windowSettings) confirmValidReplaysRoot(root string, callback fu
 			if ok {
 				callback()
 			}
-		}, settings.GetWindow())
+		}, settings.GetWindow().GetWindow())
 }
 
 // TODO: candidate for refactor
-func (settings *windowSettings) findReplaysRoot() {
-	w := settings.GetWindow()
+func (settings *paneSettings) findReplaysRoot() {
+	w := settings.GetWindow().GetWindow()
 	scanRoot := "/"
 
 	if home, err := os.UserHomeDir(); err == nil {
@@ -264,7 +246,7 @@ func (settings *windowSettings) findReplaysRoot() {
 		selected = id
 	}
 	dlg2 := dialog.NewCustomConfirm("Multiple Possible Roots Found",
-		"Select", "Cancel", widget.NewHScrollContainer(listWidget), func(ok bool) {
+		"Select", "Cancel", container.NewHScroll(listWidget), func(ok bool) {
 			if !ok {
 				return
 			}
@@ -273,7 +255,7 @@ func (settings *windowSettings) findReplaysRoot() {
 				settings.unsaved = true
 				settings.replaysRoot.SetText(roots[selected])
 			})
-		}, settings.GetWindow())
+		}, w)
 
 	size := fyne.MeasureText(longest, theme.TextSize(), fyne.TextStyle{})
 	size.Height *= len(roots)
@@ -282,25 +264,21 @@ func (settings *windowSettings) findReplaysRoot() {
 	dlg2.Show()
 }
 
-func (settings *windowSettings) onClose() {
-	w := settings.GetWindow()
+func (settings *paneSettings) onClose() {
+	w := settings.GetWindow().GetWindow()
 
 	if !settings.unsaved {
-		w.Close()
 		return
 	}
 
 	dialog.ShowConfirm("Unsaved Changes",
 		"You have not saved your settings.\nAre you sure you want to discard amy changes?",
 		func(ok bool) {
-			if ok {
-				w.Close()
-			}
 		}, w)
 }
 
-func (settings *windowSettings) openLogin() {
-	w := settings.GetWindow()
+func (settings *paneSettings) openLogin() {
+	w := settings.GetWindow().GetWindow()
 	user := widget.NewEntry()
 	pass := widget.NewPasswordEntry()
 
@@ -354,7 +332,9 @@ func (settings *windowSettings) openLogin() {
 
 			dlg2 = dialog.NewProgressInfinite("3) Login", "Finding or Generating API Key...", w)
 			dlg2.Show()
+
 			key, err := extractAPIKey(page, accid)
+
 			dlg2.Hide()
 
 			if err != nil {
@@ -372,21 +352,23 @@ func (settings *windowSettings) openLogin() {
 	dlg.Show()
 }
 
-func (settings *windowSettings) save() {
-	w := settings.GetWindow()
+func (settings *paneSettings) save() {
+	w := settings.GetWindow().GetWindow()
 
 	if err := settings.validate(); err != nil {
 		dialog.ShowError(err, w)
 		return
 	}
 
-	main := settings.UI.Windows[WindowMain].(*windowMain)
+	main := settings.GetWindow().(*windowMain)
 	if main.gettingStarted == 3 && settings.apiKey.Text != "" {
-		main.openGettingStarted4()
+		main.nav.Select(3) // ! ID BASED IS ERROR PRONE
+		// main.openGettingStarted4()
 	}
 
 	if main.gettingStarted == 2 && settings.replaysRoot.Text != "" {
-		main.openGettingStarted3()
+		main.nav.Select(3) // ! ID BASED IS ERROR PRONE
+		// main.openGettingStart/ed3()
 	}
 
 	var changes bool
@@ -407,7 +389,7 @@ func (settings *windowSettings) save() {
 	}
 
 	if changes {
-		main.genAccountList()
+		main.accounts.Refresh()
 		main.setupUploader()
 	}
 
@@ -421,13 +403,12 @@ func (settings *windowSettings) save() {
 		return
 	}
 
-	dialog.ShowInformation("Saved!", "Your settings have been saved.", settings.UI.Windows[WindowMain].GetWindow())
-	settings.unsaved = false
+	dialog.ShowInformation("Saved!", "Your settings have been saved.", w)
 
-	w.Close()
+	settings.unsaved = false
 }
 
-func (settings *windowSettings) validate() error {
+func (settings *paneSettings) validate() error {
 	if err := settings.apiKey.Validate(); settings.apiKey.Text != "" && err != nil {
 		return fmt.Errorf("invalid value for \"API Key\": %v", err)
 	}

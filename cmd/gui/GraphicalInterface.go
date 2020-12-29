@@ -6,12 +6,12 @@ import (
 )
 
 // New returns a wrapped fyne.App
-func New() *GraphicalInterface {
+func New(id string) *GraphicalInterface {
 	ui := new(GraphicalInterface)
-	ui.App = app.New()
+	ui.App = app.NewWithID(id)
 
-	ui.Theme = DarkerTheme()
-	ui.App.Settings().SetTheme(ui.Theme)
+	// ui.Theme = DarkerTheme()
+	ui.App.Settings().SetTheme(DarkerTheme())
 
 	return ui
 }
@@ -19,7 +19,6 @@ func New() *GraphicalInterface {
 // GraphicalInterface represents a wrapped fyne.App
 type GraphicalInterface struct {
 	App     fyne.App
-	Theme   fyne.Theme
 	Primary Window
 	Windows map[string]Window
 }

@@ -2,7 +2,7 @@ MAKE                = make --no-print-directory
 
 FYNE_CROSS          = $(shell go env | awk -F'"' '/GOPATH/ {print $$2}')/bin/fyne-cross
 
-DESCRIBE           := $(shell git describe --match "v*" --always --tags)
+DESCRIBE           := $(shell go run gen.go VERSION)
 DESCRIBE_PARTS     := $(subst -, ,$(DESCRIBE))
 
 VERSION_TAG        := $(word 1,$(DESCRIBE_PARTS))
@@ -19,9 +19,9 @@ NEXT_MAJOR         := $(shell echo $$(($(MAJOR)+1)))
 NEXT_MINOR         := $(shell echo $$(($(MINOR)+1)))
 NEXT_MICRO          = $(shell echo $$(($(MICRO)+$(COMMITS_SINCE_TAG))))
 
-BINARYNAME          = sc2-rsu
-MODNAME             = github.com/AlbinoGeek/sc2-rsu
-APP_NAME            = com.github.albinogeek.sc2-rsu
+BINARYNAME          = $(shell go run gen.go PROGRAM)
+MODNAME             = github.com/AlbinoGeek/$(BINARYNAME)
+APP_NAME            = com.github.albinogeek.$(BINARYNAME)
 TARGETDIR           = _dist
 
 ifeq ($(strip $(COMMITS_SINCE_TAG)),)
@@ -55,7 +55,6 @@ release_build = \
 		-app-build $(NCOMMITS) \
 		-app-id $(APP_NAME) \
 		-app-version $(CURRENT_VERSION_MICRO) \
-		-ldflags "-s -w -X main.PROGRAM=$(BINARYNAME) -X main.VERSION=$(CURRENT_VERSION_MICRO)" \
 		"$(MODNAME)" && \
 	cp "fyne-cross/bin/$(1)-$(2)/$(BINARYNAME)$(3)" \
 		"$(TARGETDIR)/$(BINARYNAME)-$(CURRENT_VERSION_MICRO)-$(1)-$(2)$(3)"
@@ -109,7 +108,7 @@ all: "$(TARGETDIR)/$(BINARYNAME)"
 
 "$(TARGETDIR)/$(BINARYNAME)":
 	if [ ! -d "$(TARGETDIR)" ]; then mkdir "$(TARGETDIR)"; fi
-	go build -ldflags "-s -w -X main.PROGRAM=$(BINARYNAME) -X main.VERSION=$(CURRENT_VERSION_MICRO)" -o "$(TARGETDIR)/$(BINARYNAME)" "$(MODNAME)"
+	go build -o "$(TARGETDIR)/$(BINARYNAME)" "$(MODNAME)" # -ldflags "-s -w"
 
 .PHONY: release
 release:

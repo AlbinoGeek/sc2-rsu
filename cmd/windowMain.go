@@ -5,12 +5,10 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
 	"fyne.io/fyne"
-	"fyne.io/fyne/canvas"
 	"fyne.io/fyne/container"
 	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/layout"
@@ -18,11 +16,11 @@ import (
 	"fyne.io/fyne/widget"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/google/go-github/v32/github"
 	"github.com/kataras/golog"
 	"github.com/spf13/viper"
 
 	"github.com/AlbinoGeek/sc2-rsu/cmd/gui"
+	"github.com/AlbinoGeek/sc2-rsu/fynex"
 	"github.com/AlbinoGeek/sc2-rsu/sc2replaystats"
 	"github.com/AlbinoGeek/sc2-rsu/sc2utils"
 	"github.com/AlbinoGeek/sc2-rsu/utils"
@@ -36,8 +34,13 @@ type windowMain struct {
 	uploadStatus   []*uploadRecord
 	watcher        *fsnotify.Watcher
 
-	accList    *fyne.Container
-	uploadList *widget.Table
+	nav    *fynex.NavDrawer
+	topbar *fynex.AppBar
+
+	// Panes
+	accounts *paneAccounts
+	uploads  *paneUploads
+	settings *paneSettings
 }
 
 type uploadRecord struct {
@@ -50,40 +53,20 @@ type uploadRecord struct {
 }
 
 func (main *windowMain) Init() {
-	w := main.App.NewWindow("SC2ReplayStats Uploader")
-	main.SetWindow(w)
-
 	main.uploadEnabled = make(map[string]bool)
 	main.uploadStatus = make([]*uploadRecord, 0)
 
-	w.SetMainMenu(fyne.NewMainMenu(
-		fyne.NewMenu("File",
-			fyne.NewMenuItem("Check for Updates", func() { go main.checkUpdate() }),
-			fyne.NewMenuItem("Settings", func() { main.UI.OpenWindow(WindowSettings) }),
-		),
-		fyne.NewMenu("Help",
-			fyne.NewMenuItem("Report Bug", main.OpenGitHub("issues/new?assignees=AlbinoGeek&labels=bug&template=bug-report.md&title=%5BBUG%5D")),
-			fyne.NewMenuItem("Request Feature", main.OpenGitHub("issues/new?assignees=AlbinoGeek&labels=enhancement&template=feature-request.md&title=%5BFEATURE+REQUEST%5D")),
-			fyne.NewMenuItemSeparator(),
-			fyne.NewMenuItem("About", func() { main.UI.OpenWindow(WindowAbout) }),
-		),
-	))
+	w := main.App.NewWindow("SC2ReplayStats Uploader")
+	w.SetPadded(false)
+	w.Resize(fyne.NewSize(640, 560))
+	w.CenterOnScreen()
+	main.SetWindow(w)
 
 	// closing the main window should quit the application
 	w.SetCloseIntercept(func() {
-		// Close "About" if it's open
-		if win := main.UI.Windows[WindowAbout].GetWindow(); win != nil {
-			win.Close()
-		}
-
-		win := main.UI.Windows[WindowSettings]
-		if win.GetWindow() != nil {
-			settings := win.(*windowSettings)
-			if settings.unsaved {
-				settings.onClose()
-				return
-			}
-			settings.GetWindow().Close()
+		if main.settings.unsaved {
+			main.settings.onClose()
+			return
 		}
 
 		if main.watcher != nil {
@@ -98,44 +81,73 @@ func (main *windowMain) Init() {
 		sc2api = sc2replaystats.New(viper.GetString("apikey"))
 	}
 
-	main.Refresh()
+	main.accounts = makePaneAccounts(main).(*paneAccounts)
+	main.uploads = makePaneUploads(main).(*paneUploads)
+	main.settings = makePaneSettings(main).(*paneSettings)
 
-	w.Resize(fyne.NewSize(420, 360))
-	w.CenterOnScreen()
+	main.topbar = fynex.NewAppBar(PROGRAM)
+	main.nav = fynex.NewNavDrawer(
+		PROGRAM,
+		"",
+		main.accounts,
+		main.uploads,
+		fynex.NewNavSeparator(),
+		main.settings,
+		makePaneAbout(main),
+		fynex.NewNavSeparator(),
+		makePaneDeveloper(main),
+	)
+	// main.nav.SetImage(theme.InfoIcon())
+	main.topbar.SetNav(main.nav)
+
+	mobile := fyne.CurrentDevice().IsMobile()
+	content := container.NewPadded(layout.NewSpacer()) // ? what's a better way ?
+	main.nav.OnSelect = func(ni fynex.NavItem) {
+		content.Objects = []fyne.CanvasObject{ni.GetContent()}
+
+		if mobile {
+			main.topbar.SetTitle(ni.GetTitle())
+			main.topbar.SetNavClosed(true)
+		}
+	}
+
+	if mobile {
+		main.GetWindow().SetContent(
+			container.NewBorder(
+				nil, nil, main.nav, nil,
+				container.NewBorder(
+					main.topbar,
+					nil,
+					nil,
+					nil,
+					content,
+				),
+			),
+		)
+
+		main.topbar.SetNavClosed(true)
+	} else {
+		main.GetWindow().SetContent(
+			container.NewBorder(
+				main.topbar,
+				nil,
+				main.nav,
+				nil,
+				content,
+			),
+		)
+
+		main.nav.SetTitle("")
+	}
+
 	w.Show()
 
+	main.nav.Select(0) // Cannot select before window is shown!
 	main.setupUploader()
 
 	if viper.GetString("version") == "" || viper.GetString("apikey") == "" {
 		main.openGettingStarted1()
 	}
-}
-
-func (main *windowMain) Refresh() {
-	main.genAccountList()
-	main.genUploadList()
-
-	tblName := newText("Map Name", 1, true)
-	tblName.Move(fyne.NewPos(8, 3))
-
-	tblID := newText("ID", 1, true)
-	tblID.Move(fyne.NewPos(248, 3))
-
-	tblStatus := newText("Status", 1, true)
-	tblStatus.Move(fyne.NewPos(334, 3))
-
-	main.GetWindow().SetContent(container.NewAppTabs(
-		container.NewTabItem("Accounts",
-			container.NewVScroll(main.accList),
-		),
-		container.NewTabItem("Uploads",
-			container.NewBorder(
-				fyne.NewContainerWithoutLayout(
-					tblName, tblID, tblStatus,
-				), nil, nil, nil, main.uploadList,
-			),
-		),
-	))
 }
 
 func (main *windowMain) WizardModal(skipText, nextText string, skipFn, nextFn func(), contents ...fyne.CanvasObject) {
@@ -202,143 +214,6 @@ func (main *windowMain) WizardModal(skipText, nextText string, skipFn, nextFn fu
 	box.Resize(size)
 }
 
-func (main *windowMain) checkUpdate() {
-	w := main.GetWindow()
-	dlg := dialog.NewProgressInfinite("Check for Updates", "Checking for new releases...", w)
-	dlg.Show()
-
-	rel := checkUpdate()
-
-	dlg.Hide()
-
-	if rel == nil {
-		dialog.ShowInformation("Check for Updates",
-			fmt.Sprintf("You are running version %s.\nNo updates are available at this time.", VERSION), w)
-		return
-	}
-
-	dialog.ShowConfirm("Update Available!",
-		fmt.Sprintf("You are running version %s.\nAn update is available: %s\nWould you like us to download it now?", VERSION, rel.GetTagName()),
-		main.doUpdate(rel), main.GetWindow())
-}
-
-func (main *windowMain) doUpdate(rel *github.RepositoryRelease) func(bool) {
-	return func(ok bool) {
-		if !ok {
-			return
-		}
-
-		w := main.GetWindow()
-
-		// otherwise we might block the fyne event queue...
-		go func() {
-			// TODO: display download progress, filename and size
-			dlg := dialog.NewProgressInfinite("Downloading Update",
-				fmt.Sprintf("Downloading version %s nomain...", rel.GetTagName()), w)
-			dlg.Show()
-
-			err := downloadUpdate(rel)
-
-			dlg.Hide()
-
-			if err != nil {
-				dialog.ShowError(err, w)
-			} else {
-				dialog.ShowInformation("Update Complete!", "Please close the program and start the new binary.", w)
-			}
-		}()
-	}
-}
-
-func (main *windowMain) genAccountList() {
-	if main.accList != nil {
-		objects := main.accList.Objects
-		for _, o := range objects {
-			main.accList.Remove(o)
-		}
-	} else {
-		main.accList = container.NewVBox()
-	}
-
-	players, err := sc2api.GetAccountPlayers()
-	if err != nil {
-		golog.Errorf("GetAccountPlayers: %v", err)
-		return
-	}
-
-	accounts, err := sc2utils.EnumerateAccounts(viper.GetString("replaysRoot"))
-	if err != nil {
-		accounts = []string{"No Accounts Found/"}
-	}
-
-	for acc, list := range toonList(accounts) {
-		header := newHeader(acc)
-		header.Move(fyne.NewPos(main.UI.Theme.Padding()/2, 1+main.UI.Theme.Padding()/2))
-		main.accList.Add(fyne.NewContainerWithoutLayout(header))
-
-		for _, toon := range list {
-			parts := strings.Split(toon, "-")
-
-			aLabel := newText("Unknown Character", 1, false)
-
-			for _, p := range players {
-				if parts[len(parts)-1] == strconv.Itoa(int(p.Player.CharacterID)) {
-					aLabel.Text = p.Player.Name
-				}
-			}
-
-			toggleBtn := widget.NewButtonWithIcon("", theme.MediaPauseIcon(), nil)
-			toggleBtn.Importance = widget.HighImportance
-
-			id := fmt.Sprintf("%s/%s", acc, toon)
-			toggleBtn.OnTapped = main.toggleUploading(toggleBtn, id)
-			main.uploadEnabled[id] = true
-
-			main.accList.Add(
-				container.NewBorder(nil, nil,
-					toggleBtn,
-					newText(sc2utils.RegionsMap[parts[0]], .9, false),
-					aLabel,
-				),
-			)
-		}
-	}
-}
-
-func (main *windowMain) genUploadList() {
-	main.uploadList = widget.NewTable(
-		func() (int, int) { return len(main.uploadStatus), 3 },
-		func() fyne.CanvasObject {
-			return newText("@@@@@@@@", 1, false)
-		},
-		func(tci widget.TableCellID, f fyne.CanvasObject) {
-			l := f.(*canvas.Text)
-			switch atom := main.uploadStatus[tci.Row]; tci.Col {
-			case 0:
-				l.Text = atom.MapName
-			case 1:
-				l.Text = atom.ReplayID
-			case 2:
-				l.Text = atom.Status
-			}
-			l.Refresh()
-		},
-	)
-	main.uploadList.OnSelected = func(id widget.TableCellID) {
-		if id.Row > len(main.uploadStatus)-1 {
-			return // selected row that does not exist
-		}
-
-		if rid := main.uploadStatus[id.Row].ReplayID; rid != "" {
-			u, _ := url.Parse(fmt.Sprintf("%s/replay/%s", sc2replaystats.WebRoot, rid))
-			main.App.OpenURL(u)
-		}
-	}
-	main.uploadList.SetColumnWidth(0, 230)
-	main.uploadList.SetColumnWidth(1, 76)
-	main.uploadList.SetColumnWidth(2, 84)
-}
-
 func (main *windowMain) handleReplay(replayFilename string) {
 	_, mapName, _ := utils.SplitFilepath(replayFilename)
 	entry := &uploadRecord{
@@ -350,6 +225,7 @@ func (main *windowMain) handleReplay(replayFilename string) {
 	golog.Debugf("uploading replay: %v", replayFilename)
 
 	main.uploadStatus = append(main.uploadStatus, entry)
+	main.uploads.Refresh()
 
 	tries := 0
 	wait := time.Second * 3
@@ -360,8 +236,6 @@ func (main *windowMain) handleReplay(replayFilename string) {
 		if tries > 3 {
 			return
 		}
-
-		main.uploadList.Refresh()
 
 		// wait for the replay to have finished being written (large enough filesize)
 		var lastSize int64
@@ -382,7 +256,7 @@ func (main *windowMain) handleReplay(replayFilename string) {
 
 		entry.Status = "uploading"
 
-		main.uploadList.Refresh()
+		main.uploads.Refresh()
 
 		rqid, err := sc2api.UploadReplay(replayFilename)
 		entry.QueueID = rqid
@@ -390,12 +264,14 @@ func (main *windowMain) handleReplay(replayFilename string) {
 		if err != nil {
 			entry.Status = "u failed"
 
-			main.uploadList.Refresh()
+			main.uploads.Refresh()
 
 			dialog.NewError(fmt.Errorf("replay upload failed:%v\n%v", mapName, err), main.GetWindow())
 		} else {
 			entry.Status = "processing"
-			main.uploadList.Refresh()
+
+			main.uploads.Refresh()
+
 			if err := main.watchReplayStatus(entry); err == nil {
 				return
 			}
@@ -419,14 +295,21 @@ func (main *windowMain) OpenGitHub(slug string) func() {
 }
 
 func (main *windowMain) openGettingStarted1() {
+	labelWithWrapping := func(text string) *widget.Label {
+		label := widget.NewLabel(text)
+		label.Wrapping = fyne.TextWrapWord
+
+		return label
+	}
+
 	main.gettingStarted = 1
 	main.WizardModal("Skip", "Next", nil, func() {
 		if viper.GetString("replaysroot") == "" {
-			main.openGettingStarted2()
+			main.nav.Select(3) // ! ID BASED IS ERROR PRONE
 		} else {
 			main.gettingStarted = 0
-			main.modal.Hide()
 		}
+		main.modal.Hide()
 	},
 		labelWithWrapping("You are only two steps away from having your replays automatically uploaded!"),
 		labelWithWrapping("1) We will find your Replays Directory"),
@@ -434,47 +317,47 @@ func (main *windowMain) openGettingStarted1() {
 	)
 }
 
-func (main *windowMain) openGettingStarted2() {
-	main.gettingStarted = 2
+// func (main *windowMain) openGettingStarted2() {
+// 	main.gettingStarted = 2
 
-	btnSettings := widget.NewButtonWithIcon("Open Settings", theme.SettingsIcon(), func() {
-		main.UI.OpenWindow(WindowSettings)
-	})
-	btnSettings.Importance = widget.HighImportance
+// 	btnSettings := widget.NewButtonWithIcon("Open Settings", theme.SettingsIcon(), func() {
+// 		main.tabs.Select(3) // ! ID BASED IS ERROR PRONE
+// 	})
+// 	btnSettings.Importance = widget.HighImportance
 
-	// TODO: Refactor this to actually have the settings UI, not just direct the user to settings
-	main.WizardModal("", "", nil, nil,
-		labelWithWrapping("First thing's first. Please use the button below to open the Settings dialog, and under the StarCraft II section, add your Replays Directory."),
-		btnSettings,
-		labelWithWrapping("Once you have found your replays directory and saved the settings, this setup wizard will automatically advance to the next step."),
-	)
-}
+// 	// TODO: Refactor this to actually have the settings UI, not just direct the user to settings
+// 	main.WizardModal("", "", nil, nil,
+// 		labelWithWrapping("First thing's first. Please use the button below to open the Settings dialog, and under the StarCraft II section, add your Replays Directory."),
+// 		btnSettings,
+// 		labelWithWrapping("Once you have found your replays directory and saved the settings, this setup wizard will automatically advance to the next step."),
+// 	)
+// }
 
-func (main *windowMain) openGettingStarted3() {
-	main.gettingStarted = 3
+// func (main *windowMain) openGettingStarted3() {
+// 	main.gettingStarted = 3
 
-	btnSettings := widget.NewButtonWithIcon("Open Settings", theme.SettingsIcon(), func() {
-		main.UI.OpenWindow(WindowSettings)
-	})
-	btnSettings.Importance = widget.HighImportance
+// 	btnSettings := widget.NewButtonWithIcon("Open Settings", theme.SettingsIcon(), func() {
+// 		main.tabs.Select(3) // ! ID BASED IS ERROR PRONE
+// 	})
+// 	btnSettings.Importance = widget.HighImportance
 
-	// TODO: Refactor this to actually have the settings UI, not just direct the user to settings
-	main.WizardModal("", "", nil, nil,
-		labelWithWrapping("Lastly, please set your sc2replaystats API key. If you do not know how to find this, use the \"Login and find it for me\" button to have us login to your account and generate one on your behalf."),
-		btnSettings,
-	)
-}
+// 	// TODO: Refactor this to actually have the settings UI, not just direct the user to settings
+// 	main.WizardModal("", "", nil, nil,
+// 		labelWithWrapping("Lastly, please set your sc2replaystats API key. If you do not know how to find this, use the \"Login and find it for me\" button to have us login to your account and generate one on your behalf."),
+// 		btnSettings,
+// 	)
+// }
 
-func (main *windowMain) openGettingStarted4() {
-	main.gettingStarted = 0
+// func (main *windowMain) openGettingStarted4() {
+// 	main.gettingStarted = 0
 
-	main.WizardModal("Close", "", func() {
-		main.gettingStarted = 0
-		main.modal.Hide()
-	}, nil,
-		labelWithWrapping("Contratulations! You have finished first-time setup. You can change these settings at any time by going to File -> Settings."),
-	)
-}
+// 	main.WizardModal("Close", "", func() {
+// 		main.gettingStarted = 0
+// 		main.modal.Hide()
+// 	}, nil,
+// 		labelWithWrapping("Contratulations! You have finished first-time setup. You can change these settings at any time by going to File -> Settings."),
+// 	)
+// }
 
 func (main *windowMain) setupUploader() {
 	w := main.GetWindow()
@@ -489,9 +372,12 @@ func (main *windowMain) setupUploader() {
 		dialog.NewError(err, w)
 	}
 
-	paths := make([]string, len(accs))
-	for i, a := range accs {
-		paths[i] = filepath.Join(replaysRoot, a, "Replays", "Multiplayer")
+	paths := make([]string, 0)
+
+	for _, a := range accs {
+		if getToonEnabled(a) {
+			paths = append(paths, filepath.Join(replaysRoot, a, "Replays", "Multiplayer"))
+		}
 	}
 
 	// TODO : should just clear watch paths instead of making a new watcher
@@ -501,6 +387,7 @@ func (main *windowMain) setupUploader() {
 	}
 
 	watch, err := newWatcher(paths)
+
 	if err != nil {
 		dialog.NewError(fmt.Errorf("Failed to start uploader:\n%v", err), w)
 		return
@@ -539,27 +426,46 @@ func (main *windowMain) toggleUploading(btn *widget.Button, id string) func() {
 		replaysRoot := viper.GetString("replaysRoot")
 
 		main.uploadEnabled[id] = !main.uploadEnabled[id]
+
 		if main.uploadEnabled[id] {
-			if err := main.watcher.Remove(filepath.Join(replaysRoot, id, "Replays", "Multiplayer")); err != nil {
+			if err := main.watcher.Add(filepath.Join(replaysRoot, id, "Replays", "Multiplayer")); err != nil {
 				dialog.NewError(err, w)
+
 				return
 			}
 
 			btn.Importance = widget.HighImportance
 			btn.Icon = theme.MediaPauseIcon()
 		} else {
-			if err := main.watcher.Add(filepath.Join(replaysRoot, id, "Replays", "Multiplayer")); err != nil {
+			if err := main.watcher.Remove(filepath.Join(replaysRoot, id, "Replays", "Multiplayer")); err != nil {
 				dialog.NewError(err, w)
+
 				return
 			}
 
 			btn.Importance = widget.MediumImportance
 			btn.Icon = theme.MediaPlayIcon()
 		}
+
+		main.updateEnabledToons()
 	}
 }
 
+func (main *windowMain) updateEnabledToons() {
+	enabledToons := make([]string, 0)
+
+	for key, enabled := range main.uploadEnabled {
+		if enabled {
+			enabledToons = append(enabledToons, key)
+		}
+	}
+
+	setToons(enabledToons)
+}
+
 func (main *windowMain) watchReplayStatus(entry *uploadRecord) error {
+	defer main.uploads.Refresh()
+
 	for {
 		time.Sleep(time.Second)
 
@@ -569,8 +475,6 @@ func (main *windowMain) watchReplayStatus(entry *uploadRecord) error {
 			golog.Errorf("error checking reply status: %v: %v", entry.QueueID, err)
 			entry.Status = "p failed"
 
-			main.uploadList.Refresh()
-
 			return err // could not check status
 		}
 
@@ -578,28 +482,9 @@ func (main *windowMain) watchReplayStatus(entry *uploadRecord) error {
 			entry.Status = "success"
 			entry.ReplayID = rid
 
-			main.uploadList.Refresh()
-
 			return nil // replay parsed!
 		}
 
 		golog.Debugf("sc2replaystats process..: [%v] %s", entry.QueueID, rid)
 	}
-}
-
-func toonList(accounts []string) (toons map[string][]string) {
-	toons = make(map[string][]string)
-
-	for _, acc := range accounts {
-		parts := strings.Split(acc[1:], string(filepath.Separator))
-		toonList, ok := toons[parts[0]]
-
-		if !ok {
-			toons[parts[0]] = []string{parts[1]}
-		} else {
-			toons[parts[0]] = append(toonList, parts[1])
-		}
-	}
-
-	return toons
 }

@@ -25,7 +25,7 @@ var (
 	WebRoot = fmt.Sprintf("%s://%s", Protocol, Hostname)
 
 	// ClientIdentifier represents the "upload_method" shown to sc2replaystats
-	ClientIdentifier = fmt.Sprintf("sc2-rsu-%s", runtime.GOOS)
+	ClientIdentifier = fmt.Sprintf("sc2-rsu-api-%s", runtime.GOOS)
 )
 
 // Client allows you to communicate with the sc2ReplayStats API

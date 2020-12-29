@@ -23,7 +23,7 @@ var (
 		"theme.padding":            4,
 		"theme.scrollBarSize":      12, // 16
 		"theme.scrollBarSmallSize": 3,
-		"theme.textSize":           14,
+		"theme.textSize":           16,
 		"update.automatic.enabled": false,
 		"update.check.enabled":     true,
 		"update.check.period":      time.Duration(minimumUpdatePeriod).String(),
@@ -117,4 +117,62 @@ func setAPIkey(key string) error {
 	golog.Info("API Key set in configuration!")
 
 	return nil
+}
+
+func getToonEnabled(toon string) bool {
+	golog.Debugf("getToonEnabled(%s)", toon)
+
+	confToons := viper.GetStringSlice("toons")
+
+	// ! if there are none in config, enable all by default
+	if len(confToons) == 0 {
+		return true
+	}
+
+	for _, t := range confToons {
+		if t == toon {
+			return true
+		}
+	}
+
+	return false
+}
+
+func setToons(toons []string) error {
+	in := func(needle string, haystack []string) bool {
+		for _, n := range haystack {
+			if n == needle {
+				return true
+			}
+		}
+
+		return false
+	}
+
+	var changed bool
+	confToons := viper.GetStringSlice("toons")
+	for _, t := range toons {
+		if !in(t, confToons) {
+			golog.Debug("setToons: added ", t)
+			confToons = append(confToons, t)
+			changed = true
+		}
+	}
+
+	for i := len(confToons) - 1; i >= 0; i-- {
+		if !in(confToons[i], toons) {
+			golog.Debug("setToons: removed ", confToons[i])
+			confToons = append(confToons[:i], confToons[i+1:]...)
+			changed = true
+		}
+	}
+
+	// don't save configuration if there were no changes made
+	if !changed {
+		return nil
+	}
+
+	viper.Set("toons", confToons)
+
+	return saveConfig()
 }
