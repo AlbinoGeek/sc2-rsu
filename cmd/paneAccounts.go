@@ -114,7 +114,7 @@ func toonList(accounts []string) (toons map[string][]string) {
 	toons = make(map[string][]string)
 
 	for _, acc := range accounts {
-		parts := strings.Split(acc[1:], string(filepath.Separator))
+		parts := strings.Split(acc, string(filepath.Separator))
 		toonList, ok := toons[parts[0]]
 
 		if !ok {

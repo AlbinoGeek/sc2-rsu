@@ -28,7 +28,7 @@ func EnumerateAccounts(replaysRoot string) (accountIDs []string, err error) {
 			uniq[p] = struct{}{}
 
 			// strip replaysRoot prefix from resulting path
-			paths[i] = p[len(replaysRoot):]
+			paths[i] = p[len(replaysRoot)+1:]
 			i++
 		}
 	}
