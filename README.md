@@ -3,9 +3,9 @@
 [![MIT License](https://img.shields.io/github/license/AlbinoGeek/sc2-rsu.svg)](https://github.com/AlbinoGeek/sc2-rsu/blob/master/LICENSE)
 [![Go Version](https://img.shields.io/github/go-mod/go-version/AlbinoGeek/sc2-rsu.svg)](https://github.com/AlbinoGeek/sc2-rsu)
 [![Maintainability](https://api.codeclimate.com/v1/badges/a308471050f8a3357d09/maintainability)](https://codeclimate.com/github/AlbinoGeek/sc2-rsu/maintainability)  
-[![CI](https://github.com/AlbinoGeek/sc2-rsu/workflows/CI/badge.svg?branch=gui%2Fv2)](#)
+[![CI](https://github.com/AlbinoGeek/sc2-rsu/workflows/CI/badge.svg?branch=main)](#)
 [![GoReportCard](https://goreportcard.com/badge/github.com/AlbinoGeek/sc2-rsu)](https://goreportcard.com/report/github.com/AlbinoGeek/sc2-rsu)
-[![Coverage Status](https://coveralls.io/repos/github/AlbinoGeek/sc2-rsu/badge.svg?branch=gui/v2)](https://coveralls.io/github/AlbinoGeek/sc2-rsu?branch=gui/v2)
+[![Coverage Status](https://coveralls.io/repos/github/AlbinoGeek/sc2-rsu/badge.svg?branch=main)](https://coveralls.io/github/AlbinoGeek/sc2-rsu?branch=main)
 
 ![GUI Screenshot](_dist/screen-v0.3.78-gui.gif)
 
