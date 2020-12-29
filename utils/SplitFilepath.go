@@ -18,7 +18,7 @@ func SplitFilepath(name string) (fpath, fname, ext string) {
 	// Trim path sep
 	fname = strings.TrimPrefix(fname, string(filepath.Separator))
 
-	// Trim extention
+	// Trim extension
 	fname = strings.TrimSuffix(fname, ext)
 
 	return

@@ -6,7 +6,7 @@ import (
 )
 
 // NavSeparator represents a visual dividing line to be shown between
-// other NavItem(s) within a NavDrawer -- it should not recieve
+// other NavItem(s) within a NavDrawer -- it should not receive
 // focus or be a candidate for selection because it contains no content.
 type NavSeparator struct {
 	res fyne.CanvasObject

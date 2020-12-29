@@ -25,6 +25,6 @@ func TestSplitFilepath(t *testing.T) {
 		p, f, e := utils.SplitFilepath(c.Input)
 		assert.Equal(t, p, c.Path, "path must match")
 		assert.Equal(t, f, c.Fname, "filename must match")
-		assert.Equal(t, e, c.Ext, "extention must match")
+		assert.Equal(t, e, c.Ext, "extension must match")
 	}
 }

@@ -63,7 +63,7 @@ func (t *paneUploads) Init() {
 		}
 	}
 
-	// TODO needs to be in a Layout call, in an overriden widget -_-
+	// TODO needs to be in a Layout call, in an overridden widget -_-
 	t.table.SetColumnWidth(0, 230)
 	t.table.SetColumnWidth(1, 86)
 	t.table.SetColumnWidth(2, 90)
