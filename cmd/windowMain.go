@@ -94,8 +94,8 @@ func (main *windowMain) Init() {
 		fynex.NewNavSeparator(),
 		main.settings,
 		makePaneAbout(main),
-		fynex.NewNavSeparator(),
-		makePaneDeveloper(main),
+		// fynex.NewNavSeparator(),
+		// makePaneDeveloper(main),
 	)
 	// main.nav.SetImage(theme.InfoIcon())
 	main.topbar.SetNav(main.nav)
