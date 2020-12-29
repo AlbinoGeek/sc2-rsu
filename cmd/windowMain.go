@@ -317,48 +317,6 @@ func (main *windowMain) openGettingStarted1() {
 	)
 }
 
-// func (main *windowMain) openGettingStarted2() {
-// 	main.gettingStarted = 2
-
-// 	btnSettings := widget.NewButtonWithIcon("Open Settings", theme.SettingsIcon(), func() {
-// 		main.tabs.Select(3) // ! ID BASED IS ERROR PRONE
-// 	})
-// 	btnSettings.Importance = widget.HighImportance
-
-// 	// TODO: Refactor this to actually have the settings UI, not just direct the user to settings
-// 	main.WizardModal("", "", nil, nil,
-// 		labelWithWrapping("First thing's first. Please use the button below to open the Settings dialog, and under the StarCraft II section, add your Replays Directory."),
-// 		btnSettings,
-// 		labelWithWrapping("Once you have found your replays directory and saved the settings, this setup wizard will automatically advance to the next step."),
-// 	)
-// }
-
-// func (main *windowMain) openGettingStarted3() {
-// 	main.gettingStarted = 3
-
-// 	btnSettings := widget.NewButtonWithIcon("Open Settings", theme.SettingsIcon(), func() {
-// 		main.tabs.Select(3) // ! ID BASED IS ERROR PRONE
-// 	})
-// 	btnSettings.Importance = widget.HighImportance
-
-// 	// TODO: Refactor this to actually have the settings UI, not just direct the user to settings
-// 	main.WizardModal("", "", nil, nil,
-// 		labelWithWrapping("Lastly, please set your sc2replaystats API key. If you do not know how to find this, use the \"Login and find it for me\" button to have us login to your account and generate one on your behalf."),
-// 		btnSettings,
-// 	)
-// }
-
-// func (main *windowMain) openGettingStarted4() {
-// 	main.gettingStarted = 0
-
-// 	main.WizardModal("Close", "", func() {
-// 		main.gettingStarted = 0
-// 		main.modal.Hide()
-// 	}, nil,
-// 		labelWithWrapping("Contratulations! You have finished first-time setup. You can change these settings at any time by going to File -> Settings."),
-// 	)
-// }
-
 func (main *windowMain) setupUploader() {
 	w := main.GetWindow()
 	replaysRoot := viper.GetString("replaysRoot")
