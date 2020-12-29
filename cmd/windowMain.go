@@ -372,10 +372,12 @@ func (main *windowMain) setupUploader() {
 		dialog.NewError(err, w)
 	}
 
-	paths := make([]string, len(accs))
+	paths := make([]string, 0)
 
-	for i, a := range accs {
-		paths[i] = filepath.Join(replaysRoot, a, "Replays", "Multiplayer")
+	for _, a := range accs {
+		if getToonEnabled(a) {
+			paths = append(paths, filepath.Join(replaysRoot, a, "Replays", "Multiplayer"))
+		}
 	}
 
 	// TODO : should just clear watch paths instead of making a new watcher

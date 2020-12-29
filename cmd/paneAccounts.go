@@ -8,7 +8,6 @@ import (
 
 	"fyne.io/fyne"
 	"fyne.io/fyne/container"
-	"fyne.io/fyne/dialog"
 	"fyne.io/fyne/theme"
 	"fyne.io/fyne/widget"
 
@@ -92,14 +91,14 @@ func (t *paneAccounts) Update() {
 			btnToggle.OnTapped = main.toggleUploading(btnToggle, id)
 
 			// todo: reverse this map ( disableUpload )
-			main.uploadEnabled[id] = true
+			main.uploadEnabled[id] = getToonEnabled(id)
 
-			if !getToonEnabled(id) {
-				if err := main.watcher.Remove(filepath.Join(viper.GetString("replaysRoot"), id, "Replays", "Multiplayer")); err != nil {
-					dialog.NewError(err, t.GetWindow().GetWindow())
+			if !main.uploadEnabled[id] {
+				// 	if err := main.watcher.Remove(filepath.Join(viper.GetString("replaysRoot"), id, "Replays", "Multiplayer")); err != nil {
+				// 		dialog.NewError(err, t.GetWindow().GetWindow())
 
-					return
-				}
+				// 		return
+				// 	}
 
 				btnToggle.Importance = widget.MediumImportance
 				btnToggle.Icon = theme.MediaPlayIcon()
