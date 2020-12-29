@@ -62,12 +62,9 @@ func (t *paneAccounts) Update() {
 
 	// Clear container if it has objects
 	objects := t.container.Objects
-
 	for _, o := range objects {
 		t.container.Remove(o)
 	}
-
-	objects = nil
 
 	main := t.GetWindow().(*windowMain)
 
