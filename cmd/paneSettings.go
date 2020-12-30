@@ -130,8 +130,8 @@ func (settings *paneSettings) Init() {
 				widget.NewButtonWithIcon("Find it for me...", theme.SearchIcon(), func() { go settings.findReplaysRoot() }),
 				widget.NewButtonWithIcon("Select folder...", theme.FolderOpenIcon(), func() {
 					dlg := dialog.NewFolderOpen(settings.browseReplaysRoot, w)
-					dlg.Resize(w.Canvas().Size().Subtract(fyne.NewSize(20, 20))) // ! can't be larger than the settings window
 					dlg.Show()
+					dlg.Resize(w.Canvas().Size().Subtract(fyne.NewSize(20, 20))) // ! can't be larger than the settings window
 				}),
 			),
 			spacer,
@@ -258,10 +258,10 @@ func (settings *paneSettings) findReplaysRoot() {
 		}, w)
 
 	size := fyne.MeasureText(longest, theme.TextSize(), fyne.TextStyle{})
-	size.Height *= len(roots)
+	size.Height *= float32(len(roots))
 
-	dlg2.Resize(fyne.NewSize(60, 144).Add(size))
 	dlg2.Show()
+	dlg2.Resize(fyne.NewSize(60, 144).Add(size))
 }
 
 func (settings *paneSettings) onClose() {
@@ -347,9 +347,9 @@ func (settings *paneSettings) openLogin() {
 		}
 	}, w)
 
+	dlg.Show()
 	vbox.Resize(fyne.NewSize(999, 280))
 	dlg.Resize(fyne.NewSize(420, 280))
-	dlg.Show()
 }
 
 func (settings *paneSettings) save() {

@@ -11,10 +11,10 @@ import (
 
 var (
 	// IconSize used with (in display pixels) used with Material Design elements
-	IconSize = 24
+	IconSize float32 = 24
 
 	// Padding (in display pixels) used with Material Design elements
-	Padding = 16
+	Padding float32 = 16
 )
 
 // AppBar ...

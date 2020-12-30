@@ -11,6 +11,8 @@ cloud.google.com/go/firestore v1.1.0/go.mod h1:ulACoGHTpvq5r8rxGJ4ddJZBZqakUQqCl
 cloud.google.com/go/pubsub v1.0.1/go.mod h1:R0Gpsv3s54REJCy4fxDixWD93lHJMoZTyQ2kNxGRt3I=
 cloud.google.com/go/storage v1.0.0/go.mod h1:IhtSnM/ZTZV8YYJWCY8RULGVqBDmpoyjwiyrjsg+URw=
 dmitri.shuralyov.com/gpu/mtl v0.0.0-20190408044501-666a987793e9/go.mod h1:H6x//7gZCb22OMCxBHrMx7a5I7Hp++hsVxbQ4BYO7hU=
+fyne.io/fyne v1.4.2-0.20201229182434-170ee4f6662a h1:OW2kxC6kwZ9PL9zWgo+hhV2fUyA7KXZGD+SB02sUvDo=
+fyne.io/fyne v1.4.2-0.20201229182434-170ee4f6662a/go.mod h1:xL4c3WmpE/Tvz5CEm5vqsaizU/EeOCm9DYlL2GtTSiM=
 fyne.io/fyne v1.4.2 h1:vh5P0ZIpczIAUu3uqh8YPjAPOy2XzgK7DcBD3CHj+3k=
 fyne.io/fyne v1.4.2/go.mod h1:xL4c3WmpE/Tvz5CEm5vqsaizU/EeOCm9DYlL2GtTSiM=
 github.com/BurntSushi/toml v0.3.1 h1:WXkYYl6Yr3qBf1K79EBnL4mak0OimBfB0XUf9Vl28OQ=

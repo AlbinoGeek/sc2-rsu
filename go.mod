@@ -3,7 +3,7 @@ module github.com/AlbinoGeek/sc2-rsu
 go 1.15
 
 require (
-	fyne.io/fyne v1.4.2
+	fyne.io/fyne v1.4.2-0.20201229182434-170ee4f6662a
 	github.com/badoux/checkmail v1.2.1
 	github.com/bgentry/speakeasy v0.1.0
 	github.com/dustin/go-humanize v1.0.0

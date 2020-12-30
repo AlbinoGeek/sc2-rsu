@@ -3,6 +3,7 @@ package gui
 import (
 	"fyne.io/fyne"
 	"fyne.io/fyne/app"
+	"fyne.io/fyne/theme"
 )
 
 // New returns a wrapped fyne.App
@@ -10,8 +11,7 @@ func New(id string) *GraphicalInterface {
 	ui := new(GraphicalInterface)
 	ui.App = app.NewWithID(id)
 
-	// ui.Theme = DarkerTheme()
-	ui.App.Settings().SetTheme(DarkerTheme())
+	ui.App.Settings().SetTheme(theme.DarkTheme())
 
 	return ui
 }

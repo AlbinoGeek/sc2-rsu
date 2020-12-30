@@ -26,7 +26,7 @@ func NewNavLabel(label string, content fyne.CanvasObject) NavItem {
 func NewNavLabelWithIcon(label string, icon fyne.Resource, content fyne.CanvasObject) NavItem {
 	return &NavLabel{
 		content: content,
-		icon:    theme.NewThemedResource(icon, nil),
+		icon:    theme.NewThemedResource(icon),
 		text:    label,
 	}
 }

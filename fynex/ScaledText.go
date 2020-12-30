@@ -41,7 +41,7 @@ const (
 	TextSizeHeading6
 )
 
-var styleSize = map[TextSize]float64{
+var styleSize = map[TextSize]float32{
 	TextSizeBody1:     1,
 	TextSizeBody2:     .875,
 	TextSizeSubtitle1: 1,
@@ -87,13 +87,13 @@ func NewTextWithStyle(text string, alignment fyne.TextAlign, style Style) *canva
 
 // ! Material Design base font size is 16 but fyne is 14 ...
 // ! until fyne changes this, we're going to scale them up.
-func newText(text string, scale float64, bold bool) *canvas.Text {
+func newText(text string, scale float32, bold bool) *canvas.Text {
 	t := canvas.NewText(text, theme.TextColor())
 
 	if t.TextSize == 14 {
-		t.TextSize = int(1.14 * float64(t.TextSize) * scale)
+		t.TextSize = 1.14 * t.TextSize * scale
 	} else {
-		t.TextSize = int(float64(t.TextSize) * scale)
+		t.TextSize = t.TextSize * scale
 	}
 
 	t.TextStyle.Bold = bold
