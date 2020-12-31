@@ -64,7 +64,7 @@ func (main *windowMain) Init() {
 
 	// closing the main window should quit the application
 	w.SetCloseIntercept(func() {
-		if main.settings.unsaved {
+		if b, _ := main.settings.unsaved.Get(); b {
 			main.settings.onClose()
 			return
 		}
