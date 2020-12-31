@@ -348,7 +348,7 @@ func (settings *paneSettings) openLogin() {
 				return
 			}
 
-			settings.apiKeyEntry.SetText(key)
+			settings.apiKey.Set(key)
 			settings.apiKeyEntry.Validate()
 		}
 	}, w)
@@ -367,29 +367,33 @@ func (settings *paneSettings) save() {
 	}
 
 	main := settings.GetWindow().(*windowMain)
-	if main.gettingStarted == 3 && settings.apiKeyEntry.Text != "" {
-		main.nav.Select(3) // ! ID BASED IS ERROR PRONE
-		// main.openGettingStarted4()
-	}
 
-	if main.gettingStarted == 2 && settings.replaysRootEntry.Text != "" {
+	s, _ := settings.replaysRoot.Get()
+	if main.gettingStarted == 2 && s != "" {
 		main.nav.Select(3) // ! ID BASED IS ERROR PRONE
 		// main.openGettingStart/ed3()
 	}
 
+	s, _ = settings.apiKey.Get()
+	if main.gettingStarted == 3 && s != "" {
+		main.nav.Select(3) // ! ID BASED IS ERROR PRONE
+		// main.openGettingStarted4()
+	}
+
 	var changes bool
 
-	if oldKey := viper.Get("apikey"); oldKey != settings.apiKeyEntry.Text {
-		viper.Set("apikey", settings.apiKeyEntry.Text)
+	if oldKey := viper.Get("apikey"); oldKey != s {
+		viper.Set("apikey", s)
 
 		changes = true
 
 		// Use the new apiKey immediately
-		sc2api = sc2replaystats.New(settings.apiKeyEntry.Text)
+		sc2api = sc2replaystats.New(s)
 	}
 
-	if oldRoot := viper.Get("replaysRoot"); oldRoot != settings.replaysRootEntry.Text {
-		viper.Set("replaysRoot", settings.replaysRootEntry.Text)
+	s, _ = settings.replaysRoot.Get()
+	if oldRoot := viper.Get("replaysRoot"); oldRoot != s {
+		viper.Set("replaysRoot", s)
 
 		changes = true
 	}
@@ -399,8 +403,12 @@ func (settings *paneSettings) save() {
 		main.setupUploader()
 	}
 
-	viper.Set("update.automatic.enabled", settings.autoDownloadCheck.Checked)
-	viper.Set("update.check.enabled", settings.checkUpdatesCheck.Checked)
+	b, _ := settings.autoDownload.Get()
+	viper.Set("update.automatic.enabled", b)
+
+	b, _ = settings.checkUpdates.Get()
+	viper.Set("update.check.enabled", b)
+
 	viper.Set("version", VERSION)
 
 	if err := saveConfig(); err != nil {
